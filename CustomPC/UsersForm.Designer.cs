@@ -1,0 +1,126 @@
+#nullable enable
+namespace CustomPC;
+
+partial class UsersForm
+{
+    private System.ComponentModel.IContainer? components = null;
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing) components?.Dispose();
+        base.Dispose(disposing);
+    }
+    private void InitializeComponent()
+    {
+        components = new System.ComponentModel.Container();
+        SuspendLayout();
+        heading = new Label();
+        heading.Name = "heading";
+        heading.Location = new Point(32, 24);
+        heading.Size = new Size(1036, 40);
+        heading.TabIndex = 0;
+        heading.Text = "User accounts";
+        heading.UseMnemonic = false;
+        heading.Font = new Font("Segoe UI", 22F, FontStyle.Bold);
+        Controls.Add(heading);
+        subheading = new Label();
+        subheading.Name = "subheading";
+        subheading.Location = new Point(32, 72);
+        subheading.Size = new Size(1036, 40);
+        subheading.TabIndex = 1;
+        subheading.Text = "Admin manages customer, staff and administrator access. Archived accounts cannot sign in.";
+        subheading.UseMnemonic = false;
+        subheading.ForeColor = Color.FromArgb(71, 85, 105);
+        Controls.Add(subheading);
+        searchLabel = new Label();
+        searchLabel.Name = "searchLabel";
+        searchLabel.Location = new Point(32, 120);
+        searchLabel.Size = new Size(440, 28);
+        searchLabel.TabIndex = 2;
+        searchLabel.Text = "Search name or email";
+        searchLabel.UseMnemonic = false;
+        Controls.Add(searchLabel);
+        search = new TextBox();
+        search.Name = "search";
+        search.Location = new Point(32, 150);
+        search.Size = new Size(440, 32);
+        search.TabIndex = 3;
+        Controls.Add(search);
+        archived = new CheckBox();
+        archived.Name = "archived";
+        archived.Location = new Point(500, 150);
+        archived.Size = new Size(320, 32);
+        archived.TabIndex = 4;
+        archived.Text = "Include archived accounts";
+        Controls.Add(archived);
+        grid = new DataGridView();
+        grid.Name = "grid";
+        grid.Location = new Point(32, 190);
+        grid.Size = new Size(1036, 430);
+        grid.TabIndex = 5;
+        grid.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+        grid.BackgroundColor = Color.White;
+        grid.BorderStyle = BorderStyle.None;
+        grid.ReadOnly = true;
+        grid.AllowUserToAddRows = false;
+        grid.AllowUserToDeleteRows = false;
+        grid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+        grid.MultiSelect = false;
+        grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+        grid.RowHeadersVisible = false;
+        grid.EnableHeadersVisualStyles = false;
+        grid.ColumnHeadersHeight = 42;
+        grid.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(30, 41, 59);
+        grid.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
+        grid.RowTemplate.Height = 38;
+        grid.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(241, 245, 249);
+        grid.DefaultCellStyle.SelectionBackColor = Color.FromArgb(204, 235, 225);
+        grid.DefaultCellStyle.SelectionForeColor = Color.FromArgb(15, 23, 42);
+        Controls.Add(grid);
+        add = new Button();
+        add.Name = "add";
+        add.Location = new Point(32, 644);
+        add.Size = new Size(180, 40);
+        add.TabIndex = 6;
+        add.Text = "Add account";
+        add.BackColor = Color.FromArgb(15, 98, 84);
+        add.ForeColor = Color.White;
+        add.FlatStyle = FlatStyle.Flat;
+        add.FlatAppearance.BorderSize = 0;
+        add.Cursor = Cursors.Hand;
+        add.UseMnemonic = false;
+        Controls.Add(add);
+        edit = new Button();
+        edit.Name = "edit";
+        edit.Location = new Point(228, 644);
+        edit.Size = new Size(250, 40);
+        edit.TabIndex = 7;
+        edit.Text = "Edit / archive account";
+        edit.BackColor = Color.FromArgb(15, 98, 84);
+        edit.ForeColor = Color.White;
+        edit.FlatStyle = FlatStyle.Flat;
+        edit.FlatAppearance.BorderSize = 0;
+        edit.Cursor = Cursors.Hand;
+        edit.UseMnemonic = false;
+        Controls.Add(edit);
+        AutoScaleDimensions = new SizeF(7F, 17F);
+        AutoScaleMode = AutoScaleMode.Font;
+        Font = new Font("Segoe UI", 10F);
+        ForeColor = Color.FromArgb(15, 23, 42);
+        BackColor = Color.FromArgb(248, 250, 252);
+        ClientSize = new Size(1100, 720);
+        MinimumSize = new Size(1116, 759);
+        StartPosition = FormStartPosition.CenterScreen;
+        Text = "CustomPC | User accounts";
+        Name = "UsersForm";
+        ResumeLayout(false);
+        PerformLayout();
+    }
+    private Label heading = null!;
+    private Label subheading = null!;
+    private Label searchLabel = null!;
+    private TextBox search = null!;
+    private CheckBox archived = null!;
+    private DataGridView grid = null!;
+    private Button add = null!;
+    private Button edit = null!;
+}
