@@ -1,17 +1,22 @@
 namespace CustomPC;
 
-public class UserAccount
+// Models describe saved records. Every record has an Id, inherited from this base class.
+public class DatabaseRecord
 {
     public string Id { get; set; } = Guid.NewGuid().ToString();
+}
+
+public class UserAccount : DatabaseRecord
+{
     public string Name { get; set; } = "";
     public string Email { get; set; } = "";
     public string PasswordHash { get; set; } = "";
     public string Role { get; set; } = "Customer";
     public bool Archived { get; set; }
 }
-public class Part
+
+public class Part : DatabaseRecord
 {
-    public string Id { get; set; } = Guid.NewGuid().ToString();
     public string Name { get; set; } = "";
     public string Category { get; set; } = "CPU";
     public string Brand { get; set; } = "";
@@ -24,41 +29,52 @@ public class Part
     public int LowStock { get; set; } = 3;
     public string SupplierId { get; set; } = "";
     public bool Archived { get; set; }
-    public override string ToString() => $"{Name}  |  PHP {Price:N2}";
+
+    // ComboBoxes in the PC builder display this text for each part.
+    public override string ToString()
+    {
+        return Name + "  |  PHP " + Price.ToString("N2");
+    }
 }
-public class Supplier
+
+public class Supplier : DatabaseRecord
 {
-    public string Id { get; set; } = Guid.NewGuid().ToString();
     public string Name { get; set; } = "";
     public string Contact { get; set; } = "";
     public string Email { get; set; } = "";
     public string Address { get; set; } = "";
     public bool Archived { get; set; }
-    public override string ToString() => Name;
+
+    public override string ToString()
+    {
+        return Name;
+    }
 }
-public class CompatibilityRule
+
+public class CompatibilityRule : DatabaseRecord
 {
-    public string Id { get; set; } = Guid.NewGuid().ToString();
     public string Name { get; set; } = "";
     public string Kind { get; set; } = "Socket";
     public bool Enabled { get; set; } = true;
 }
+
 public class OrderLine
 {
+    // Receipts keep the name and price from order creation, even if the catalog changes.
     public string PartId { get; set; } = "";
     public string Name { get; set; } = "";
     public int Quantity { get; set; } = 1;
     public decimal Price { get; set; }
 }
-public class PcBuild
+
+public class PcBuild : DatabaseRecord
 {
-    public string Id { get; set; } = Guid.NewGuid().ToString();
     public string CustomerId { get; set; } = "";
-    public List<string> PartIds { get; set; } = [];
+    public List<string> PartIds { get; set; } = new List<string>();
 }
-public class CustomerOrder
+
+public class CustomerOrder : DatabaseRecord
 {
-    public string Id { get; set; } = Guid.NewGuid().ToString();
     public string Number { get; set; } = "";
     public string CustomerId { get; set; } = "";
     public string CustomerName { get; set; } = "";
@@ -66,20 +82,34 @@ public class CustomerOrder
     public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
     public DateTime DeadlineUtc { get; set; } = DateTime.UtcNow.AddHours(24);
     public string Status { get; set; } = "Pending Payment";
-    public List<OrderLine> Lines { get; set; } = [];
-    public decimal Total => Lines.Sum(x => x.Price * x.Quantity);
+    public List<OrderLine> Lines { get; set; } = new List<OrderLine>();
+
+    public decimal Total
+    {
+        get
+        {
+            decimal total = 0;
+
+            foreach (OrderLine line in Lines)
+            {
+                total += line.Price * line.Quantity;
+            }
+
+            return total;
+        }
+    }
 }
-public class Payment
+
+public class Payment : DatabaseRecord
 {
-    public string Id { get; set; } = Guid.NewGuid().ToString();
     public string OrderId { get; set; } = "";
     public string StaffId { get; set; } = "";
     public decimal Amount { get; set; }
     public DateTime PaidUtc { get; set; } = DateTime.UtcNow;
 }
-public class InventoryMovement
+
+public class InventoryMovement : DatabaseRecord
 {
-    public string Id { get; set; } = Guid.NewGuid().ToString();
     public string PartId { get; set; } = "";
     public int Quantity { get; set; }
     public string Reason { get; set; } = "";

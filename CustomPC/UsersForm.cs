@@ -1,17 +1,99 @@
+using System.Data;
+
 namespace CustomPC;
 
 public partial class UsersForm : Form
 {
     public UsersForm()
     {
-        InitializeComponent(); if (Ui.IsDesign) return;
-        if (!AppStore.Current.IsAdmin) throw new InvalidOperationException("Admin access required.");
-        search.TextChanged += (_, _) => LoadRows(); archived.CheckedChanged += (_, _) => LoadRows();
-        add.Click += (_, _) => { using var f = new UserEditForm(); f.ShowDialog(this); LoadRows(); };
-        edit.Click += (_, _) => Ui.Run(this, () => { using var f = new UserEditForm(Ui.RequireSelection(grid)); f.ShowDialog(this); LoadRows(); }); LoadRows();
+        InitializeComponent();
+        if (Ui.IsDesign)
+        {
+            return;
+        }
+
+        if (!AppStore.Current.IsAdmin)
+        {
+            throw new InvalidOperationException("Admin access required.");
+        }
+
+        search.TextChanged += FiltersChanged;
+        archived.CheckedChanged += FiltersChanged;
+        add.Click += AddClicked;
+        edit.Click += EditClicked;
+        LoadRows();
     }
+
+    private void FiltersChanged(object? sender, EventArgs e)
+    {
+        try
+        {
+            LoadRows();
+        }
+        catch (Exception exception)
+        {
+            Ui.ShowError(this, exception);
+        }
+    }
+
+    private void AddClicked(object? sender, EventArgs e)
+    {
+        try
+        {
+            using UserEditForm userForm = new UserEditForm();
+            userForm.ShowDialog(this);
+            LoadRows();
+        }
+        catch (Exception exception)
+        {
+            Ui.ShowError(this, exception);
+        }
+    }
+
+    private void EditClicked(object? sender, EventArgs e)
+    {
+        try
+        {
+            string selectedUserId = Ui.RequireSelection(grid);
+            using UserEditForm userForm = new UserEditForm(selectedUserId);
+            userForm.ShowDialog(this);
+            LoadRows();
+        }
+        catch (Exception exception)
+        {
+            Ui.ShowError(this, exception);
+        }
+    }
+
     private void LoadRows()
     {
-        var s = AppStore.Current; s.Refresh(); Ui.Bind(grid, s.Users.Where(x => (archived.Checked || !x.Archived) && $"{x.Name} {x.Email}".Contains(search.Text.Trim(), StringComparison.OrdinalIgnoreCase)).Select(x => new { x.Id, x.Name, x.Email, x.Role, x.Archived }).ToList());
+        AppStore store = AppStore.Current;
+        store.Refresh();
+        string searchText = search.Text.Trim();
+
+        DataTable table = new DataTable();
+        table.Columns.Add("Id");
+        table.Columns.Add("Name");
+        table.Columns.Add("Email");
+        table.Columns.Add("Role");
+        table.Columns.Add("Archived", typeof(bool));
+
+        foreach (UserAccount user in store.Users)
+        {
+            if (user.Archived && !archived.Checked)
+            {
+                continue;
+            }
+
+            string searchableText = user.Name + " " + user.Email;
+            if (!searchableText.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            table.Rows.Add(user.Id, user.Name, user.Email, user.Role, user.Archived);
+        }
+
+        Ui.Bind(grid, table);
     }
 }

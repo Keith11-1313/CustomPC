@@ -3,23 +3,107 @@ namespace CustomPC;
 public partial class PartEditForm : Form
 {
     private string? partId;
+
     public PartEditForm()
     {
-        InitializeComponent(); if (Ui.IsDesign) return;
-        category.Items.AddRange(AppStore.Categories); category.SelectedIndex = 0;
-        supplier.DataSource = AppStore.Current.Suppliers.Where(x => !x.Archived).ToList(); supplier.SelectedIndex = -1;
-        low.Value = 3; save.Click += (_, _) => Ui.Run(this, () => {
-            var p = new Part { Name = partName.Text.Trim(), Category = category.Text, Brand = brand.Text.Trim(), Price = price.Value, Stock = (int)stock.Value,
-                Specifications = specifications.Text.Trim(), Socket = socket.Text.Trim(), MemoryType = memory.Text.Trim(), Watts = (int)watts.Value, LowStock = (int)low.Value,
-                SupplierId = (supplier.SelectedItem as Supplier)?.Id ?? "", Archived = archived.Checked };
-            if (partId != null) p.Id = partId; AppStore.Current.SavePart(p); DialogResult = DialogResult.OK;
-        });
+        InitializeComponent();
+        if (Ui.IsDesign)
+        {
+            return;
+        }
+
+        category.Items.AddRange(AppStore.Categories);
+        category.SelectedIndex = 0;
+
+        List<Supplier> activeSuppliers = new List<Supplier>();
+        foreach (Supplier savedSupplier in AppStore.Current.Suppliers)
+        {
+            if (!savedSupplier.Archived)
+            {
+                activeSuppliers.Add(savedSupplier);
+            }
+        }
+        supplier.DataSource = activeSuppliers;
+        supplier.SelectedIndex = -1;
+
+        low.Value = 3;
+        save.Click += SaveClicked;
     }
+
+    // The same form can add a new part or edit an existing part.
     public PartEditForm(string id) : this()
     {
-        var p = AppStore.Current.Parts.Single(x => x.Id == id); partId = id;
-        partName.Text = p.Name; category.SelectedItem = p.Category; brand.Text = p.Brand; price.Value = p.Price; stock.Value = p.Stock;
-        specifications.Text = p.Specifications; socket.Text = p.Socket; memory.Text = p.MemoryType; watts.Value = p.Watts; low.Value = p.LowStock; archived.Checked = p.Archived;
-        supplier.SelectedItem = supplier.Items.Cast<Supplier>().FirstOrDefault(x => x.Id == p.SupplierId);
+        partId = id;
+        Part? part = null;
+        foreach (Part savedPart in AppStore.Current.Parts)
+        {
+            if (savedPart.Id == id)
+            {
+                part = savedPart;
+                break;
+            }
+        }
+
+        if (part == null)
+        {
+            throw new InvalidOperationException("The selected part no longer exists.");
+        }
+
+        partName.Text = part.Name;
+        category.SelectedItem = part.Category;
+        brand.Text = part.Brand;
+        price.Value = part.Price;
+        stock.Value = part.Stock;
+        specifications.Text = part.Specifications;
+        socket.Text = part.Socket;
+        memory.Text = part.MemoryType;
+        watts.Value = part.Watts;
+        low.Value = part.LowStock;
+        archived.Checked = part.Archived;
+
+        foreach (Supplier savedSupplier in supplier.Items)
+        {
+            if (savedSupplier.Id == part.SupplierId)
+            {
+                supplier.SelectedItem = savedSupplier;
+                break;
+            }
+        }
+    }
+
+    private void SaveClicked(object? sender, EventArgs e)
+    {
+        try
+        {
+            Part part = new Part();
+            part.Name = partName.Text.Trim();
+            part.Category = category.Text;
+            part.Brand = brand.Text.Trim();
+            part.Price = price.Value;
+            part.Stock = (int)stock.Value;
+            part.Specifications = specifications.Text.Trim();
+            part.Socket = socket.Text.Trim();
+            part.MemoryType = memory.Text.Trim();
+            part.Watts = (int)watts.Value;
+            part.LowStock = (int)low.Value;
+            part.Archived = archived.Checked;
+
+            if (supplier.SelectedItem is Supplier selectedSupplier)
+            {
+                part.SupplierId = selectedSupplier.Id;
+            }
+
+            if (partId != null)
+            {
+                part.Id = partId;
+            }
+
+            AppStore.Current.SavePart(part);
+            DialogResult = DialogResult.OK;
+        }
+        catch (Exception exception)
+        {
+            Ui.ShowError(this, exception);
+        }
     }
 }

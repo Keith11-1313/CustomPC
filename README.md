@@ -1,12 +1,54 @@
 # CustomPC Windows Forms
 
-A Windows Forms adaptation of the supplied CustomPC proposal. Targets .NET 10 on Windows. Open `CustomPC.slnx` in Visual Studio with the .NET desktop development workload, restore NuGet packages, and press F5.
+Open `CustomPC.slnx` in Visual Studio with the **.NET desktop development** workload and .NET 10 installed. Restore NuGet packages if prompted, then press **F5**.
 
-## Open a screen in the Designer
+## Edit a screen
 
-In Solution Explorer, right-click a form's **.cs** file and choose **View Designer**, or select it and press **Shift+F7**. Open `LoginForm.cs`, `DashboardForm.cs`, `BuilderForm.cs`, or any form below. Controls are declared and positioned in each matching `.Designer.cs` file; business logic remains in the main `.cs` file. Do not open the `.Designer.cs` file expecting the visual view. Database access is skipped in design mode.
+Right-click a form such as `LoginForm.cs` or `BuilderForm.cs` and choose **View Designer** (**Shift+F7**).
 
-## Demo sign-in
+- `FormName.cs`: button clicks, reading inputs, and opening other screens. Write application code here.
+- `FormName.Designer.cs`: controls, sizes, positions, and other layout settings maintained by Visual Studio.
+- `FormName.resx`: resources belonging to the form.
+
+These files belong to the same form. Use the visual Designer to change its layout.
+
+## Where the code lives
+
+| File | Responsibility |
+| --- | --- |
+| `Program.cs` | Starts the app and opens the dashboard. |
+| `DashboardForm.cs` | Opens the login screen, then shows the menu for the user's role. |
+| `LoginForm.cs`, `RegisterForm.cs` | Sign-in, registration, and guest access. |
+| `CatalogForm.cs`, `BuilderForm.cs` | Browse parts, choose components, check compatibility, and create an order. |
+| `OrdersForm.cs`, `ReceiptForm.cs` | Track orders, confirm store payment, update status, and print receipts. |
+| Inventory, supplier, user, compatibility, and report forms | Staff and admin screens. Each screen keeps its own event handlers. |
+| `Models.cs` | Record classes such as `Part`, `UserAccount`, and `CustomerOrder`. |
+| `AppStore.cs` | Shared records, the signed-in user, loading, and saving. |
+| `AppStore.Accounts.cs` | Account validation, roles, and passwords. |
+| `AppStore.Inventory.cs` | Parts, suppliers, available stock, and stock adjustments. |
+| `AppStore.Compatibility.cs` | Socket, memory, and power checks. |
+| `AppStore.Orders.cs` | Order creation, reservations, payments, status changes, and expiry. |
+| `AppStore.SampleData.cs` | Initial demo accounts and sample parts. |
+| `Database.cs` | Opens SQLite and runs the SQL commands. |
+| `Ui.cs` | Display helpers for errors, prices, grids, exports, and receipts. |
+
+The `AppStore.*.cs` files are sections of **one class**, declared with `partial`. They share the same fields and methods; each file groups one subject. Forms access that shared object through `AppStore.Current`.
+
+Suggested reading order for later: **Program → LoginForm → Models → CatalogForm → BuilderForm → OrdersForm → Database**. Open the relevant `AppStore` section when a form calls a method such as `Login` or `CreateOrder`.
+
+## How a button works
+
+A named event handler is a method called when the user clicks a button. For example, `StockAdjustmentForm.cs` connects the save button with `save.Click += SaveClicked;`. Inside that method:
+
+```csharp
+int stockChange = (int)quantity.Value;
+AppStore.Current.AdjustStock(partId, stockChange, reason.Text);
+DialogResult = DialogResult.OK;
+```
+
+The usual flow is **click → read inputs → validate → save → refresh**. Here the form reads the quantity, `AdjustStock` validates and saves it, the dialog closes, and `InventoryForm` reloads its grid. A `try/catch` around the handler displays a readable error if the operation fails.
+
+## Demo accounts
 
 | Role | Email | Password |
 | --- | --- | --- |
@@ -14,42 +56,12 @@ In Solution Explorer, right-click a form's **.cs** file and choose **View Design
 | Staff | staff@custompc.local | CustomPC123! |
 | Customer | customer@custompc.local | CustomPC123! |
 
-Accounts and illustrative parts/prices are seeded on the first run. Guest browsing is available from the login screen. Admin can change passwords using User accounts. Passwords use salted PBKDF2-SHA256 hashes; the database does not store plaintext passwords. Demo credentials are for project demonstrations.
+Demo accounts are created for a new database. Existing accounts retain any password changes. Guest access is available from the login screen.
 
-## Screens and proposal coverage
+## Saved data and order deadline
 
-| Form | Purpose |
-| --- | --- |
-| LoginForm / RegisterForm | Sign-in, customer registration, guest entry |
-| DashboardForm | Role-specific dashboard and navigation |
-| CatalogForm | Component search, category and availability filters; name, brand and specification search |
-| BuilderForm | Seven component selections, socket/RAM/PSU checks, live PHP total, customer selection for staff |
-| OrdersForm | Customer-owned order tracking; staff payments and status management; cancellation |
-| ReceiptForm | Receipt details, order number, quantities, prices, payment deadline; print or save text |
-| InventoryForm / PartEditForm | Component add/edit/archive, prices/specifications/suppliers, available/reserved/low/out-of-stock quantities |
-| StockAdjustmentForm | Staff restocking/corrections with reason and audit record |
-| SuppliersForm / SupplierEditForm | Supplier contacts, editing/archiving, supplied component links |
-| UsersForm / UserEditForm | Admin accounts, role changes, editing/archiving and password changes |
-| CompatibilityForm / RuleEditForm | Admin management of enabled socket, memory and power checks |
-| ReportsForm | Inventory, orders and stock movements for staff; sales report for admin; date filtering and CSV export |
+The local SQLite file is `%LOCALAPPDATA%\CustomPC\custompc.db`, normally `C:\Users\Jerald\AppData\Local\CustomPC\custompc.db`. Closing the app keeps your records.
 
-Orders reserve one unit of each selected component. Staff confirm the full payment at the physical store, then advance through **Paid → Processing → Assembly → Ready for Pickup → Completed**. Completion records pickup and deducts on-hand stock once. Cancelling an unpaid order releases its reservations. Paid orders retain reservations until completion; paid-order cancellation/refunds are outside the proposal.
+Each table has `Id` and `Data` columns. `Data` contains the record's fields as JSON. This format is unchanged, so existing records remain usable. Manage records through the app's admin and staff screens.
 
-The app checks the 24-hour payment deadline every 30 seconds while running, when data refreshes, and on startup. If the app is closed, expired orders are cancelled the next time it opens. An always-running service would be needed for cancellation while the desktop app is closed.
-
-## Database and boundaries
-
-The SQLite database is at `%LOCALAPPDATA%\CustomPC\custompc.db`. It has separate tables for users/customers, parts, suppliers, compatibility rules, saved confirmed builds, orders, payments and inventory movements. Entity fields are serialized as JSON within each table, with IDs as primary keys. Receipts retain the names and prices from order creation. Reservations, payments and stock changes are saved in transactions. This is a local desktop database, not a hosted multi-store server. `CUSTOMPC_DATABASE_PATH` can override the database location for isolated verification.
-
-Compatibility uses stored socket, RAM generation, and component power data, with 100 W power headroom. Physical case dimensions, cooler clearance and unrecorded specifications require manual review. No online payments, shipping, or delivery were added.
-
-## Verify
-
-```powershell
-dotnet build CustomPC\CustomPC.csproj
-dotnet run --project Verification\Verification.csproj
-```
-
-Verification uses a new database under `.qa`, exercises role restrictions, compatibility errors, reservations, expiry, payment and pickup, then renders all forms off-screen. The verification suite passed 50 checks, and the build completed with zero warnings and errors. It does not modify the normal application database. It does not test a physical printer or prove Visual Studio Designer loading; verify those locally with View Designer and the receipt print dialog.
-
-For a manual walkthrough: sign in as Customer, choose Ryzen 5 5600, B550M motherboard, 16 GB DDR4, RTX 3060, 500 GB SSD, 650 W PSU and Micro ATX tower. The illustrative total is **PHP 36,200.00**. Confirm, then switch to Staff to confirm payment and advance the order. Check inventory quantities and reports as Admin.
+Orders have a 24-hour payment deadline. The desktop app cancels expired unpaid orders during refresh and while its timer is running. If the app is closed, cancellation happens when it next opens. Store payment and pickup are recorded by staff.

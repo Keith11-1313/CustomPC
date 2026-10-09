@@ -1,15 +1,139 @@
+using System.Data;
+
 namespace CustomPC;
 
 public partial class SuppliersForm : Form
 {
     public SuppliersForm()
     {
-        InitializeComponent(); if (Ui.IsDesign) return;
-        if (!AppStore.Current.IsAdmin) throw new InvalidOperationException("Admin access required.");
-        search.TextChanged += (_, _) => LoadRows(); archived.CheckedChanged += (_, _) => LoadRows();
-        add.Click += (_, _) => { using var f = new SupplierEditForm(); f.ShowDialog(this); LoadRows(); };
-        edit.Click += (_, _) => Ui.Run(this, () => { using var f = new SupplierEditForm(Ui.RequireSelection(grid)); f.ShowDialog(this); LoadRows(); });
-        parts.Click += (_, _) => Ui.Run(this, () => { var id = Ui.RequireSelection(grid); var lines = AppStore.Current.Parts.Where(x => x.SupplierId == id).Select(x => $"{x.Name} | {x.Category} | stock {x.Stock}"); MessageBox.Show(this, string.Join("\n", lines.DefaultIfEmpty("No components assigned.")), "Supplied components"); }); LoadRows();
+        InitializeComponent();
+        if (Ui.IsDesign)
+        {
+            return;
+        }
+
+        if (!AppStore.Current.IsAdmin)
+        {
+            throw new InvalidOperationException("Admin access required.");
+        }
+
+        search.TextChanged += FiltersChanged;
+        archived.CheckedChanged += FiltersChanged;
+        add.Click += AddClicked;
+        edit.Click += EditClicked;
+        parts.Click += SuppliedPartsClicked;
+        LoadRows();
     }
-    private void LoadRows() { var s = AppStore.Current; s.Refresh(); Ui.Bind(grid, s.Suppliers.Where(x => (archived.Checked || !x.Archived) && $"{x.Name} {x.Contact}".Contains(search.Text.Trim(), StringComparison.OrdinalIgnoreCase)).Select(x => new { x.Id, Supplier = x.Name, x.Contact, x.Email, x.Address, Components = s.Parts.Count(p => p.SupplierId == x.Id), x.Archived }).ToList()); }
+
+    private void FiltersChanged(object? sender, EventArgs e)
+    {
+        try
+        {
+            LoadRows();
+        }
+        catch (Exception exception)
+        {
+            Ui.ShowError(this, exception);
+        }
+    }
+
+    private void AddClicked(object? sender, EventArgs e)
+    {
+        try
+        {
+            using SupplierEditForm supplierForm = new SupplierEditForm();
+            supplierForm.ShowDialog(this);
+            LoadRows();
+        }
+        catch (Exception exception)
+        {
+            Ui.ShowError(this, exception);
+        }
+    }
+
+    private void EditClicked(object? sender, EventArgs e)
+    {
+        try
+        {
+            string selectedSupplierId = Ui.RequireSelection(grid);
+            using SupplierEditForm supplierForm = new SupplierEditForm(selectedSupplierId);
+            supplierForm.ShowDialog(this);
+            LoadRows();
+        }
+        catch (Exception exception)
+        {
+            Ui.ShowError(this, exception);
+        }
+    }
+
+    private void SuppliedPartsClicked(object? sender, EventArgs e)
+    {
+        try
+        {
+            string selectedSupplierId = Ui.RequireSelection(grid);
+            List<string> partDescriptions = new List<string>();
+            foreach (Part part in AppStore.Current.Parts)
+            {
+                if (part.SupplierId == selectedSupplierId)
+                {
+                    partDescriptions.Add($"{part.Name} | {part.Category} | stock {part.Stock}");
+                }
+            }
+
+            if (partDescriptions.Count == 0)
+            {
+                partDescriptions.Add("No components assigned.");
+            }
+
+            MessageBox.Show(this, string.Join(Environment.NewLine, partDescriptions), "Supplied components");
+        }
+        catch (Exception exception)
+        {
+            Ui.ShowError(this, exception);
+        }
+    }
+
+    private void LoadRows()
+    {
+        AppStore store = AppStore.Current;
+        store.Refresh();
+        string searchText = search.Text.Trim();
+
+        DataTable table = new DataTable();
+        table.Columns.Add("Id");
+        table.Columns.Add("Supplier");
+        table.Columns.Add("Contact");
+        table.Columns.Add("Email");
+        table.Columns.Add("Address");
+        table.Columns.Add("Components", typeof(int));
+        table.Columns.Add("Archived", typeof(bool));
+
+        foreach (Supplier supplier in store.Suppliers)
+        {
+            if (supplier.Archived && !archived.Checked)
+            {
+                continue;
+            }
+
+            string searchableText = supplier.Name + " " + supplier.Contact;
+            if (!searchableText.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            int componentCount = 0;
+            foreach (Part part in store.Parts)
+            {
+                if (part.SupplierId == supplier.Id)
+                {
+                    componentCount++;
+                }
+            }
+
+            table.Rows.Add(supplier.Id, supplier.Name, supplier.Contact, supplier.Email,
+                supplier.Address, componentCount, supplier.Archived);
+        }
+
+        Ui.Bind(grid, table);
+    }
 }
