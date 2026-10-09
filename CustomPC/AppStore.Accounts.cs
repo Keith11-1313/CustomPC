@@ -8,6 +8,13 @@ public sealed partial class AppStore
 {
     public void Login(string email, string password)
     {
+        // Email ignores outer spaces and letter case. Passwords must match exactly.
+        // Never trim the password: spaces can be part of a user's chosen password.
+        if (string.IsNullOrWhiteSpace(email) || password.Length == 0)
+        {
+            throw new InvalidOperationException("Enter your email address and password.");
+        }
+
         Refresh();
         UserAccount? matchingAccount = null;
 
@@ -134,10 +141,27 @@ public sealed partial class AppStore
     private static bool VerifyPassword(string password, string savedPasswordHash)
     {
         string[] savedValues = savedPasswordHash.Split(':');
-        byte[] salt = Convert.FromBase64String(savedValues[0]);
-        byte[] savedHash = Convert.FromBase64String(savedValues[1]);
-        byte[] enteredHash = Rfc2898DeriveBytes.Pbkdf2(password, salt, 210000, HashAlgorithmName.SHA256, 32);
+        if (savedValues.Length != 2)
+        {
+            return false;
+        }
 
-        return CryptographicOperations.FixedTimeEquals(enteredHash, savedHash);
+        try
+        {
+            byte[] salt = Convert.FromBase64String(savedValues[0]);
+            byte[] savedHash = Convert.FromBase64String(savedValues[1]);
+            if (salt.Length != 16 || savedHash.Length != 32)
+            {
+                return false;
+            }
+
+            byte[] enteredHash = Rfc2898DeriveBytes.Pbkdf2(password, salt, 210000, HashAlgorithmName.SHA256, 32);
+            return CryptographicOperations.FixedTimeEquals(enteredHash, savedHash);
+        }
+        catch (FormatException)
+        {
+            // A damaged stored value must fail sign-in, not bypass it or crash decoding.
+            return false;
+        }
     }
 }

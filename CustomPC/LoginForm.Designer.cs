@@ -60,11 +60,18 @@ partial class LoginForm
         password.TabIndex = 5;
         password.UseSystemPasswordChar = true;
         Controls.Add(password);
+        showPassword = new CheckBox();
+        showPassword.Name = "showPassword";
+        showPassword.Location = new Point(32, 296);
+        showPassword.Size = new Size(220, 28);
+        showPassword.TabIndex = 6;
+        showPassword.Text = "Show password";
+        Controls.Add(showPassword);
         login = new Button();
         login.Name = "login";
         login.Location = new Point(32, 328);
         login.Size = new Size(480, 40);
-        login.TabIndex = 6;
+        login.TabIndex = 7;
         login.Text = "Sign in";
         login.BackColor = Color.FromArgb(15, 98, 84);
         login.ForeColor = Color.White;
@@ -77,7 +84,7 @@ partial class LoginForm
         register.Name = "register";
         register.Location = new Point(32, 384);
         register.Size = new Size(232, 40);
-        register.TabIndex = 7;
+        register.TabIndex = 8;
         register.Text = "Create customer account";
         register.BackColor = Color.FromArgb(15, 98, 84);
         register.ForeColor = Color.White;
@@ -90,7 +97,7 @@ partial class LoginForm
         guest.Name = "guest";
         guest.Location = new Point(280, 384);
         guest.Size = new Size(232, 40);
-        guest.TabIndex = 8;
+        guest.TabIndex = 9;
         guest.Text = "Browse as guest";
         guest.BackColor = Color.FromArgb(15, 98, 84);
         guest.ForeColor = Color.White;
@@ -103,8 +110,8 @@ partial class LoginForm
         demo.Name = "demo";
         demo.Location = new Point(32, 454);
         demo.Size = new Size(500, 70);
-        demo.TabIndex = 9;
-        demo.Text = "Demo accounts: admin / staff / customer @custompc.local\nPassword for all demo accounts: CustomPC123!";
+        demo.TabIndex = 10;
+        demo.Text = "Initial demo accounts: admin / staff / customer @custompc.local\nInitial password: CustomPC123! (case-sensitive, ends with !)\nAccounts edited by Admin keep their updated passwords.";
         demo.UseMnemonic = false;
         Controls.Add(demo);
         AutoScaleDimensions = new SizeF(7F, 17F);
@@ -126,6 +133,7 @@ partial class LoginForm
     private TextBox email = null!;
     private Label passwordLabel = null!;
     private TextBox password = null!;
+    private CheckBox showPassword = null!;
     private Button login = null!;
     private Button register = null!;
     private Button guest = null!;

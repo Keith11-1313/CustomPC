@@ -2,6 +2,16 @@
 
 Open `CustomPC.slnx` in Visual Studio with the **.NET desktop development** workload and .NET 10 installed. Restore NuGet packages if prompted, then press **F5**.
 
+## Understand the code
+
+Start with [the beginner code guide](docs/CODE_GUIDE.md). Lessons 1–5 show you how to open a form, identify its controls, read Sign in's code, and watch it run in the debugger. Each lesson gives an action, the expected result, and a checkpoint with an answer. Later lessons cover accounts, the builder, and saving with a separate practice database.
+
+Use [the code reference](docs/CODE_REFERENCE.md) afterward for all 17 forms, the C# lookup table, roles, order stages, SQLite details, and the advanced manual checklist.
+
+The guide explains expected behavior. A successful build alone does not verify login against your saved database, runtime workflows, Visual Studio Designer loading, or printer output.
+
+Read [the validation results](docs/VALIDATION.md) for the checks that actually ran, corrected issues, and remaining manual checks. The 9 October run passed 261 automated checks and 3 separate login-button checks against a copy of the saved database.
+
 ## Edit a screen
 
 Right-click a form such as `LoginForm.cs` or `BuilderForm.cs` and choose **View Designer** (**Shift+F7**).
@@ -48,7 +58,9 @@ DialogResult = DialogResult.OK;
 
 The usual flow is **click → read inputs → validate → save → refresh**. Here the form reads the quantity, `AdjustStock` validates and saves it, the dialog closes, and `InventoryForm` reloads its grid. A `try/catch` around the handler displays a readable error if the operation fails.
 
-## Demo accounts
+## Initial demo accounts
+
+These credentials apply when the app creates sample data in a database **with no user accounts**. They are not an automatic password reset for an existing database.
 
 | Role | Email | Password |
 | --- | --- | --- |
@@ -56,7 +68,7 @@ The usual flow is **click → read inputs → validate → save → refresh**. H
 | Staff | staff@custompc.local | CustomPC123! |
 | Customer | customer@custompc.local | CustomPC123! |
 
-Demo accounts are created for a new database. Existing accounts retain any password changes. Guest access is available from the login screen.
+Existing accounts retain saved password changes and archive status. If a demo email rejects the initial password, check which database is being opened and the account's saved state before changing or deleting data. Guest access is available from the login screen.
 
 ## Saved data and order deadline
 

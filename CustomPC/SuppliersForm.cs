@@ -41,6 +41,8 @@ public partial class SuppliersForm : Form
     {
         try
         {
+            AppStore.Current.Refresh();
+            ValidateAccess(AppStore.Current);
             using SupplierEditForm supplierForm = new SupplierEditForm();
             supplierForm.ShowDialog(this);
             LoadRows();
@@ -55,6 +57,8 @@ public partial class SuppliersForm : Form
     {
         try
         {
+            AppStore.Current.Refresh();
+            ValidateAccess(AppStore.Current);
             string selectedSupplierId = Ui.RequireSelection(grid);
             using SupplierEditForm supplierForm = new SupplierEditForm(selectedSupplierId);
             supplierForm.ShowDialog(this);
@@ -70,6 +74,8 @@ public partial class SuppliersForm : Form
     {
         try
         {
+            AppStore.Current.Refresh();
+            ValidateAccess(AppStore.Current);
             string selectedSupplierId = Ui.RequireSelection(grid);
             List<string> partDescriptions = new List<string>();
             foreach (Part part in AppStore.Current.Parts)
@@ -97,6 +103,7 @@ public partial class SuppliersForm : Form
     {
         AppStore store = AppStore.Current;
         store.Refresh();
+        ValidateAccess(store);
         string searchText = search.Text.Trim();
 
         DataTable table = new DataTable();
@@ -135,5 +142,18 @@ public partial class SuppliersForm : Form
         }
 
         Ui.Bind(grid, table);
+    }
+
+    private void ValidateAccess(AppStore store)
+    {
+        add.Enabled = store.IsAdmin;
+        edit.Enabled = store.IsAdmin;
+        parts.Enabled = store.IsAdmin;
+
+        if (!store.IsAdmin)
+        {
+            grid.DataSource = null;
+            throw new InvalidOperationException("Your account no longer has admin access. Close this screen and sign in with an administrator account.");
+        }
     }
 }

@@ -40,42 +40,42 @@ public partial class DashboardForm : Form
 
     private void CatalogButton_Click(object? sender, EventArgs e)
     {
-        Open(new CatalogForm());
+        OpenScreen("Catalog");
     }
 
     private void BuilderButton_Click(object? sender, EventArgs e)
     {
-        Open(new BuilderForm());
+        OpenScreen("Builder");
     }
 
     private void OrdersButton_Click(object? sender, EventArgs e)
     {
-        Open(new OrdersForm());
+        OpenScreen("Orders");
     }
 
     private void InventoryButton_Click(object? sender, EventArgs e)
     {
-        Open(new InventoryForm());
+        OpenScreen("Inventory");
     }
 
     private void SuppliersButton_Click(object? sender, EventArgs e)
     {
-        Open(new SuppliersForm());
+        OpenScreen("Suppliers");
     }
 
     private void UsersButton_Click(object? sender, EventArgs e)
     {
-        Open(new UsersForm());
+        OpenScreen("Users");
     }
 
     private void RulesButton_Click(object? sender, EventArgs e)
     {
-        Open(new CompatibilityForm());
+        OpenScreen("Compatibility");
     }
 
     private void ReportsButton_Click(object? sender, EventArgs e)
     {
-        Open(new ReportsForm());
+        OpenScreen("Reports");
     }
 
     private void SignOutButton_Click(object? sender, EventArgs e)
@@ -85,13 +85,21 @@ public partial class DashboardForm : Form
 
     private void DashboardForm_Shown(object? sender, EventArgs e)
     {
-        if (askForLogin)
+        try
         {
-            SignIn();
+            if (askForLogin)
+            {
+                SignIn();
+            }
+            else
+            {
+                UpdateDashboard();
+            }
         }
-        else
+        catch (Exception exception)
         {
-            UpdateDashboard();
+            Ui.ShowError(this, exception);
+            Close();
         }
     }
 
@@ -113,38 +121,81 @@ public partial class DashboardForm : Form
         expiryTimer.Dispose();
     }
 
-    private void Open(Form form)
+    private void OpenScreen(string screenName)
     {
-        using (form)
+        try
         {
-            try
+            // Construct the screen inside the try block too: loading its data can fail.
+            AppStore.Current.Refresh();
+            Form form;
+
+            switch (screenName)
+            {
+                case "Catalog":
+                    form = new CatalogForm();
+                    break;
+                case "Builder":
+                    form = new BuilderForm();
+                    break;
+                case "Orders":
+                    form = new OrdersForm();
+                    break;
+                case "Inventory":
+                    form = new InventoryForm();
+                    break;
+                case "Suppliers":
+                    form = new SuppliersForm();
+                    break;
+                case "Users":
+                    form = new UsersForm();
+                    break;
+                case "Compatibility":
+                    form = new CompatibilityForm();
+                    break;
+                case "Reports":
+                    form = new ReportsForm();
+                    break;
+                default:
+                    throw new InvalidOperationException("This screen is not available.");
+            }
+
+            using (form)
             {
                 form.ShowDialog(this);
-                UpdateDashboard();
             }
-            catch (Exception exception)
-            {
-                Ui.ShowError(this, exception);
-            }
+
+            UpdateDashboard();
+        }
+        catch (Exception exception)
+        {
+            Ui.ShowError(this, exception);
         }
     }
 
     private void SignIn()
     {
         expiryTimer.Stop();
-        AppStore.Current.Logout();
-
-        using (LoginForm loginForm = new LoginForm())
+        try
         {
-            if (loginForm.ShowDialog(this) != DialogResult.OK)
-            {
-                Close();
-                return;
-            }
-        }
+            AppStore.Current.Logout();
 
-        UpdateDashboard();
-        expiryTimer.Start();
+            using (LoginForm loginForm = new LoginForm())
+            {
+                if (loginForm.ShowDialog(this) != DialogResult.OK)
+                {
+                    Close();
+                    return;
+                }
+            }
+
+            UpdateDashboard();
+            expiryTimer.Start();
+        }
+        catch (Exception exception)
+        {
+            Ui.ShowError(this, exception);
+            Close();
+        }
     }
 
     private void UpdateDashboard()

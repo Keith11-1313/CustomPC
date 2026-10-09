@@ -67,6 +67,8 @@ public partial class ReportsForm : Form
     {
         try
         {
+            // Refresh the report and its permissions before exporting any records.
+            LoadReport();
             Ui.Export(this, grid);
         }
         catch (Exception exception)
@@ -79,6 +81,7 @@ public partial class ReportsForm : Form
     {
         AppStore store = AppStore.Current;
         store.Refresh();
+        ValidateAccess(store);
         if (from.Value.Date > to.Value.Date)
         {
             throw new InvalidOperationException("Start date must not be after end date.");
@@ -101,6 +104,26 @@ public partial class ReportsForm : Form
             default:
                 LoadStockMovementsReport(store);
                 break;
+        }
+    }
+
+    private void ValidateAccess(AppStore store)
+    {
+        export.Enabled = store.IsStaff;
+
+        if (!store.IsStaff)
+        {
+            grid.DataSource = null;
+            summary.Text = "Staff access is required to view reports.";
+            throw new InvalidOperationException("Your account no longer has staff access. Close this screen and sign in with an authorized account.");
+        }
+
+        if (report.Text == "Sales" && !store.IsAdmin)
+        {
+            grid.DataSource = null;
+            summary.Text = "Admin access is required to view sales.";
+            export.Enabled = false;
+            throw new InvalidOperationException("Sales reports require admin access. Choose another report or sign in with an administrator account.");
         }
     }
 

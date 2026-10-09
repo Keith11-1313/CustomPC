@@ -159,6 +159,10 @@ public partial class OrdersForm : Form
     {
         AppStore store = AppStore.Current;
         store.Refresh();
+        // A role change in another running copy must also update these buttons.
+        pay.Enabled = store.IsStaff;
+        advance.Enabled = store.IsStaff;
+        cancel.Enabled = store.Session != null;
         string searchText = search.Text.Trim();
 
         DataTable table = new DataTable();

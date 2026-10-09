@@ -109,6 +109,7 @@ public sealed partial class AppStore
 
     private void LoadData(SqliteConnection connection)
     {
+        // Forms use these typed lists instead of writing SQL themselves.
         Users = database.ReadRecords<UserAccount>(connection, "Users");
         Parts = database.ReadRecords<Part>(connection, "Parts");
         Suppliers = database.ReadRecords<Supplier>(connection, "Suppliers");
@@ -151,6 +152,7 @@ public sealed partial class AppStore
 
     private void UndoFailedChange(SqliteConnection connection, SqliteTransaction transaction)
     {
+        // Undo SQLite changes and reload the lists too, so the UI cannot display a failed edit.
         transaction.Rollback();
         LoadData(connection);
     }

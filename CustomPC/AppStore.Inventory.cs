@@ -4,6 +4,7 @@ namespace CustomPC;
 
 public sealed partial class AppStore
 {
+    public const int MaximumStock = 10000000;
     public int Reserved(string partId)
     {
         int reservedQuantity = 0;
@@ -114,6 +115,11 @@ public sealed partial class AppStore
             throw new InvalidOperationException("Stock cannot be below the reserved quantity.");
         }
 
+        if (part.Stock > MaximumStock)
+        {
+            throw new InvalidOperationException("Stock cannot exceed 10,000,000 units.");
+        }
+
         if (part.LowStock < 0 || part.Watts < 0)
         {
             throw new InvalidOperationException("Low-stock threshold and wattage cannot be negative.");
@@ -121,17 +127,32 @@ public sealed partial class AppStore
 
         if (part.SupplierId.Length > 0)
         {
-            bool activeSupplierFound = false;
+            bool allowedSupplierFound = false;
             foreach (Supplier supplier in Suppliers)
             {
-                if (supplier.Id == part.SupplierId && !supplier.Archived)
+                if (supplier.Id != part.SupplierId)
                 {
-                    activeSupplierFound = true;
+                    continue;
+                }
+
+                if (!supplier.Archived)
+                {
+                    allowedSupplierFound = true;
                     break;
+                }
+
+                // Archiving a supplier must not erase historical component associations.
+                foreach (Part existingPart in Parts)
+                {
+                    if (existingPart.Id == part.Id && existingPart.SupplierId == supplier.Id)
+                    {
+                        allowedSupplierFound = true;
+                        break;
+                    }
                 }
             }
 
-            if (!activeSupplierFound)
+            if (!allowedSupplierFound)
             {
                 throw new InvalidOperationException("Choose an active supplier.");
             }
@@ -154,13 +175,19 @@ public sealed partial class AppStore
                     throw new InvalidOperationException("Enter a nonzero adjustment and a reason.");
                 }
 
-                int updatedStock = part.Stock + quantity;
+                // Calculate as long first so a large adjustment cannot overflow an int.
+                long updatedStock = (long)part.Stock + quantity;
                 if (updatedStock < Reserved(partId))
                 {
                     throw new InvalidOperationException("Stock cannot be below the reserved quantity.");
                 }
 
-                part.Stock = updatedStock;
+                if (updatedStock > MaximumStock)
+                {
+                    throw new InvalidOperationException("Stock cannot exceed 10,000,000 units.");
+                }
+
+                part.Stock = (int)updatedStock;
                 RecordStockMovement(partId, quantity, reason.Trim());
                 SaveData(connection, transaction);
             }

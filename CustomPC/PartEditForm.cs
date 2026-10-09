@@ -28,6 +28,7 @@ public partial class PartEditForm : Form
 
         low.Value = 3;
         save.Click += SaveClicked;
+        Shown += PartEditForm_Shown;
     }
 
     // The same form can add a new part or edit an existing part.
@@ -53,6 +54,8 @@ public partial class PartEditForm : Form
         category.SelectedItem = part.Category;
         brand.Text = part.Brand;
         price.Value = part.Price;
+        // Older records may exceed today's input limit. Still allow opening them to correct it.
+        stock.Maximum = Math.Max(stock.Maximum, part.Stock);
         stock.Value = part.Stock;
         specifications.Text = part.Specifications;
         socket.Text = part.Socket;
@@ -61,13 +64,46 @@ public partial class PartEditForm : Form
         low.Value = part.LowStock;
         archived.Checked = part.Archived;
 
-        foreach (Supplier savedSupplier in supplier.Items)
+        List<Supplier> supplierChoices = new List<Supplier>();
+        foreach (Supplier savedSupplier in AppStore.Current.Suppliers)
+        {
+            if (!savedSupplier.Archived || savedSupplier.Id == part.SupplierId)
+            {
+                supplierChoices.Add(savedSupplier);
+            }
+        }
+
+        supplier.DataSource = supplierChoices;
+        supplier.SelectedIndex = -1;
+        foreach (Supplier savedSupplier in supplierChoices)
         {
             if (savedSupplier.Id == part.SupplierId)
             {
                 supplier.SelectedItem = savedSupplier;
+                if (savedSupplier.Archived)
+                {
+                    supplierLabel.Text = "Supplier (current supplier is archived)";
+                }
                 break;
             }
+        }
+    }
+
+    private void PartEditForm_Shown(object? sender, EventArgs e)
+    {
+        // Small laptop displays can be shorter than this editor. Fit the window, then scroll.
+        Rectangle workingArea = Screen.FromControl(this).WorkingArea;
+        MinimumSize = new Size(Math.Min(MinimumSize.Width, workingArea.Width),
+            Math.Min(MinimumSize.Height, workingArea.Height));
+        if (Height > workingArea.Height)
+        {
+            Height = workingArea.Height;
+            Top = workingArea.Top;
+        }
+        if (Width > workingArea.Width)
+        {
+            Width = workingArea.Width;
+            Left = workingArea.Left;
         }
     }
 

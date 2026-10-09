@@ -25,6 +25,8 @@ public partial class CompatibilityForm : Form
     {
         try
         {
+            AppStore.Current.Refresh();
+            ValidateAccess(AppStore.Current);
             string selectedRuleId = Ui.RequireSelection(grid);
             using RuleEditForm ruleForm = new RuleEditForm(selectedRuleId);
             ruleForm.ShowDialog(this);
@@ -40,6 +42,7 @@ public partial class CompatibilityForm : Form
     {
         AppStore store = AppStore.Current;
         store.Refresh();
+        ValidateAccess(store);
 
         DataTable table = new DataTable();
         table.Columns.Add("Id");
@@ -53,5 +56,16 @@ public partial class CompatibilityForm : Form
         }
 
         Ui.Bind(grid, table);
+    }
+
+    private void ValidateAccess(AppStore store)
+    {
+        edit.Enabled = store.IsAdmin;
+
+        if (!store.IsAdmin)
+        {
+            grid.DataSource = null;
+            throw new InvalidOperationException("Your account no longer has admin access. Close this screen and sign in with an administrator account.");
+        }
     }
 }

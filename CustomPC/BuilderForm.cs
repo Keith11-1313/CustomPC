@@ -41,6 +41,7 @@ public partial class BuilderForm : Form
             }
 
             ComboBox selector = partSelectors[index];
+            selector.SelectedIndexChanged -= PartSelectionChanged;
             selector.DataSource = availableParts;
             selector.SelectedIndex = -1;
             selector.SelectedIndexChanged += PartSelectionChanged;
@@ -125,7 +126,13 @@ public partial class BuilderForm : Form
     {
         try
         {
-            if (!Ui.Confirm(this, "Confirm this build and reserve its parts for 24 hours?"))
+            decimal confirmedTotal = 0;
+            foreach (Part selectedPart in GetSelectedParts())
+            {
+                confirmedTotal += selectedPart.Price;
+            }
+
+            if (!Ui.Confirm(this, "Confirm this build for " + Ui.Money(confirmedTotal) + " and reserve its parts for 24 hours?"))
             {
                 return;
             }
@@ -142,7 +149,7 @@ public partial class BuilderForm : Form
                 selectedPartIds.Add(part.Id);
             }
 
-            CustomerOrder newOrder = AppStore.Current.CreateOrder(selectedPartIds, selectedCustomer.Id);
+            CustomerOrder newOrder = AppStore.Current.CreateOrder(selectedPartIds, selectedCustomer.Id, confirmedTotal);
             using (ReceiptForm receiptForm = new ReceiptForm(newOrder.Id))
             {
                 receiptForm.ShowDialog(this);
@@ -152,7 +159,59 @@ public partial class BuilderForm : Form
         }
         catch (Exception exception)
         {
+            try
+            {
+                RefreshSelectedParts();
+            }
+            catch (Exception refreshError)
+            {
+                exception = new InvalidOperationException(exception.Message + "\nThe build could not be refreshed: " + refreshError.Message);
+            }
             Ui.ShowError(this, exception);
         }
+    }
+
+    private void RefreshSelectedParts()
+    {
+        // Keep the chosen IDs while replacing old ComboBox objects with current records.
+        List<string> chosenIds = new List<string>();
+        string chosenCustomerId = "";
+        if (customer.SelectedItem is UserAccount selectedCustomer)
+        {
+            chosenCustomerId = selectedCustomer.Id;
+        }
+        foreach (ComboBox selector in partSelectors)
+        {
+            string chosenId = "";
+            if (selector.SelectedItem is Part part)
+            {
+                chosenId = part.Id;
+            }
+            chosenIds.Add(chosenId);
+        }
+
+        LoadPartChoices();
+        for (int index = 0; index < partSelectors.Length; index++)
+        {
+            foreach (Part part in partSelectors[index].Items)
+            {
+                if (part.Id == chosenIds[index])
+                {
+                    partSelectors[index].SelectedItem = part;
+                    break;
+                }
+            }
+        }
+
+        LoadCustomerChoices();
+        foreach (UserAccount account in customer.Items)
+        {
+            if (account.Id == chosenCustomerId)
+            {
+                customer.SelectedItem = account;
+                break;
+            }
+        }
+        UpdateBuildSummary();
     }
 }

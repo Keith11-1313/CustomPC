@@ -51,6 +51,13 @@ public partial class InventoryForm : Form
     {
         try
         {
+            AppStore.Current.Refresh();
+            ValidateAccess(AppStore.Current);
+            if (!AppStore.Current.IsAdmin)
+            {
+                throw new InvalidOperationException("Only an administrator can add parts.");
+            }
+
             using PartEditForm partForm = new PartEditForm();
             partForm.ShowDialog(this);
             LoadRows();
@@ -65,6 +72,13 @@ public partial class InventoryForm : Form
     {
         try
         {
+            AppStore.Current.Refresh();
+            ValidateAccess(AppStore.Current);
+            if (!AppStore.Current.IsAdmin)
+            {
+                throw new InvalidOperationException("Only an administrator can edit component details.");
+            }
+
             string selectedPartId = Ui.RequireSelection(grid);
             using PartEditForm partForm = new PartEditForm(selectedPartId);
             partForm.ShowDialog(this);
@@ -80,6 +94,8 @@ public partial class InventoryForm : Form
     {
         try
         {
+            AppStore.Current.Refresh();
+            ValidateAccess(AppStore.Current);
             string selectedPartId = Ui.RequireSelection(grid);
             using StockAdjustmentForm adjustmentForm = new StockAdjustmentForm(selectedPartId);
             adjustmentForm.ShowDialog(this);
@@ -95,6 +111,8 @@ public partial class InventoryForm : Form
     {
         try
         {
+            AppStore.Current.Refresh();
+            ValidateAccess(AppStore.Current);
             using ReportsForm reportsForm = new ReportsForm("Stock movements");
             reportsForm.ShowDialog(this);
         }
@@ -120,6 +138,7 @@ public partial class InventoryForm : Form
     {
         AppStore store = AppStore.Current;
         store.Refresh();
+        ValidateAccess(store);
         string searchText = search.Text.Trim();
 
         DataTable table = new DataTable();
@@ -174,5 +193,19 @@ public partial class InventoryForm : Form
         }
 
         Ui.Bind(grid, table);
+    }
+
+    private void ValidateAccess(AppStore store)
+    {
+        add.Enabled = store.IsAdmin;
+        edit.Enabled = store.IsAdmin;
+        adjust.Enabled = store.IsStaff;
+        history.Enabled = store.IsStaff;
+
+        if (!store.IsStaff)
+        {
+            grid.DataSource = null;
+            throw new InvalidOperationException("Your account no longer has staff access. Close this screen and sign in with an authorized account.");
+        }
     }
 }

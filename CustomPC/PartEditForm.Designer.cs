@@ -222,7 +222,9 @@ partial class PartEditForm
         ForeColor = Color.FromArgb(15, 23, 42);
         BackColor = Color.FromArgb(248, 250, 252);
         ClientSize = new Size(560, 760);
-        MinimumSize = new Size(576, 799);
+        MinimumSize = new Size(576, 480);
+        AutoScroll = true;
+        AutoScrollMinSize = new Size(540, 760);
         StartPosition = FormStartPosition.CenterScreen;
         Text = "CustomPC | Component details";
         Name = "PartEditForm";

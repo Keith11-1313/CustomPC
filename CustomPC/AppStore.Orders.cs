@@ -4,7 +4,7 @@ namespace CustomPC;
 
 public sealed partial class AppStore
 {
-    public CustomerOrder CreateOrder(List<string> partIds, string customerId)
+    public CustomerOrder CreateOrder(List<string> partIds, string customerId, decimal? confirmedTotal = null)
     {
         using (SqliteConnection connection = database.OpenConnection())
         using (SqliteTransaction transaction = connection.BeginTransaction())
@@ -36,6 +36,19 @@ public sealed partial class AppStore
                 if (errors.Count > 0)
                 {
                     throw new InvalidOperationException(string.Join(Environment.NewLine, errors));
+                }
+
+                // Check again inside the transaction: another instance could change a price
+                // while the customer is reading the confirmation message.
+                decimal currentTotal = 0;
+                foreach (Part selectedPart in selectedParts)
+                {
+                    currentTotal += selectedPart.Price;
+                }
+
+                if (confirmedTotal.HasValue && confirmedTotal.Value != currentTotal)
+                {
+                    throw new InvalidOperationException("Component prices changed. Review the updated build total and confirm again.");
                 }
 
                 PcBuild build = new PcBuild();

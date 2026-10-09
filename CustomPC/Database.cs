@@ -59,6 +59,7 @@ internal class Database
                 while (reader.Read())
                 {
                     string savedJson = reader.GetString(0);
+                    // Convert one SQLite Data cell back into a normal C# model object.
                     T? record = JsonSerializer.Deserialize<T>(savedJson);
 
                     if (record == null)
@@ -79,6 +80,8 @@ internal class Database
     {
         using (SqliteCommand clearTable = connection.CreateCommand())
         {
+            // This small local app replaces each table with its current list. The shared
+            // transaction restores the old rows if any later write fails.
             clearTable.Transaction = transaction;
             clearTable.CommandText = $"DELETE FROM {tableName}";
             clearTable.ExecuteNonQuery();
@@ -93,6 +96,7 @@ internal class Database
 
                 // Parameters keep record values separate from SQL instructions.
                 saveRecord.Parameters.AddWithValue("$id", record.Id);
+                // Convert the model's properties into JSON for the Data column.
                 saveRecord.Parameters.AddWithValue("$data", JsonSerializer.Serialize(record));
                 saveRecord.ExecuteNonQuery();
             }

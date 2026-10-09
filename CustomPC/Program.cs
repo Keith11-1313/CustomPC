@@ -2,15 +2,13 @@ namespace CustomPC
 {
     internal static class Program
     {
-        /// <summary>
-        ///  The main entry point for the application.
-        /// </summary>
+        // Windows Forms starts here, on one UI thread.
         [STAThread]
         static void Main()
         {
-            // To customize application configuration such as set high DPI settings or default font,
-            // see https://aka.ms/applicationconfiguration.
+            // Apply desktop display settings before any form or control is created.
             ApplicationConfiguration.Initialize();
+            // Run keeps the app listening for button clicks until the dashboard closes.
             Application.Run(new DashboardForm());
         }
     }
