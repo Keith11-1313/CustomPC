@@ -7,6 +7,7 @@ public partial class PartEditForm : Form
     public PartEditForm()
     {
         InitializeComponent();
+        back.Click += BackButton_Click;
         if (Ui.IsDesign)
         {
             return;
@@ -87,6 +88,13 @@ public partial class PartEditForm : Form
                 break;
             }
         }
+    }
+
+    private void BackButton_Click(object? sender, EventArgs e)
+    {
+        // Return to the previous screen without saving changes.
+        DialogResult = DialogResult.Cancel;
+        Close();
     }
 
     private void PartEditForm_Shown(object? sender, EventArgs e)

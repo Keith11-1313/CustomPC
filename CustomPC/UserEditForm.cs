@@ -7,6 +7,7 @@ public partial class UserEditForm : Form
     public UserEditForm()
     {
         InitializeComponent();
+        back.Click += BackButton_Click;
         if (Ui.IsDesign)
         {
             return;
@@ -39,6 +40,13 @@ public partial class UserEditForm : Form
         email.Text = user.Email;
         role.SelectedItem = user.Role;
         archived.Checked = user.Archived;
+    }
+
+    private void BackButton_Click(object? sender, EventArgs e)
+    {
+        // Return to the previous screen without saving changes.
+        DialogResult = DialogResult.Cancel;
+        Close();
     }
 
     private void SaveClicked(object? sender, EventArgs e)

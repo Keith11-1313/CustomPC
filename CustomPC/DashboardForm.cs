@@ -6,13 +6,8 @@ public partial class DashboardForm : Form
     {
         Interval = 30000
     };
-    private readonly bool askForLogin;
 
-    public DashboardForm() : this(true)
-    {
-    }
-
-    public DashboardForm(bool askForLogin)
+    public DashboardForm()
     {
         InitializeComponent();
 
@@ -21,7 +16,6 @@ public partial class DashboardForm : Form
             return;
         }
 
-        this.askForLogin = askForLogin;
         catalog.Click += CatalogButton_Click;
         builder.Click += BuilderButton_Click;
         orders.Click += OrdersButton_Click;
@@ -34,8 +28,6 @@ public partial class DashboardForm : Form
         Shown += DashboardForm_Shown;
         FormClosed += DashboardForm_FormClosed;
         expiryTimer.Tick += ExpiryTimer_Tick;
-
-        expiryTimer.Start();
     }
 
     private void CatalogButton_Click(object? sender, EventArgs e)
@@ -87,14 +79,8 @@ public partial class DashboardForm : Form
     {
         try
         {
-            if (askForLogin)
-            {
-                SignIn();
-            }
-            else
-            {
-                UpdateDashboard();
-            }
+            UpdateDashboard();
+            expiryTimer.Start();
         }
         catch (Exception exception)
         {
@@ -175,13 +161,15 @@ public partial class DashboardForm : Form
     private void SignIn()
     {
         expiryTimer.Stop();
+        // Switching accounts should show only login, just like a fresh app launch.
+        Hide();
         try
         {
             AppStore.Current.Logout();
 
             using (LoginForm loginForm = new LoginForm())
             {
-                if (loginForm.ShowDialog(this) != DialogResult.OK)
+                if (loginForm.ShowDialog() != DialogResult.OK)
                 {
                     Close();
                     return;
@@ -189,6 +177,8 @@ public partial class DashboardForm : Form
             }
 
             UpdateDashboard();
+            Show();
+            Activate();
             expiryTimer.Start();
         }
         catch (Exception exception)

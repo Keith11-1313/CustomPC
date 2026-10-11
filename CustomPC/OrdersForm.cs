@@ -12,6 +12,7 @@ public partial class OrdersForm : Form
     public OrdersForm()
     {
         InitializeComponent();
+        back.Click += BackButton_Click;
 
         if (Ui.IsDesign)
         {
@@ -36,6 +37,13 @@ public partial class OrdersForm : Form
 
         refreshTimer.Start();
         LoadRows();
+    }
+
+    private void BackButton_Click(object? sender, EventArgs e)
+    {
+        // Closing this screen returns to the window that opened it.
+        DialogResult = DialogResult.Cancel;
+        Close();
     }
 
     private void FilterChanged(object? sender, EventArgs e)

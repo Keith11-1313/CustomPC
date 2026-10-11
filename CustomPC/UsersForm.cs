@@ -7,6 +7,7 @@ public partial class UsersForm : Form
     public UsersForm()
     {
         InitializeComponent();
+        back.Click += BackButton_Click;
         if (Ui.IsDesign)
         {
             return;
@@ -22,6 +23,13 @@ public partial class UsersForm : Form
         add.Click += AddClicked;
         edit.Click += EditClicked;
         LoadRows();
+    }
+
+    private void BackButton_Click(object? sender, EventArgs e)
+    {
+        // Closing this screen returns to the window that opened it.
+        DialogResult = DialogResult.Cancel;
+        Close();
     }
 
     private void FiltersChanged(object? sender, EventArgs e)

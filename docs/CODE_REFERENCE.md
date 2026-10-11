@@ -92,22 +92,31 @@ You can return to this table when an unfamiliar expression interrupts your readi
 
 ```csharp
 ApplicationConfiguration.Initialize();
+
+using (LoginForm loginForm = new LoginForm())
+{
+    if (loginForm.ShowDialog() != DialogResult.OK)
+    {
+        return;
+    }
+}
+
 Application.Run(new DashboardForm());
 ```
 
-The first line sets up WinForms defaults. The second creates the main window and starts the message loop, which waits for button clicks, keyboard input, window events, and timer ticks. Closing the main dashboard ends the app.
+The first line sets up WinForms defaults. The `using` block creates and displays login before a dashboard exists. Sign-in and guest access return OK; any other result ends `Main`. After an OK result, `Application.Run` creates the dashboard and starts its message loop, which waits for button clicks, keyboard input, window events, and timer ticks. Closing the main dashboard ends the app.
 
-Follow these steps in `DashboardForm.cs` and `AppStore.cs`:
+Follow these steps in `Program.cs`, `LoginForm.cs`, `DashboardForm.cs`, and `AppStore.cs`:
 
-1. The dashboard constructor calls `InitializeComponent` to create its controls.
-2. It connects named event handlers to buttons, the `Shown` event, and its timer.
-3. `DashboardForm_Shown` calls `SignIn` for the normal startup path.
-4. `SignIn` stops the expiry timer, clears any previous session, and opens `LoginForm` with `ShowDialog(this)`.
-5. The first use of `AppStore.Current` creates one shared `AppStore` object. Later calls reuse it for the lifetime of this process.
-6. The store constructor chooses the database path, creates missing tables, and loads the saved records into lists.
-7. If there are no users, `CreateSampleData` writes the initial demo users, supplier, parts, and rules. Existing user records are not reset at every launch.
-8. `ExpireOrders` cancels overdue unpaid orders.
-9. After login or guest access returns `DialogResult.OK`, `UpdateDashboard` refreshes data, shows the identity, and enables the appropriate menu buttons.
+1. `Program.Main` creates `LoginForm`, whose constructor creates controls and connects its event handlers.
+2. `ShowDialog()` shows only login and waits for successful sign-in, guest access, or cancellation.
+3. The first use of `AppStore.Current` creates one shared `AppStore` object. Later calls reuse it for the lifetime of this process.
+4. The store constructor chooses the database path, creates missing tables, and loads the saved records into lists.
+5. If there are no users, `CreateSampleData` writes the initial demo users, supplier, parts, and rules. Existing user records are not reset at every launch.
+6. `ExpireOrders` cancels overdue unpaid orders.
+7. After login or guest access returns `DialogResult.OK`, `Program.Main` creates `DashboardForm`. Cancelling login returns from Main without opening a dashboard.
+8. The dashboard constructor creates its controls and connects button, `Shown`, and timer events.
+9. `DashboardForm_Shown` calls `UpdateDashboard` to refresh data, show the identity, and enable the appropriate menu buttons, then starts the expiry timer.
 
 Dashboard button handlers call `OpenScreen` with a screen name. That method refreshes saved data, uses a `switch` to construct the requested form, and opens it inside `try/catch`. Keeping construction inside that block means an access or loading error raised by a child form can be displayed instead of escaping the button handler.
 
@@ -120,6 +129,12 @@ The database path is chosen in this order: a path explicitly passed to the `AppS
 `Refresh` reloads the database. `LoadData` finds the signed-in account again by its `Id`, so an archived account loses its session and a changed role takes effect in the loaded account. Lists are replaced during refresh; do not assume an old reference is always the latest saved record.
 
 `ShowDialog(this)` opens a modal child window. The owner waits until that dialog closes. A `using` statement disposes of the child afterward. `DialogResult.OK` indicates that the dialog completed its action; it is not an order status.
+
+`DashboardForm.SignIn` handles **Sign out / Switch account** after startup. It stops the timer, hides the dashboard, clears the current session, and opens login without a dashboard owner. An OK result updates and shows the dashboard, activates it, and restarts the timer. Cancelling login closes the dashboard and ends the app.
+
+The 15 forms other than Dashboard and Login have a **Back** button. **Esc** activates the same button through the form's `CancelButton` property. Back closes the current dialog and returns to its previous screen: catalog to dashboard, an inventory editor to inventory, registration to login, or a receipt to the screen that opened it. It does not save unfinished editor inputs. Records already saved by an earlier action remain saved; closing a receipt after confirming an order does not cancel that order.
+
+Each form connects `back.Click += BackButton_Click;` and sets `CancelButton = back;`. `BackButton_Click` sets `DialogResult.Cancel` and calls `Close()`. This uses the ordinary button declared in that form's Designer file, so you can select and move Back through View Designer. Login is the starting screen, and the dashboard is the main menu; neither has a previous screen to return to. Use Sign out / Switch account on the dashboard to return to login.
 
 ## 5. Designer files and event handlers
 
@@ -168,7 +183,7 @@ Open `LoginForm.cs`, then `AppStore.Accounts.cs`.
 3. It loops through `Users`, compares the trimmed email without case sensitivity, and ignores archived accounts.
 4. It verifies the entered password against the stored `PasswordHash`.
 5. On success, it assigns the account to `Session`.
-6. The login handler sets `DialogResult.OK`. The dashboard resumes and updates its menu.
+6. The login handler sets `DialogResult.OK`. At startup, `Program.Main` then creates the dashboard. When switching accounts, `DashboardForm.SignIn` restores the existing dashboard with an updated menu.
 7. On failure, the exception reaches the form's `catch` block and its message appears in a warning dialog.
 
 Demo credentials are **initial seed data**. `admin@custompc.local`, `staff@custompc.local`, and `customer@custompc.local` initially use `CustomPC123!`. A saved account with a changed password or an archived status will not regain those credentials merely because the login screen shows demo information. A screenshot of a failed login needs investigation against the selected database and saved account, not just a successful compile.
@@ -348,7 +363,7 @@ Values use SQL parameters (`$id` and `$data`) rather than being placed directly 
 
 | Form source | Screen and main responsibilities | Methods to follow |
 | --- | --- | --- |
-| `DashboardForm.cs` | Main navigation, role menus, metrics, login, expiry refresh | `SignIn`, `UpdateDashboard`, `OpenScreen`, `ExpiryTimer_Tick` |
+| `DashboardForm.cs` | Main navigation, role menus, metrics, account switching, expiry refresh | `SignIn`, `UpdateDashboard`, `OpenScreen`, `ExpiryTimer_Tick` |
 | `LoginForm.cs` | Login, show password, register button, guest access | `LoginButton_Click`, `ShowPassword_CheckedChanged`, `RegisterButton_Click`, `GuestButton_Click` |
 | `RegisterForm.cs` | Create a customer account | `SaveButton_Click` |
 | `CatalogForm.cs` | Search/filter active components and inspect details | `LoadRows`, `PartsGrid_CellDoubleClick`, `FilterChanged` |
@@ -403,7 +418,8 @@ When something fails, first write down the exact action, account role, message, 
 
 | Problem | First place to inspect | Next place |
 | --- | --- | --- |
-| App starts in the wrong window | `Program.Main` | `DashboardForm_Shown`, `SignIn` |
+| App starts in the wrong window | `Program.Main`: login and result check | `LoginForm` result, then `Application.Run(new DashboardForm())` |
+| Account switching shows the wrong window | `DashboardForm.SignIn` | `Hide`, login result, `UpdateDashboard`, `Show` |
 | Login rejects an account | `LoginButton_Click` | `AppStore.Login`, `VerifyPassword`, selected database path, saved account's archive status |
 | Registration fails | `RegisterForm.SaveButton_Click` | `SaveUser` |
 | Wrong catalog rows or filter | `CatalogForm.LoadRows` | `Available`, `StockState` |
@@ -425,9 +441,9 @@ The `bin/` and `obj/` folders are generated build outputs. They are not the file
 
 This is a checklist with expected behavior, **not a claim that these steps have all been performed on your machine**. Use separate demonstration records when trying payments, stock changes, and cancellation. Record actual results when validating the app.
 
-1. Open `CustomPC.slnx`, build, and run. Check the selected database path before testing an existing account. Sign in with an active account; a wrong password must show a message and keep the login screen open.
+1. Open `CustomPC.slnx`, build, and run. Expect only login at startup. Close login once and verify the app exits without opening a dashboard. Run again, check the selected database path, and sign in with an active account. A wrong password must show a message and keep login open. After success, expect the dashboard. Switch accounts and verify the dashboard stays hidden until sign-in or guest access succeeds.
 2. Open the same forms in **View Designer**. Confirm controls appear, then return to code view. Designer loading must be checked separately from compilation.
-3. Browse as guest. Search and filter the catalog; double-click a component. Preview a full build. Order submission must remain unavailable to a guest.
+3. Browse as guest. Search and filter the catalog; double-click a component. Use Back to return to the dashboard, reopen the catalog, and use Esc to return again. Preview a full build. Order submission must remain unavailable to a guest. Check Back/Esc in the remaining screens; an editor's unsaved inputs must not change saved records, and Back from a receipt must leave its already-created order intact.
 4. Register a new customer. Try mismatched passwords and a duplicate email before using valid details. Sign in with the newly created account, close/reopen the app, and sign in again to verify persistence.
 5. Choose Ryzen 5 5600 with B550M motherboard and DDR4 RAM, plus GPU, storage, the 650 W PSU, and case. Check total and compatibility messages. Change to the Intel CPU while retaining the AM4 motherboard; submit must become unavailable with a socket message. Try DDR5 RAM with the DDR4 motherboard for a memory message.
 6. Submit a valid order, retain its number, and save the receipt. Verify Pending Payment, seven order lines, correct total, and a 24-hour deadline. In inventory, reserved increases while on hand stays unchanged.

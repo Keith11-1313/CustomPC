@@ -7,6 +7,7 @@ public partial class SuppliersForm : Form
     public SuppliersForm()
     {
         InitializeComponent();
+        back.Click += BackButton_Click;
         if (Ui.IsDesign)
         {
             return;
@@ -23,6 +24,13 @@ public partial class SuppliersForm : Form
         edit.Click += EditClicked;
         parts.Click += SuppliedPartsClicked;
         LoadRows();
+    }
+
+    private void BackButton_Click(object? sender, EventArgs e)
+    {
+        // Closing this screen returns to the window that opened it.
+        DialogResult = DialogResult.Cancel;
+        Close();
     }
 
     private void FiltersChanged(object? sender, EventArgs e)

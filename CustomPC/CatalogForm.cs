@@ -7,6 +7,7 @@ public partial class CatalogForm : Form
     public CatalogForm()
     {
         InitializeComponent();
+        back.Click += BackButton_Click;
 
         if (Ui.IsDesign)
         {
@@ -30,6 +31,13 @@ public partial class CatalogForm : Form
         grid.CellDoubleClick += PartsGrid_CellDoubleClick;
 
         LoadRows();
+    }
+
+    private void BackButton_Click(object? sender, EventArgs e)
+    {
+        // Closing this screen returns to the window that opened it.
+        DialogResult = DialogResult.Cancel;
+        Close();
     }
 
     private void FilterChanged(object? sender, EventArgs e)

@@ -16,12 +16,26 @@ partial class SupplierEditForm
         heading = new Label();
         heading.Name = "heading";
         heading.Location = new Point(32, 24);
-        heading.Size = new Size(516, 40);
+        heading.Size = new Size(396, 40);
         heading.TabIndex = 0;
         heading.Text = "Supplier details";
         heading.UseMnemonic = false;
         heading.Font = new Font("Segoe UI", 22F, FontStyle.Bold);
         Controls.Add(heading);
+        back = new Button();
+        back.Name = "back";
+        back.Location = new Point(448, 24);
+        back.Size = new Size(100, 40);
+        back.TabIndex = 12;
+        back.Text = "Back";
+        back.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        back.BackColor = Color.White;
+        back.ForeColor = Color.FromArgb(15, 23, 42);
+        back.FlatStyle = FlatStyle.Flat;
+        back.FlatAppearance.BorderColor = Color.FromArgb(203, 213, 225);
+        back.Cursor = Cursors.Hand;
+        back.UseMnemonic = false;
+        Controls.Add(back);
         subheading = new Label();
         subheading.Name = "subheading";
         subheading.Location = new Point(32, 72);
@@ -107,6 +121,7 @@ partial class SupplierEditForm
         save.Cursor = Cursors.Hand;
         save.UseMnemonic = false;
         Controls.Add(save);
+        CancelButton = back;
         AutoScaleDimensions = new SizeF(7F, 17F);
         AutoScaleMode = AutoScaleMode.Font;
         Font = new Font("Segoe UI", 10F);
@@ -121,6 +136,7 @@ partial class SupplierEditForm
         PerformLayout();
     }
     private Label heading = null!;
+    private Button back = null!;
     private Label subheading = null!;
     private Label supplierNameLabel = null!;
     private TextBox supplierName = null!;

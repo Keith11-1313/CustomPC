@@ -16,7 +16,8 @@ partial class CompatibilityForm
         heading = new Label();
         heading.Name = "heading";
         heading.Location = new Point(32, 24);
-        heading.Size = new Size(1036, 40);
+        heading.Size = new Size(892, 40);
+        heading.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
         heading.TabIndex = 0;
         heading.Text = "Compatibility rules";
         heading.UseMnemonic = false;
@@ -76,6 +77,21 @@ partial class CompatibilityForm
         edit.Cursor = Cursors.Hand;
         edit.UseMnemonic = false;
         Controls.Add(edit);
+        back = new Button();
+        back.Name = "back";
+        back.Location = new Point(948, 24);
+        back.Size = new Size(120, 40);
+        back.TabIndex = 5;
+        back.Text = "Back";
+        back.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        back.BackColor = Color.FromArgb(226, 232, 240);
+        back.ForeColor = Color.FromArgb(15, 23, 42);
+        back.FlatStyle = FlatStyle.Flat;
+        back.FlatAppearance.BorderSize = 0;
+        back.Cursor = Cursors.Hand;
+        back.UseMnemonic = false;
+        Controls.Add(back);
+        CancelButton = back;
         AutoScaleDimensions = new SizeF(7F, 17F);
         AutoScaleMode = AutoScaleMode.Font;
         Font = new Font("Segoe UI", 10F);
@@ -94,4 +110,5 @@ partial class CompatibilityForm
     private DataGridView grid = null!;
     private Label note = null!;
     private Button edit = null!;
+    private Button back = null!;
 }

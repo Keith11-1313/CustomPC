@@ -1,14 +1,30 @@
 # CustomPC validation results
 
-Validated on **9 October 2026**, Windows, .NET SDK 10.0.401. The final workflow run completed at **23:02 Philippine time**.
+Validated on **11 October 2026**, Windows, .NET SDK 10.0.401. The final workflow run completed at **15:05 Philippine time**.
 
-**Result: 261 automated checks passed, 0 failed.** A separate run passed **3 login-button checks against a copy of your existing database**. The application and test harness built with **0 warnings and 0 errors**.
+**Result: 360 automated checks passed, 0 failed.** This repeats the earlier 261 checks and adds 99 checks for startup and navigation. The application and test harness built with **0 warnings and 0 errors**. A separate run on **9 October** passed **3 login-button checks against a copy of your existing database**.
 
 These results apply to the source saved during this validation. Start with [CODE_GUIDE.md](CODE_GUIDE.md) to learn the code. The [code reference](CODE_REFERENCE.md) contains the advanced manual validation checklist.
 
+## Login-first startup and Back navigation
+
+The earlier startup code created the dashboard first, then opened login over it. `Program.Main` now opens login before it creates the dashboard. Sign in or Browse as guest opens the homepage; closing login exits. Switching accounts hides the homepage while login is open.
+
+All 15 secondary forms now have a Back button in their `.Designer.cs` file. Back closes the current screen and returns to the existing screen that opened it. Esc activates the same action. Leaving an editor with Back discards unfinished inputs. Leaving a receipt keeps its already-created order.
+
+The added checks exercised:
+
+- The actual application entry point in a fresh process for cancelled login, guest access, and Admin login. No dashboard existed while initial login was open; successful access opened exactly one dashboard after login closed.
+- The actual Switch account button: homepage hidden and timer stopped during login, guest permissions restored afterward, and cancelled login closed the homepage without leaving a hidden app.
+- The actual Catalog and Registration Back buttons through the screens that opened them, returning to the same homepage or login window.
+- All 15 Back buttons: visible within the client area, no overlap with the heading, Escape assigned, and closing with a Cancel result. Reloaded records across all eight collections remained unchanged, including unfinished editor inputs.
+- Escape executing the real Catalog Back action and a confirmed order remaining saved after leaving its receipt.
+
+These tests used fresh databases outside the application project. They did not change your normal AppData database. The manual Designer and visual checks below remain separate.
+
 ## Your saved database and the failed login screenshot
 
-The existing file was inspected read-only at:
+On **9 October 2026**, the existing file was inspected read-only at:
 
 ```text
 C:\Users\Jerald\AppData\Local\CustomPC\custompc.db
@@ -26,7 +42,7 @@ To retry the current build, run it from Visual Studio, enter `admin@custompc.loc
 
 ## What was exercised
 
-The 261 checks include **142 business/data checks** and **119 form checks**. Form checks created real WinForms controls, used `PerformClick` for buttons, changed selectors/search inputs, and inspected resulting saved records and displayed data. Permission checks also called reload handlers and attempted restricted screen construction. Test windows stayed hidden; native confirmation/error dialogs were answered within the test process.
+The 360 checks include **142 business/data checks**, **119 existing form checks**, and **99 startup/navigation checks**. Form checks created real WinForms controls, used `PerformClick` for buttons, changed selectors/search inputs, and inspected resulting saved records and displayed data. Permission checks also called reload handlers and attempted restricted screen construction. Test windows stayed hidden; native confirmation/error dialogs were answered within the test process.
 
 | Area | Checks | Evidence covered |
 | --- | ---: | --- |
@@ -44,8 +60,9 @@ The 261 checks include **142 business/data checks** and **119 form checks**. For
 | Order form buttons | 11 | Pay, advance, cancel, displayed status, search/status filters |
 | Customer access and reports | 29 | Own orders/receipt, denied other-customer receipt, management permissions, report dates/totals, hidden record IDs |
 | Access revoked with a screen open | 29 | Clear protected grids, disable actions, block export, Sales demotion, staff archive |
-| **Full run** | **261** | **All passed** |
-| Existing-database login buttons, separate run | 3 | Admin, Staff, Customer login using the saved database copy; all passed |
+| Login-first startup and Back navigation | 99 | Initial login before dashboard creation, account switching, cancel/exit, return to parent, 15 Back buttons, Escape, discarded inputs, unchanged saved order |
+| **Full run, 11 October** | **360** | **All passed** |
+| Existing-database login buttons, separate 9 October run | 3 | Admin, Staff, Customer login using the saved database copy; all passed |
 
 Rollback checks deliberately caused a SQLite insert to fail. Both the persisted records and in-memory records returned to their original state. This checks failure behavior as well as successful operations.
 
@@ -58,6 +75,8 @@ Rollback checks deliberately caused a SQLite insert to fail. Both the persisted 
 5. **Stock overflow:** large adjustments use `long` arithmetic and reject results above 10,000,000 before saving. Invalid stock edits leave stock and movement history unchanged.
 6. **Changed prices:** confirmation includes the displayed total. The order transaction checks it against current prices, rejects a changed quote, and refreshes the builder before another confirmation.
 7. **Login diagnostics:** added Show password, clear blank-input validation, accurate initial-account wording, and graceful rejection of a malformed stored password hash.
+8. **Two windows at startup:** login now finishes before the homepage is created. Account switching hides the homepage and pauses its timer until login finishes.
+9. **Missing Back navigation:** added Designer buttons and named handlers to all 15 secondary forms, with Esc as the keyboard shortcut. Back closes a screen without calling its save handler.
 
 ## What still needs manual verification
 
@@ -85,7 +104,7 @@ Wait for the build to succeed before running the commands. The full run creates 
 
 Machine-readable evidence on this computer:
 
-- [Full run results](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/custompc-runtime-validation/run-20261009-230203-898/report.json)
+- [Full run results, 11 October](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/custompc-runtime-validation/run-20261011-150436-189/report.json)
 - [Existing-database login results](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/custompc-runtime-validation/run-20261009-224736-007/report.json)
 - [Read-only database inspection](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/custompc-runtime-validation/actual-database-evidence.json)
 

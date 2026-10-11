@@ -7,6 +7,7 @@ public partial class SupplierEditForm : Form
     public SupplierEditForm()
     {
         InitializeComponent();
+        back.Click += BackButton_Click;
         if (Ui.IsDesign)
         {
             return;
@@ -38,6 +39,13 @@ public partial class SupplierEditForm : Form
         email.Text = supplier.Email;
         address.Text = supplier.Address;
         archived.Checked = supplier.Archived;
+    }
+
+    private void BackButton_Click(object? sender, EventArgs e)
+    {
+        // Return to the previous screen without saving changes.
+        DialogResult = DialogResult.Cancel;
+        Close();
     }
 
     private void SaveClicked(object? sender, EventArgs e)

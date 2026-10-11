@@ -7,6 +7,7 @@ public partial class BuilderForm : Form
     public BuilderForm()
     {
         InitializeComponent();
+        back.Click += BackButton_Click;
 
         if (Ui.IsDesign)
         {
@@ -19,6 +20,13 @@ public partial class BuilderForm : Form
         LoadPartChoices();
         LoadCustomerChoices();
         UpdateBuildSummary();
+    }
+
+    private void BackButton_Click(object? sender, EventArgs e)
+    {
+        // Closing this screen returns to the window that opened it.
+        DialogResult = DialogResult.Cancel;
+        Close();
     }
 
     private void LoadPartChoices()

@@ -7,6 +7,7 @@ public partial class InventoryForm : Form
     public InventoryForm()
     {
         InitializeComponent();
+        back.Click += BackButton_Click;
         if (Ui.IsDesign)
         {
             return;
@@ -33,6 +34,13 @@ public partial class InventoryForm : Form
         refresh.Click += RefreshClicked;
 
         LoadRows();
+    }
+
+    private void BackButton_Click(object? sender, EventArgs e)
+    {
+        // Closing this screen returns to the window that opened it.
+        DialogResult = DialogResult.Cancel;
+        Close();
     }
 
     private void FiltersChanged(object? sender, EventArgs e)

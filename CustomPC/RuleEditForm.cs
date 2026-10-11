@@ -7,6 +7,7 @@ public partial class RuleEditForm : Form
     public RuleEditForm()
     {
         InitializeComponent();
+        back.Click += BackButton_Click;
         if (Ui.IsDesign)
         {
             return;
@@ -39,6 +40,13 @@ public partial class RuleEditForm : Form
         ruleName.Text = rule.Name;
         kind.SelectedItem = rule.Kind;
         enabled.Checked = rule.Enabled;
+    }
+
+    private void BackButton_Click(object? sender, EventArgs e)
+    {
+        // Return to the previous screen without saving changes.
+        DialogResult = DialogResult.Cancel;
+        Close();
     }
 
     private void SaveClicked(object? sender, EventArgs e)

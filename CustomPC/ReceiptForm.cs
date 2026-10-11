@@ -11,6 +11,7 @@ public partial class ReceiptForm : Form
     public ReceiptForm()
     {
         InitializeComponent();
+        back.Click += BackButton_Click;
 
         if (Ui.IsDesign)
         {
@@ -44,6 +45,13 @@ public partial class ReceiptForm : Form
         }
 
         receiptText.Text = Ui.Receipt(selectedOrder, store);
+    }
+
+    private void BackButton_Click(object? sender, EventArgs e)
+    {
+        // Return to the previous screen without saving changes.
+        DialogResult = DialogResult.Cancel;
+        Close();
     }
 
     private void ReceiptForm_Shown(object? sender, EventArgs e)

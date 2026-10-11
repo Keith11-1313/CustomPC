@@ -14,8 +14,10 @@ The longer [code reference](CODE_REFERENCE.md) contains the complete file map, C
 2. Open **View → Solution Explorer**. Expand the `CustomPC` project using the arrow beside its name. A project groups the source files and settings needed to build one application.
 3. Find `LoginForm.cs`. Right-click it and choose **View Code**. If you see a drawn window instead of code, press **F7**.
 4. Press **Ctrl+F** and find `LoginButton_Click`.
-5. Press **F5** to run the application. You should see a dashboard with the Welcome to CustomPC login window in front of it.
-6. Click **Browse as guest**, then **Parts catalog**. You can look at parts without placing an order. Close the catalog and dashboard when done.
+5. Press **F5** to run the application. You should see only the Welcome to CustomPC login window. The homepage opens after successful sign-in or guest access.
+6. Click **Browse as guest**, then **Parts catalog**. You can look at parts without placing an order. Click **Back** to return to the homepage, then close the homepage when done.
+
+**Try navigating:** run again, choose Browse as guest, open Parts catalog, then press **Esc**. It should return to the homepage just like Back. On an editor such as customer registration, Back returns without saving unfinished inputs. Back from a receipt only closes the receipt; an order you already confirmed stays saved. The login window has no Back button because it is the starting screen. Closing it exits the app.
 
 An application must be **built** before it runs: the compiler checks your C# and creates the executable. If F5 reports an error, open **View → Error List** and read the first error before trying later lessons. This project requires .NET 10 and Visual Studio's .NET desktop development tools.
 
@@ -97,6 +99,8 @@ In the method's first line, `private` means other classes cannot directly call i
 
 **Answer:** The `!` reverses its `Checked` value from true to false.
 
+**Follow another button:** open `CatalogForm.cs` and find `BackButton_Click`. The constructor connects `back.Click += BackButton_Click;`, using the same event pattern. In `CatalogForm.Designer.cs`, `InitializeComponent` sets `CancelButton = back;`, which makes Esc activate Back. The handler sets `DialogResult.Cancel` and closes the catalog, so control returns to the homepage. Cancel here is a window result; it does not cancel an order or call a save method.
+
 ## 4. Read the Sign in handler, a few lines at a time
 
 **Goal:** understand what the form does and where its work goes.
@@ -124,7 +128,7 @@ Read it from top to bottom:
 2. **`email.Text` and `password.Text`** read what was entered into the two text boxes.
 3. **`AppStore.Current`** gives the form the shared object that manages the loaded records and signed-in account. Different forms use the same object. You can understand this call before learning how `Current` creates that object.
 4. **`Login(...)`** calls another method. The two comma-separated values inside the parentheses are the inputs passed to that method. It checks the account and password.
-5. **`DialogResult = DialogResult.OK;`** reports a successful result. When this form is opened as a dialog, that closes it and lets the dashboard continue. “OK” here is a window result, not an order status.
+5. **`DialogResult = DialogResult.OK;`** reports a successful result. That closes the login dialog and lets `Program.Main` open the homepage. When switching accounts later, it lets the existing homepage reappear. “OK” here is a window result, not an order status.
 6. **`catch`** handles an error raised inside `try`. An **exception** is the error information C# passes to this block. If `Login` fails, execution skips the OK line and enters `catch`.
 7. **`Ui.ShowError(this, exception);`** shows the error's message. `this` means this login form, which owns the message box. `Ui` contains display helpers shared by the forms.
 
@@ -202,7 +206,7 @@ Session = matchingAccount;
 
 ```text
 Click Sign in → LoginButton_Click → AppStore.Login
-             → Session assigned → DialogResult.OK → dashboard resumes
+             → Session assigned → DialogResult.OK → homepage opens
 ```
 
 For a successful retry, the initial demo Admin is `admin@custompc.local` with `CustomPC123!`. Those credentials apply to initial demo data; an edited account keeps its saved password.
@@ -270,8 +274,8 @@ The first line chooses a database for apps started from **this PowerShell proces
 1. Sign in as `staff@custompc.local`, password `CustomPC123!` in the fresh practice database.
 2. Open Parts & inventory. Select one component row and note its **OnHand** number.
 3. Click **Adjust stock**. Set **Quantity change** to `2`, enter `Learning exercise` in **Reason / supply reference**, and click **Record adjustment**.
-4. Expect OnHand to increase by 2. Open **Movement history**. This opens the stock movements report for all parts; find the row matching your component, quantity 2, and reason. Close the report.
-5. Select the component again and click Adjust stock. Set Quantity change to `0` with the same reason, then click Record adjustment. Expect an error and no extra stock change. Close the unsaved editor.
+4. Expect OnHand to increase by 2. Open **Movement history**. This opens the stock movements report for all parts; find the row matching your component, quantity 2, and reason. Click Back to return to inventory.
+5. Select the component again and click Adjust stock. Set Quantity change to `0` with the same reason, then click Record adjustment. Expect an error and no extra stock change. Click Back to leave the unsaved editor. Its earlier successful adjustment stays saved.
 6. Close the app. The PowerShell command should finish. Run the same `dotnet run` line again; the saved stock should remain.
 7. Close the app. Remove the override from this PowerShell process:
 
@@ -317,7 +321,9 @@ You can now follow one button at a time. Open its form, find the event connectio
 
 | What you want to understand | Open first | Follow next |
 | --- | --- | --- |
-| Why the dashboard opens first | `Program.cs`: `Application.Run(new DashboardForm())` | `DashboardForm_Shown`, then `SignIn` in `DashboardForm.cs` |
+| Why login opens before the homepage | `Program.cs`: `loginForm.ShowDialog()` | The result check, then `Application.Run(new DashboardForm())` |
+| Switching accounts | `DashboardForm.cs`: `SignOutButton_Click` | `SignIn`: hide homepage, clear session, show login, restore homepage on OK |
+| Returning to the previous screen | The open form's `BackButton_Click` | `back.Click` in its constructor; `CancelButton = back` in the matching `.Designer.cs` file's `InitializeComponent` |
 | Customer registration | `RegisterForm.cs`: `SaveButton_Click` | `SaveUser` in `AppStore.Accounts.cs` |
 | Catalog search | `CatalogForm.cs`: `FilterChanged` | `LoadRows` in the same file |
 | Build errors | `BuilderForm.cs`: `UpdateBuildSummary` | `CheckBuild` in `AppStore.Compatibility.cs` |
@@ -327,7 +333,23 @@ You can now follow one button at a time. Open its form, find the event connectio
 | Report totals | `ReportsForm.cs`: `LoadReport` | The selected report's loader in the same file |
 | Saved data returning after restart | `AppStore.cs`: `LoadData` | `ReadRecords` in `Database.cs` |
 
-Start `Program.cs` by reading `Application.Run(new DashboardForm())` as “create a dashboard window and keep the app running.” `new` creates an object. The dashboard opens LoginForm when shown, which is why both windows appear at startup.
+Open `Program.cs` and read its startup code from top to bottom:
+
+```csharp
+using (LoginForm loginForm = new LoginForm())
+{
+    if (loginForm.ShowDialog() != DialogResult.OK)
+    {
+        return;
+    }
+}
+
+Application.Run(new DashboardForm());
+```
+
+`new LoginForm()` creates the login window. `ShowDialog()` displays it and waits for its result. `!=` means “is not equal to.” If login closes without an OK result, `return` ends `Main`, so the homepage is never created. Sign in and Browse as guest both return OK. Only then does `Application.Run(new DashboardForm())` create the homepage and keep the app running. The `using` block releases the login window's resources after it closes.
+
+When you click **Sign out / Switch account**, `DashboardForm.SignIn` hides the homepage and shows login. A successful sign-in or guest choice brings the homepage back with the new menu. Closing that login window ends the app.
 
 The `AppStore.*.cs` files use `partial` just like the form files: they are sections of **one class**, grouped by subject. `AppStore.Accounts.cs` is not a second store or a second database.
 

@@ -7,6 +7,7 @@ public partial class ReportsForm : Form
     public ReportsForm()
     {
         InitializeComponent();
+        back.Click += BackButton_Click;
         if (Ui.IsDesign)
         {
             return;
@@ -37,6 +38,13 @@ public partial class ReportsForm : Form
     {
         report.SelectedItem = kind;
         LoadReport();
+    }
+
+    private void BackButton_Click(object? sender, EventArgs e)
+    {
+        // Closing this screen returns to the window that opened it.
+        DialogResult = DialogResult.Cancel;
+        Close();
     }
 
     private void ReportChanged(object? sender, EventArgs e)

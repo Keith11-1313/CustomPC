@@ -7,6 +7,7 @@ public partial class StockAdjustmentForm : Form
     public StockAdjustmentForm()
     {
         InitializeComponent();
+        back.Click += BackButton_Click;
         if (Ui.IsDesign)
         {
             return;
@@ -34,6 +35,13 @@ public partial class StockAdjustmentForm : Form
         }
 
         partLabel.Text = selectedPart.Name;
+    }
+
+    private void BackButton_Click(object? sender, EventArgs e)
+    {
+        // Return to the previous screen without saving changes.
+        DialogResult = DialogResult.Cancel;
+        Close();
     }
 
     private void SaveClicked(object? sender, EventArgs e)

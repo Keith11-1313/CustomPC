@@ -16,7 +16,8 @@ partial class SuppliersForm
         heading = new Label();
         heading.Name = "heading";
         heading.Location = new Point(32, 24);
-        heading.Size = new Size(1036, 40);
+        heading.Size = new Size(892, 40);
+        heading.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
         heading.TabIndex = 0;
         heading.Text = "Suppliers";
         heading.UseMnemonic = false;
@@ -115,6 +116,21 @@ partial class SuppliersForm
         parts.Cursor = Cursors.Hand;
         parts.UseMnemonic = false;
         Controls.Add(parts);
+        back = new Button();
+        back.Name = "back";
+        back.Location = new Point(948, 24);
+        back.Size = new Size(120, 40);
+        back.TabIndex = 9;
+        back.Text = "Back";
+        back.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        back.BackColor = Color.FromArgb(226, 232, 240);
+        back.ForeColor = Color.FromArgb(15, 23, 42);
+        back.FlatStyle = FlatStyle.Flat;
+        back.FlatAppearance.BorderSize = 0;
+        back.Cursor = Cursors.Hand;
+        back.UseMnemonic = false;
+        Controls.Add(back);
+        CancelButton = back;
         AutoScaleDimensions = new SizeF(7F, 17F);
         AutoScaleMode = AutoScaleMode.Font;
         Font = new Font("Segoe UI", 10F);
@@ -137,4 +153,5 @@ partial class SuppliersForm
     private Button add = null!;
     private Button edit = null!;
     private Button parts = null!;
+    private Button back = null!;
 }

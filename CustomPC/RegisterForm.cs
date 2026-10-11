@@ -5,6 +5,7 @@ public partial class RegisterForm : Form
     public RegisterForm()
     {
         InitializeComponent();
+        back.Click += BackButton_Click;
 
         if (Ui.IsDesign)
         {
@@ -13,6 +14,13 @@ public partial class RegisterForm : Form
 
         AcceptButton = save;
         save.Click += SaveButton_Click;
+    }
+
+    private void BackButton_Click(object? sender, EventArgs e)
+    {
+        // Return to the previous screen without saving changes.
+        DialogResult = DialogResult.Cancel;
+        Close();
     }
 
     private void SaveButton_Click(object? sender, EventArgs e)

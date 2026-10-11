@@ -7,6 +7,7 @@ public partial class CompatibilityForm : Form
     public CompatibilityForm()
     {
         InitializeComponent();
+        back.Click += BackButton_Click;
         if (Ui.IsDesign)
         {
             return;
@@ -19,6 +20,13 @@ public partial class CompatibilityForm : Form
 
         edit.Click += EditClicked;
         LoadRows();
+    }
+
+    private void BackButton_Click(object? sender, EventArgs e)
+    {
+        // Closing this screen returns to the window that opened it.
+        DialogResult = DialogResult.Cancel;
+        Close();
     }
 
     private void EditClicked(object? sender, EventArgs e)

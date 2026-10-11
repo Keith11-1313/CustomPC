@@ -2,6 +2,8 @@
 
 Open `CustomPC.slnx` in Visual Studio with the **.NET desktop development** workload and .NET 10 installed. Restore NuGet packages if prompted, then press **F5**.
 
+The login window appears first. Sign in or choose **Browse as guest** to open the homepage. Closing login exits the app. On the other screens, **Back** or **Esc** returns to the previous screen. Leaving an editor this way does not save its unfinished inputs.
+
 ## Understand the code
 
 Start with [the beginner code guide](docs/CODE_GUIDE.md). Lessons 1–5 show you how to open a form, identify its controls, read Sign in's code, and watch it run in the debugger. Each lesson gives an action, the expected result, and a checkpoint with an answer. Later lessons cover accounts, the builder, and saving with a separate practice database.
@@ -10,7 +12,7 @@ Use [the code reference](docs/CODE_REFERENCE.md) afterward for all 17 forms, the
 
 The guide explains expected behavior. A successful build alone does not verify login against your saved database, runtime workflows, Visual Studio Designer loading, or printer output.
 
-Read [the validation results](docs/VALIDATION.md) for the checks that actually ran, corrected issues, and remaining manual checks. The 9 October run passed 261 automated checks and 3 separate login-button checks against a copy of the saved database.
+Read [the validation results](docs/VALIDATION.md) for the checks that actually ran, corrected issues, and remaining manual checks. The 11 October run passed 360 automated checks, including login-first startup and Back navigation. The earlier 9 October run also passed 3 separate login-button checks against a copy of the saved database.
 
 ## Edit a screen
 
@@ -26,8 +28,8 @@ These files belong to the same form. Use the visual Designer to change its layou
 
 | File | Responsibility |
 | --- | --- |
-| `Program.cs` | Starts the app and opens the dashboard. |
-| `DashboardForm.cs` | Opens the login screen, then shows the menu for the user's role. |
+| `Program.cs` | Opens login first; opens the dashboard only after sign-in or guest access. |
+| `DashboardForm.cs` | Shows the menu for the user's role and handles switching accounts. |
 | `LoginForm.cs`, `RegisterForm.cs` | Sign-in, registration, and guest access. |
 | `CatalogForm.cs`, `BuilderForm.cs` | Browse parts, choose components, check compatibility, and create an order. |
 | `OrdersForm.cs`, `ReceiptForm.cs` | Track orders, confirm store payment, update status, and print receipts. |
