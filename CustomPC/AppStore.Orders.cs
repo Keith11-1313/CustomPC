@@ -12,19 +12,18 @@ public sealed partial class AppStore
             try
             {
                 LoadData(connection);
-                CancelExpiredOrders();
+                RequireCustomer();
 
-                if (Session == null)
-                {
-                    throw new InvalidOperationException("Sign in to place an order.");
-                }
+                if (!DemoMode && DefaultPasswordAccounts() > 0)
+                    throw new InvalidOperationException("Before taking store orders, an administrator must change or archive all legacy demo accounts using the public password. Open User accounts, then check Store tools.");
 
-                if (!IsStaff && customerId != Session.Id)
+                if (customerId != Session!.Id)
                 {
                     throw new InvalidOperationException("You can only order for your own account.");
                 }
 
                 UserAccount customer = FindActiveCustomer(customerId);
+                CancelExpiredOrders();
                 List<Part> selectedParts = new List<Part>();
 
                 foreach (string partId in partIds)
@@ -113,8 +112,8 @@ public sealed partial class AppStore
 
         foreach (CustomerOrder order in Orders)
         {
-            bool ownOrder = Session != null && order.CustomerId == Session.Id;
-            if (IsStaff || ownOrder)
+            bool ownOrder = IsCustomer && order.CustomerId == Session!.Id;
+            if (CanViewAllOrders || ownOrder)
             {
                 visibleOrders.Add(order);
             }
@@ -177,8 +176,6 @@ public sealed partial class AppStore
 
     public void ConfirmPayment(string orderId)
     {
-        ExpireOrders();
-
         using (SqliteConnection connection = database.OpenConnection())
         using (SqliteTransaction transaction = connection.BeginTransaction())
         {
@@ -269,9 +266,10 @@ public sealed partial class AppStore
             try
             {
                 LoadData(connection);
+                RequireCustomer();
                 CustomerOrder order = FindOrder(orderId);
 
-                if (Session == null || (!IsStaff && order.CustomerId != Session.Id))
+                if (order.CustomerId != Session!.Id)
                 {
                     throw new InvalidOperationException("You cannot cancel this order.");
                 }

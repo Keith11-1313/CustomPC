@@ -1,6 +1,8 @@
+using System.Data;
+
 namespace CustomPC;
 
-public partial class DashboardForm : Form
+public partial class DashboardForm : StoreWindow
 {
     private readonly System.Windows.Forms.Timer expiryTimer = new System.Windows.Forms.Timer
     {
@@ -24,6 +26,8 @@ public partial class DashboardForm : Form
         users.Click += UsersButton_Click;
         rules.Click += RulesButton_Click;
         reports.Click += ReportsButton_Click;
+        tools.Click += ToolsButton_Click;
+        recent.CellDoubleClick += RecentOrder_DoubleClick;
         signout.Click += SignOutButton_Click;
         Shown += DashboardForm_Shown;
         FormClosed += DashboardForm_FormClosed;
@@ -68,6 +72,24 @@ public partial class DashboardForm : Form
     private void ReportsButton_Click(object? sender, EventArgs e)
     {
         OpenScreen("Reports");
+    }
+
+    private void ToolsButton_Click(object? sender, EventArgs e)
+    {
+        OpenScreen("Store tools");
+    }
+
+    private void RecentOrder_DoubleClick(object? sender, DataGridViewCellEventArgs e)
+    {
+        if (e.RowIndex < 0) return;
+        try
+        {
+            string id = recent.Rows[e.RowIndex].Cells["Id"].Value?.ToString()
+                ?? throw new InvalidOperationException("Select an order first.");
+            using ReceiptForm receipt = new ReceiptForm(id);
+            receipt.ShowDialog(this);
+        }
+        catch (Exception exception) { Ui.ShowError(this, exception); }
     }
 
     private void SignOutButton_Click(object? sender, EventArgs e)
@@ -141,6 +163,9 @@ public partial class DashboardForm : Form
                 case "Reports":
                     form = new ReportsForm();
                     break;
+                case "Store tools":
+                    form = new StoreToolsForm();
+                    break;
                 default:
                     throw new InvalidOperationException("This screen is not available.");
             }
@@ -202,12 +227,17 @@ public partial class DashboardForm : Form
             identity.Text = $"Welcome, {store.Session.Name}   /   {store.Session.Role}";
         }
 
-        inventory.Enabled = store.IsStaff;
-        reports.Enabled = store.IsStaff;
+        inventory.Enabled = store.CanViewInventory;
+        reports.Enabled = store.IsAdmin;
         suppliers.Enabled = store.IsAdmin;
         users.Enabled = store.IsAdmin;
         rules.Enabled = store.IsAdmin;
-        orders.Enabled = store.Session != null;
+        tools.Enabled = store.IsAdmin;
+        orders.Enabled = store.CanViewAllOrders || store.IsCustomer;
+        builder.Enabled = store.IsCustomer || store.Session == null;
+        builder.Text = store.Session == null ? "PC builder preview" : "PC builder";
+        orders.Text = store.IsAdmin ? "View orders" : store.IsStaff ? "Orders & payments" : "My orders";
+        ArrangeRoleMenu();
 
         int activeParts = 0;
         int availableParts = 0;
@@ -233,7 +263,7 @@ public partial class DashboardForm : Form
             }
         }
 
-        if (store.IsStaff)
+        if (store.CanViewAllOrders)
         {
             int pendingOrders = 0;
             decimal totalSales = 0;
@@ -251,24 +281,66 @@ public partial class DashboardForm : Form
                 totalSales += payment.Amount;
             }
 
-            metrics.Text = $"{activeParts} active parts   /   {pendingOrders} awaiting payment\n" +
-                $"{lowStockParts} low / out of stock   /   {Ui.Money(totalSales)} sales";
+            metrics.Text = "Inventory and order summary";
+            statParts.Text = activeParts.ToString();
+            statOrders.Text = pendingOrders.ToString();
+            statStock.Text = lowStockParts.ToString();
+            statSales.Text = store.IsAdmin
+                ? totalSales.ToString("N0")
+                : store.Orders.Count(o => o.Status == "Ready for Pickup").ToString();
+            statSalesCaption.Text = store.IsAdmin ? "Recorded sales (PHP)" : "Ready for pickup";
 
-            guide.Text = "STORE WORKFLOW\n\n" +
-                "Review orders and confirm in-store payments.\n" +
-                "Move paid orders through processing, assembly and pickup.\n" +
-                "Monitor reserved stock and record inventory adjustments.\n" +
-                "Use reports to review orders, stock and recorded sales.";
+            guide.Text = store.IsAdmin
+                ? "Manage accounts and assign roles in User accounts.\n\nMaintain parts, suppliers and rules.\n\nMonitor orders and reports."
+                : "Confirm payment after receiving it at the store.\n\nUpdate assembly and pickup in Orders.\n\nAdjust stock in Inventory.";
         }
         else
         {
             int customerOrderCount = store.VisibleOrders().Count;
-            metrics.Text = $"{availableParts} parts available   /   {customerOrderCount} your orders";
-            guide.Text = "01   Browse available components\n\n" +
-                "02   Select a compatible build\n\n" +
-                "03   Confirm your order and keep the receipt\n\n" +
-                "04   Pay at the store within 24 hours\n\n" +
-                "05   Track assembly and collect your PC";
+            metrics.Text = "Your next PC starts here";
+            statParts.Text = availableParts.ToString();
+            statPartsCaption.Text = "Parts available";
+            statOrders.Text = customerOrderCount.ToString();
+            statOrdersCaption.Text = "Your orders";
+            statStock.Text = "24h";
+            statStockCaption.Text = "Payment deadline";
+            statSales.Text = "In store";
+            statSalesCaption.Text = "Payment & pickup";
+            guide.Text = "Choose your parts in PC builder.\n\nConfirm the order and keep your receipt.\n\nPay at the store within 24 hours.";
+        }
+        if (store.CanViewAllOrders)
+        {
+            statPartsCaption.Text = "Active parts";
+            statOrdersCaption.Text = "Awaiting payment";
+            statStockCaption.Text = "Low / out of stock";
+        }
+        health.Text = "Review stock and specifications before assembly. Double-click a recent order to view its receipt.";
+        if (store.IsAdmin && store.DefaultPasswordAccounts() > 0)
+            health.Text = "Before store use: change or archive the legacy demo accounts in User accounts. Review sample prices and stock. Store tools includes backups and activity history.";
+
+        DataTable recentOrders = new DataTable();
+        recentOrders.Columns.Add("Id"); recentOrders.Columns.Add("Order");
+        recentOrders.Columns.Add("Customer"); recentOrders.Columns.Add("Status");
+        foreach (CustomerOrder order in store.VisibleOrders().OrderByDescending(o => o.CreatedUtc).Take(6))
+            recentOrders.Rows.Add(order.Id, order.Number, order.CustomerName, order.Status);
+        Ui.Bind(recent, recentOrders);
+    }
+
+    private void ArrangeRoleMenu()
+    {
+        // Show only this role's screens, without leaving gaps in the sidebar.
+        int nextTop = catalog.Top;
+        int left = catalog.Left;
+        int spacing = catalog.Height + 6;
+        Button[] menu = { catalog, builder, orders, inventory, suppliers, users, rules, reports, tools };
+        foreach (Button button in menu)
+        {
+            button.Visible = button.Enabled;
+            if (button.Enabled)
+            {
+                button.Location = new Point(left, nextTop);
+                nextTop += spacing;
+            }
         }
     }
 }

@@ -79,14 +79,15 @@ public sealed partial class AppStore
                 if (existingPart != null)
                 {
                     previousStock = existingPart.Stock;
-                    Parts.Remove(existingPart);
                 }
 
-                if (existingPart == null || previousStock != part.Stock)
+                // Catalog maintenance cannot bypass the Staff-only stock adjustment action.
+                if (part.Stock != previousStock)
                 {
-                    RecordStockMovement(part.Id, part.Stock - previousStock, "Admin stock entry");
+                    throw new InvalidOperationException("Only Staff can change stock. New parts start at zero; use Adjust stock with a Staff account.");
                 }
 
+                if (existingPart != null) Parts.Remove(existingPart);
                 Parts.Add(part);
                 SaveData(connection, transaction);
             }

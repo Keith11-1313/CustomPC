@@ -1,6 +1,6 @@
 namespace CustomPC;
 
-public partial class StockAdjustmentForm : Form
+public partial class StockAdjustmentForm : StoreWindow
 {
     private string? partId;
 
@@ -12,6 +12,10 @@ public partial class StockAdjustmentForm : Form
         {
             return;
         }
+
+        AppStore.Current.Refresh();
+        if (!AppStore.Current.IsStaff)
+            throw new InvalidOperationException("Staff access is required.");
 
         save.Click += SaveClicked;
     }

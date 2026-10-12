@@ -2,7 +2,7 @@ using System.Data;
 
 namespace CustomPC;
 
-public partial class ReportsForm : Form
+public partial class ReportsForm : StoreWindow
 {
     public ReportsForm()
     {
@@ -14,16 +14,13 @@ public partial class ReportsForm : Form
         }
 
         AppStore store = AppStore.Current;
-        if (!store.IsStaff)
+        store.Refresh();
+        if (!store.IsAdmin)
         {
-            throw new InvalidOperationException("Staff access required.");
+            throw new InvalidOperationException("Admin access required.");
         }
 
-        report.Items.AddRange(new object[] { "Inventory", "Orders", "Stock movements" });
-        if (store.IsAdmin)
-        {
-            report.Items.Add("Sales");
-        }
+        report.Items.AddRange(new object[] { "Inventory", "Orders", "Stock movements", "Sales" });
 
         from.Value = DateTime.Today.AddDays(-30);
         to.Value = DateTime.Today;
@@ -117,22 +114,15 @@ public partial class ReportsForm : Form
 
     private void ValidateAccess(AppStore store)
     {
-        export.Enabled = store.IsStaff;
+        export.Enabled = store.IsAdmin;
 
-        if (!store.IsStaff)
+        if (!store.IsAdmin)
         {
             grid.DataSource = null;
-            summary.Text = "Staff access is required to view reports.";
-            throw new InvalidOperationException("Your account no longer has staff access. Close this screen and sign in with an authorized account.");
+            summary.Text = "Admin access is required to view reports.";
+            throw new InvalidOperationException("Your account no longer has admin access. Close this screen and sign in with an authorized account.");
         }
 
-        if (report.Text == "Sales" && !store.IsAdmin)
-        {
-            grid.DataSource = null;
-            summary.Text = "Admin access is required to view sales.";
-            export.Enabled = false;
-            throw new InvalidOperationException("Sales reports require admin access. Choose another report or sign in with an administrator account.");
-        }
     }
 
     private bool IsWithinDateRange(DateTime utcDate)

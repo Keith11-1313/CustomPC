@@ -1,6 +1,6 @@
 namespace CustomPC;
 
-public partial class LoginForm : Form
+public partial class LoginForm : StoreWindow
 {
     public LoginForm()
     {

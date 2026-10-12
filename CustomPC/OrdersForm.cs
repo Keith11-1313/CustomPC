@@ -2,7 +2,7 @@ using System.Data;
 
 namespace CustomPC;
 
-public partial class OrdersForm : Form
+public partial class OrdersForm : StoreWindow
 {
     private readonly System.Windows.Forms.Timer refreshTimer = new System.Windows.Forms.Timer
     {
@@ -18,6 +18,10 @@ public partial class OrdersForm : Form
         {
             return;
         }
+
+        AppStore.Current.Refresh();
+        if (!AppStore.Current.CanViewAllOrders && !AppStore.Current.IsCustomer)
+            throw new InvalidOperationException("Sign in with an authorized account to view orders.");
 
         pay.Enabled = AppStore.Current.IsStaff;
         advance.Enabled = AppStore.Current.IsStaff;
@@ -170,7 +174,18 @@ public partial class OrdersForm : Form
         // A role change in another running copy must also update these buttons.
         pay.Enabled = store.IsStaff;
         advance.Enabled = store.IsStaff;
-        cancel.Enabled = store.Session != null;
+        cancel.Enabled = store.IsCustomer;
+        pay.Visible = store.IsStaff;
+        advance.Visible = store.IsStaff;
+        cancel.Visible = store.IsCustomer;
+        receipt.Enabled = store.CanViewAllOrders || store.IsCustomer;
+        heading.Text = store.IsAdmin ? "Order monitoring" : store.IsStaff ? "Orders & payments" : "My orders";
+        Text = "CustomPC | " + heading.Text;
+        subheading.Text = store.IsAdmin
+            ? "Read-only monitoring. Staff records payment and progress; Customers cancel their own unpaid orders."
+            : store.IsStaff
+                ? "Staff workspace: confirm store payments and update processing, assembly and pickup."
+                : "Your orders only. You can cancel an unpaid order; Staff confirms payment and progress.";
         string searchText = search.Text.Trim();
 
         DataTable table = new DataTable();

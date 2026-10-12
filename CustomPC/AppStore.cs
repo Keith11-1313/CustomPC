@@ -1,4 +1,5 @@
 using Microsoft.Data.Sqlite;
+using System.Runtime.CompilerServices;
 
 namespace CustomPC;
 
@@ -38,6 +39,8 @@ public sealed partial class AppStore
 
     public string DatabasePath { get; }
     public UserAccount? Session { get; private set; }
+    public bool NeedsSetup => Users.Count == 0;
+    public static bool DemoMode => Environment.GetEnvironmentVariable("CUSTOMPC_DEMO_MODE") == "1";
 
     public List<UserAccount> Users { get; private set; } = new List<UserAccount>();
     public List<Part> Parts { get; private set; } = new List<Part>();
@@ -55,16 +58,14 @@ public sealed partial class AppStore
 
     public bool IsStaff
     {
-        get
-        {
-            if (Session == null)
-            {
-                return false;
-            }
-
-            return Session.Role == "Admin" || Session.Role == "Staff";
-        }
+        get { return Session != null && Session.Role == "Staff"; }
     }
+
+    public bool IsCustomer => Session != null && Session.Role == "Customer";
+
+    // Shared read access is explicit. Admin does not inherit Staff or Customer actions.
+    public bool CanViewInventory => IsAdmin || IsStaff;
+    public bool CanViewAllOrders => IsAdmin || IsStaff;
 
     public AppStore(string? path = null)
     {
@@ -82,6 +83,8 @@ public sealed partial class AppStore
 
         DatabasePath = Path.GetFullPath(customPath);
         database = new Database(DatabasePath);
+        // Preserve existing data before applying a schema update. Backups include SQLite's live state.
+        EnsureDailyBackup();
         database.CreateTables();
 
         using (SqliteConnection connection = database.OpenConnection())
@@ -89,7 +92,7 @@ public sealed partial class AppStore
             LoadData(connection);
         }
 
-        if (Users.Count == 0)
+        if (Users.Count == 0 && DemoMode)
         {
             CreateSampleData();
         }
@@ -136,17 +139,36 @@ public sealed partial class AppStore
         }
     }
 
-    private void SaveData(SqliteConnection connection, SqliteTransaction transaction)
+    private void SaveData(SqliteConnection connection, SqliteTransaction transaction,
+        [CallerMemberName] string action = "")
     {
         // Related records succeed together, such as a payment and its order status.
-        database.WriteRecords(connection, transaction, "Users", Users);
-        database.WriteRecords(connection, transaction, "Parts", Parts);
-        database.WriteRecords(connection, transaction, "Suppliers", Suppliers);
-        database.WriteRecords(connection, transaction, "Rules", Rules);
-        database.WriteRecords(connection, transaction, "Builds", Builds);
-        database.WriteRecords(connection, transaction, "Orders", Orders);
-        database.WriteRecords(connection, transaction, "Payments", Payments);
-        database.WriteRecords(connection, transaction, "Movements", Movements);
+        database.ChangedRecords.Clear();
+        int changed = database.WriteRecords(connection, transaction, "Users", Users);
+        changed += database.WriteRecords(connection, transaction, "Parts", Parts);
+        changed += database.WriteRecords(connection, transaction, "Suppliers", Suppliers);
+        changed += database.WriteRecords(connection, transaction, "Rules", Rules);
+        changed += database.WriteRecords(connection, transaction, "Builds", Builds);
+        changed += database.WriteRecords(connection, transaction, "Orders", Orders);
+        changed += database.WriteRecords(connection, transaction, "Payments", Payments);
+        changed += database.WriteRecords(connection, transaction, "Movements", Movements);
+        if (changed > 0)
+        {
+            List<string> details = new List<string>();
+            foreach (var record in database.ChangedRecords.Take(20))
+            {
+                string description = record.Table switch
+                {
+                    "Orders" => "Order " + Orders.Find(x => x.Id == record.Id)?.Number,
+                    "Parts" => "Part " + Parts.Find(x => x.Id == record.Id)?.Name,
+                    "Users" => "Account " + Users.Find(x => x.Id == record.Id)?.Name,
+                    "Suppliers" => "Supplier " + Suppliers.Find(x => x.Id == record.Id)?.Name,
+                    _ => record.Table + " " + record.Id[..Math.Min(8, record.Id.Length)]
+                };
+                details.Add(description);
+            }
+            WriteAudit(connection, transaction, action, changed + " records changed: " + string.Join("; ", details));
+        }
         transaction.Commit();
     }
 
@@ -170,6 +192,14 @@ public sealed partial class AppStore
         if (!IsStaff)
         {
             throw new InvalidOperationException("Store staff access is required.");
+        }
+    }
+
+    private void RequireCustomer()
+    {
+        if (!IsCustomer)
+        {
+            throw new InvalidOperationException("Customer access is required. Sign in with a customer account.");
         }
     }
 

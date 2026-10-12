@@ -2,7 +2,7 @@ using System.Data;
 
 namespace CustomPC;
 
-public partial class CompatibilityForm : Form
+public partial class CompatibilityForm : StoreWindow
 {
     public CompatibilityForm()
     {

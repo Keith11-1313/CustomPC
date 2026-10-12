@@ -1,6 +1,6 @@
 namespace CustomPC;
 
-public partial class RuleEditForm : Form
+public partial class RuleEditForm : StoreWindow
 {
     private string? ruleId;
 
@@ -12,6 +12,10 @@ public partial class RuleEditForm : Form
         {
             return;
         }
+
+        AppStore.Current.Refresh();
+        if (!AppStore.Current.IsAdmin)
+            throw new InvalidOperationException("Administrator access is required.");
 
         kind.Items.AddRange(new object[] { "Socket", "Memory", "Power" });
         kind.SelectedIndex = 0;

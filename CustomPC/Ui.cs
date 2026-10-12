@@ -21,7 +21,14 @@ internal static class Ui
 
     public static void ShowError(IWin32Window owner, Exception exception)
     {
-        MessageBox.Show(owner, exception.Message, "Please check",
+        string message = exception.Message;
+        if (exception is not InvalidOperationException)
+        {
+            string reference = AppLog.Write(exception);
+            message = "The operation could not be completed. Check available disk space and file access, then try again.\n\n" +
+                "If the problem continues, contact support with reference " + reference + ". Your diagnostic log is in " + AppLog.Folder;
+        }
+        MessageBox.Show(owner, message, "Please check",
             MessageBoxButtons.OK, MessageBoxIcon.Warning);
     }
 
@@ -37,6 +44,37 @@ internal static class Ui
         }
 
         grid.ClearSelection();
+        grid.Paint -= EmptyGrid_Paint;
+        grid.Paint += EmptyGrid_Paint;
+        grid.CellFormatting -= StatusCell_Formatting;
+        grid.CellFormatting += StatusCell_Formatting;
+    }
+
+    private static void EmptyGrid_Paint(object? sender, PaintEventArgs e)
+    {
+        if (sender is not DataGridView grid || grid.Rows.Count != 0) return;
+        Rectangle area = grid.ClientRectangle;
+        area.Y += grid.ColumnHeadersHeight;
+        area.Height -= grid.ColumnHeadersHeight;
+        TextRenderer.DrawText(e.Graphics, "No records in this view.\nTry another filter or add a record.", grid.Font,
+            area, Color.FromArgb(76, 92, 78), TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.WordBreak);
+    }
+
+    private static void StatusCell_Formatting(object? sender, DataGridViewCellFormattingEventArgs e)
+    {
+        if (sender is not DataGridView grid || e.ColumnIndex < 0 || e.RowIndex < 0) return;
+        string name = grid.Columns[e.ColumnIndex].Name;
+        if (name != "Status" && name != "Availability" && name != "StockState") return;
+        string value = e.Value?.ToString() ?? "";
+        Color color = value switch
+        {
+            "Completed" or "Available" or "Paid" => Color.FromArgb(18, 103, 70),
+            "Cancelled" or "Out of stock" => Color.FromArgb(170, 30, 50),
+            "Pending Payment" or "Low stock" => Color.FromArgb(139, 82, 5),
+            _ => Color.FromArgb(46, 123, 31)
+        };
+        e.CellStyle.ForeColor = color;
+        e.CellStyle.SelectionForeColor = color;
     }
 
     public static string? Selected(DataGridView grid)
@@ -128,7 +166,9 @@ internal static class Ui
         string text = Convert.ToString(value, CultureInfo.InvariantCulture) ?? "";
 
         // Prevent spreadsheet programs from treating exported text as a formula.
-        if (text.Length > 0 && "=+-@".Contains(text[0]))
+        string formulaCheck = text.TrimStart();
+        if ((formulaCheck.Length > 0 && "=+-@".Contains(formulaCheck[0])) ||
+            (text.Length > 0 && "\t\r\n".Contains(text[0])))
         {
             text = "'" + text;
         }
@@ -156,7 +196,8 @@ internal static class Ui
         string paymentDeadline = order.DeadlineUtc.ToLocalTime().ToString("MMM dd, yyyy hh:mm tt");
 
         StringBuilder receipt = new StringBuilder();
-        receipt.AppendLine("CUSTOMPC");
+        receipt.AppendLine(store.StoreName);
+        if (store.StoreContact.Length > 0) receipt.AppendLine(store.StoreContact);
         receipt.AppendLine("PC BUILD ORDER RECEIPT");
         receipt.AppendLine(headingSeparator);
         receipt.AppendLine("Order: " + order.Number);

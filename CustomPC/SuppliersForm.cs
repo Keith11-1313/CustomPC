@@ -2,7 +2,7 @@ using System.Data;
 
 namespace CustomPC;
 
-public partial class SuppliersForm : Form
+public partial class SuppliersForm : StoreWindow
 {
     public SuppliersForm()
     {

@@ -2,7 +2,7 @@ using System.Data;
 
 namespace CustomPC;
 
-public partial class InventoryForm : Form
+public partial class InventoryForm : StoreWindow
 {
     public InventoryForm()
     {
@@ -14,9 +14,9 @@ public partial class InventoryForm : Form
         }
 
         AppStore store = AppStore.Current;
-        if (!store.IsStaff)
+        if (!store.CanViewInventory)
         {
-            throw new InvalidOperationException("Staff access required.");
+            throw new InvalidOperationException("Admin or Staff access required.");
         }
 
         add.Enabled = store.IsAdmin;
@@ -208,12 +208,15 @@ public partial class InventoryForm : Form
         add.Enabled = store.IsAdmin;
         edit.Enabled = store.IsAdmin;
         adjust.Enabled = store.IsStaff;
-        history.Enabled = store.IsStaff;
+        history.Enabled = store.IsAdmin;
+        subheading.Text = store.IsAdmin
+            ? "Admin maintains component details. Stock quantities are updated through Staff transactions."
+            : "Staff can adjust stock with a reason. Catalog details, suppliers and reports belong to Admin.";
 
-        if (!store.IsStaff)
+        if (!store.CanViewInventory)
         {
             grid.DataSource = null;
-            throw new InvalidOperationException("Your account no longer has staff access. Close this screen and sign in with an authorized account.");
+            throw new InvalidOperationException("Your account no longer has inventory access. Close this screen and sign in with an authorized account.");
         }
     }
 }

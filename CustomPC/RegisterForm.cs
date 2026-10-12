@@ -1,6 +1,6 @@
 namespace CustomPC;
 
-public partial class RegisterForm : Form
+public partial class RegisterForm : StoreWindow
 {
     public RegisterForm()
     {

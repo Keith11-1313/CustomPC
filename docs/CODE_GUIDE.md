@@ -4,6 +4,8 @@ Start here if you can open Visual Studio but do not yet understand how a Windows
 
 Your first goal is small: **find the code behind Sign in, explain what it does, and watch it run**. Start with lessons 1–5. Leave the database and the rest of the screens until those make sense.
 
+Before testing different jobs, read [who can do what](ROLES.md). Admin manages accounts/catalog/reports; Staff adjusts stock and records payments/progress; Customers place and cancel their own unpaid orders. Admin does not automatically get every permission.
+
 The longer [code reference](CODE_REFERENCE.md) contains the complete file map, C# lookup table, role rules, and detailed database explanation. Use it when you have a specific question. [Validation results](VALIDATION.md) describe what was tested.
 
 ## 1. Find your way around Visual Studio
@@ -14,12 +16,14 @@ The longer [code reference](CODE_REFERENCE.md) contains the complete file map, C
 2. Open **View → Solution Explorer**. Expand the `CustomPC` project using the arrow beside its name. A project groups the source files and settings needed to build one application.
 3. Find `LoginForm.cs`. Right-click it and choose **View Code**. If you see a drawn window instead of code, press **F7**.
 4. Press **Ctrl+F** and find `LoginButton_Click`.
-5. Press **F5** to run the application. You should see only the Welcome to CustomPC login window. The homepage opens after successful sign-in or guest access.
+5. Press **F5** to run. If your database is empty, **Set up your store** appears first: create your own administrator with a password of at least 12 characters. After setup, or with existing accounts, expect login alone. The homepage opens after successful sign-in or guest access.
 6. Click **Browse as guest**, then **Parts catalog**. You can look at parts without placing an order. Click **Back** to return to the homepage, then close the homepage when done.
 
 **Try navigating:** run again, choose Browse as guest, open Parts catalog, then press **Esc**. It should return to the homepage just like Back. On an editor such as customer registration, Back returns without saving unfinished inputs. Back from a receipt only closes the receipt; an order you already confirmed stays saved. The login window has no Back button because it is the starting screen. Closing it exits the app.
 
 An application must be **built** before it runs: the compiler checks your C# and creates the executable. If F5 reports an error, open **View → Error List** and read the first error before trying later lessons. This project requires .NET 10 and Visual Studio's .NET desktop development tools.
+
+An `.exe` appearing after F5 is the test program Visual Studio built. It does not mean the product is finished. `bin` holds build outputs; `obj` holds temporary compiler files. Keep your edits in the `.cs`, `.Designer.cs` and asset files. This project is still under revision and has no published release package.
 
 A **method** is a named block of instructions. `LoginButton_Click` is a method: the instructions between its `{` and `}` run when it is called. You will follow those instructions in lesson 4.
 
@@ -50,11 +54,17 @@ Expand the arrow beside `LoginForm.cs` in Solution Explorer if its related files
 
 The keyword `partial` lets the same class be written across multiple files. Here the behavior file and Designer file both belong to `LoginForm`. A **class** describes the information and instructions an object will have. The running login window is an **object** created from the `LoginForm` class.
 
-**Try one reversible edit:** select the large heading in the Designer. Record its original Text, `Welcome to CustomPC`. Change Text to `My CustomPC login`, save, and press F5. You should see the new heading. Stop, restore `Welcome to CustomPC`, and save again. Change **Text**, keeping **(Name)** as `heading`, so existing code can still find it.
+**Try one reversible edit:** select the large heading in the Designer. Record its original Text, `Welcome back`. Change Text to `My CustomPC login`, save, and press F5. You should see the new heading. Stop, restore `Welcome back`, and save again. Change **Text**, keeping **(Name)** as `heading`, so existing code can still find it.
 
 **Checkpoint:** Does changing a button's Text make it call a different method?
 
 **Answer:** No. Text changes its caption. The event connection determines which method runs.
+
+**Try the branding:** in the login Designer, select `heading` and look at Font in Properties: it requests Righteous. Select `login`: its font requests Roboto. The bundled fonts are loaded by `AppFonts.cs`; `StoreWindow.cs` applies them to real controls. They are private to this application, so they may not appear in Windows' installed-font list. Your image is `CustomPC/Assets/logo.png`; `BrandLogo.cs` displays it. The green button colour is `#54B137` and its dark text is `#202923`.
+
+**Checkpoint:** To replace the logo, would you edit the login button handler?
+
+**Answer:** No. Replace `Assets/logo.png`, then rebuild. The button handler controls behavior; `BrandLogo.cs` reads the image.
 
 ## 3. Understand the connection between a click and a method
 
@@ -209,7 +219,7 @@ Click Sign in → LoginButton_Click → AppStore.Login
              → Session assigned → DialogResult.OK → homepage opens
 ```
 
-For a successful retry, the initial demo Admin is `admin@custompc.local` with `CustomPC123!`. Those credentials apply to initial demo data; an edited account keeps its saved password.
+For a successful retry, use the administrator email/password you chose during store setup. In an explicit practice database, the demo Admin is `admin@custompc.local` with `CustomPC123!`. An edited account keeps its saved password.
 
 An account's **role** determines its permitted actions: Customer orders for themselves, Staff handles store operations such as payments and stock adjustments, and Admin also manages accounts, parts, suppliers, and rules. The reference has the full permissions table.
 
@@ -266,21 +276,23 @@ This lesson changes stock. Use a separate practice database so the exercise has 
 
 ```powershell
 $env:CUSTOMPC_DATABASE_PATH = Join-Path $env:TEMP 'CustomPC-Learning\guide.db'
+$env:CUSTOMPC_DEMO_MODE = '1'
 dotnet run --project 'C:\Users\Jerald\Desktop\CustomPC\CustomPC\CustomPC.csproj'
 ```
 
-The first line chooses a database for apps started from **this PowerShell process**. It does not change an already-open Visual Studio's F5 environment. The second line builds and runs this project. On the first launch at this new path, the app creates demo data. Later launches reuse that practice data.
+The first line chooses a database for apps started from **this PowerShell process**, without changing an already-open Visual Studio's F5 environment. The second explicitly enables demo data for this exercise. The third builds and runs the project. A fresh practice path gets sample accounts and parts; later launches reuse them. Keep demo mode out of the real store's startup environment.
 
 1. Sign in as `staff@custompc.local`, password `CustomPC123!` in the fresh practice database.
 2. Open Parts & inventory. Select one component row and note its **OnHand** number.
 3. Click **Adjust stock**. Set **Quantity change** to `2`, enter `Learning exercise` in **Reason / supply reference**, and click **Record adjustment**.
-4. Expect OnHand to increase by 2. Open **Movement history**. This opens the stock movements report for all parts; find the row matching your component, quantity 2, and reason. Click Back to return to inventory.
+4. Expect OnHand to increase by 2. Movement history is an Admin report, so that button is disabled for Staff. Stay signed in as Staff for the next step.
 5. Select the component again and click Adjust stock. Set Quantity change to `0` with the same reason, then click Record adjustment. Expect an error and no extra stock change. Click Back to leave the unsaved editor. Its earlier successful adjustment stays saved.
 6. Close the app. The PowerShell command should finish. Run the same `dotnet run` line again; the saved stock should remain.
 7. Close the app. Remove the override from this PowerShell process:
 
 ```powershell
 Remove-Item Env:\CUSTOMPC_DATABASE_PATH
+Remove-Item Env:\CUSTOMPC_DEMO_MODE
 ```
 
 The practice database remains in `%TEMP%\CustomPC-Learning\guide.db`; removing the environment variable does not delete it. Keep it for later practice. Future runs from this shell now use the default database unless another override is supplied.
@@ -295,7 +307,7 @@ DialogResult = DialogResult.OK;
 
 `quantity.Value` reads the numeric control. `(int)` converts its value to a whole number; `stockChange` stores that number. `partId` identifies the selected component. `reason.Text` reads the explanation. `AdjustStock` validates and saves before the form reports OK.
 
-Press F12 on `AdjustStock` to reach `AppStore.Inventory.cs`. It reloads saved records, requires Staff/Admin access, rejects zero or a blank reason, checks stock limits and reservations, changes the Part, records the movement, and calls `SaveData`.
+Press F12 on `AdjustStock` to reach `AppStore.Inventory.cs`. It reloads saved records, requires Staff-only access, rejects zero or a blank reason, checks stock limits and reservations, changes the Part, records the movement, and calls `SaveData`. Admin cannot call this operation. To inspect the recorded movement, switch to Admin, open Reports, and choose Stock movements; find your quantity 2 and Learning exercise reason.
 
 Find `SaveData` in `AppStore.cs`. It calls `database.WriteRecords` for each collection, then `transaction.Commit()`. A **transaction** groups the related database writes so they succeed together. If saving fails, `UndoFailedChange` restores both saved data and the loaded lists.
 
@@ -368,4 +380,4 @@ For any feature, answer these four questions before moving on:
 3. Where is invalid input rejected?
 4. Does this action only change the screen, or does it save records?
 
-If you cannot answer one, return to that part of the flow. You do not need to memorize all 17 forms. The [reference](CODE_REFERENCE.md) provides their map, less common C# expressions, password hashing, database details, and the advanced manual validation checklist.
+If you cannot answer one, return to that part of the flow. You do not need to memorize all 19 forms. The [reference](CODE_REFERENCE.md) provides their map, less common C# expressions, password hashing, database details, and the advanced manual validation checklist. The [store guide](STORE_GUIDE.md) explains setup, backups and daily operation.

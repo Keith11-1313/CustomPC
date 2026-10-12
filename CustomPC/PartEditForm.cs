@@ -1,6 +1,6 @@
 namespace CustomPC;
 
-public partial class PartEditForm : Form
+public partial class PartEditForm : StoreWindow
 {
     private string? partId;
 
@@ -12,6 +12,10 @@ public partial class PartEditForm : Form
         {
             return;
         }
+
+        AppStore.Current.Refresh();
+        if (!AppStore.Current.IsAdmin)
+            throw new InvalidOperationException("Administrator access is required.");
 
         category.Items.AddRange(AppStore.Categories);
         category.SelectedIndex = 0;
@@ -119,12 +123,14 @@ public partial class PartEditForm : Form
     {
         try
         {
+            AppStore store = AppStore.Current;
+            store.Refresh();
             Part part = new Part();
             part.Name = partName.Text.Trim();
             part.Category = category.Text;
             part.Brand = brand.Text.Trim();
             part.Price = price.Value;
-            part.Stock = (int)stock.Value;
+            part.Stock = partId == null ? 0 : store.Parts.First(p => p.Id == partId).Stock;
             part.Specifications = specifications.Text.Trim();
             part.Socket = socket.Text.Trim();
             part.MemoryType = memory.Text.Trim();

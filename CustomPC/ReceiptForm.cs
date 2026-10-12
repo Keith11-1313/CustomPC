@@ -2,7 +2,7 @@ using System.Drawing.Printing;
 
 namespace CustomPC;
 
-public partial class ReceiptForm : Form
+public partial class ReceiptForm : StoreWindow
 {
     private string? orderId;
     private string[] printLines = Array.Empty<string>();
@@ -26,13 +26,18 @@ public partial class ReceiptForm : Form
     public ReceiptForm(string id) : this()
     {
         orderId = id;
+        RefreshReceipt();
+    }
+
+    private void RefreshReceipt()
+    {
         AppStore store = AppStore.Current;
         store.Refresh();
 
         CustomerOrder? selectedOrder = null;
         foreach (CustomerOrder order in store.VisibleOrders())
         {
-            if (order.Id == id)
+            if (order.Id == orderId)
             {
                 selectedOrder = order;
                 break;
@@ -41,6 +46,9 @@ public partial class ReceiptForm : Form
 
         if (selectedOrder == null)
         {
+            receiptText.Clear();
+            save.Enabled = false;
+            print.Enabled = false;
             throw new InvalidOperationException("Receipt access denied.");
         }
 
@@ -76,6 +84,7 @@ public partial class ReceiptForm : Form
     {
         try
         {
+            RefreshReceipt();
             using (SaveFileDialog saveDialog = new SaveFileDialog())
             {
                 saveDialog.Filter = "Text receipt (*.txt)|*.txt";
@@ -99,6 +108,8 @@ public partial class ReceiptForm : Form
         {
             throw new InvalidOperationException("Open a receipt from an order first.");
         }
+
+        RefreshReceipt();
 
         using (PrintDocument printDocument = new PrintDocument())
         {

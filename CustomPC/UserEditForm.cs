@@ -1,6 +1,6 @@
 namespace CustomPC;
 
-public partial class UserEditForm : Form
+public partial class UserEditForm : StoreWindow
 {
     private string? userId;
 
@@ -12,6 +12,10 @@ public partial class UserEditForm : Form
         {
             return;
         }
+
+        AppStore.Current.Refresh();
+        if (!AppStore.Current.IsAdmin)
+            throw new InvalidOperationException("Administrator access is required.");
 
         role.Items.AddRange(AppStore.Roles);
         role.SelectedItem = "Customer";

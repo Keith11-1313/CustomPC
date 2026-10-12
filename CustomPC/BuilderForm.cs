@@ -1,6 +1,6 @@
 namespace CustomPC;
 
-public partial class BuilderForm : Form
+public partial class BuilderForm : StoreWindow
 {
     private ComboBox[] partSelectors = Array.Empty<ComboBox>();
 
@@ -13,6 +13,10 @@ public partial class BuilderForm : Form
         {
             return;
         }
+
+        AppStore.Current.Refresh();
+        if (AppStore.Current.Session != null && !AppStore.Current.IsCustomer)
+            throw new InvalidOperationException("Customer access is required to build and order a PC. Guests may preview only.");
 
         partSelectors = new ComboBox[] { part0, part1, part2, part3, part4, part5, part6 };
         submit.Click += SubmitButton_Click;
@@ -63,7 +67,7 @@ public partial class BuilderForm : Form
 
         foreach (UserAccount account in store.Users)
         {
-            bool canOrderForCustomer = store.IsStaff || account.Id == store.Session?.Id;
+            bool canOrderForCustomer = store.IsCustomer && account.Id == store.Session?.Id;
             if (!account.Archived && account.Role == "Customer" && canOrderForCustomer)
             {
                 customers.Add(account);
@@ -73,7 +77,7 @@ public partial class BuilderForm : Form
         customer.DisplayMember = "Name";
         customer.ValueMember = "Id";
         customer.DataSource = customers;
-        customer.Enabled = store.IsStaff;
+        customer.Enabled = false;
     }
 
     private List<Part> GetSelectedParts()
@@ -121,12 +125,12 @@ public partial class BuilderForm : Form
             validation.ForeColor = Color.FromArgb(153, 27, 27);
         }
 
-        submit.Enabled = store.Session != null && errors.Count == 0 && customer.Items.Count > 0;
-        submit.BackColor = submit.Enabled ? Color.FromArgb(15, 98, 84) : Color.FromArgb(226, 232, 240);
+        submit.Enabled = store.IsCustomer && errors.Count == 0 && customer.Items.Count > 0;
+        submit.BackColor = submit.Enabled ? Color.FromArgb(84, 177, 55) : Color.FromArgb(226, 232, 224);
 
         if (store.Session == null)
         {
-            validation.Text += "\n\nSign in or register to place an order.";
+            validation.Text += "\n\nSign in with a Customer account to place your own order.";
         }
     }
 

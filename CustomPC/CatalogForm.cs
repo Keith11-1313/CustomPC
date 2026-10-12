@@ -2,7 +2,7 @@ using System.Data;
 
 namespace CustomPC;
 
-public partial class CatalogForm : Form
+public partial class CatalogForm : StoreWindow
 {
     public CatalogForm()
     {

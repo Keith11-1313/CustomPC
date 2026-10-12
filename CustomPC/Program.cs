@@ -8,19 +8,45 @@ namespace CustomPC
         {
             // Apply desktop display settings before any form or control is created.
             ApplicationConfiguration.Initialize();
-
-            // Finish login before creating the homepage, so only login appears at startup.
-            // Guest access also returns OK. Closing login ends the app here.
-            using (LoginForm loginForm = new LoginForm())
+            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+            Application.ThreadException += (_, e) =>
             {
-                if (loginForm.ShowDialog() != DialogResult.OK)
-                {
-                    return;
-                }
+                Ui.ShowError(new NativeWindow(), e.Exception);
+                Application.Exit();
+            };
+
+            string path = Environment.GetEnvironmentVariable("CUSTOMPC_DATABASE_PATH") ??
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CustomPC", "custompc.db");
+            string key = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(
+                System.Text.Encoding.UTF8.GetBytes(Path.GetFullPath(path).ToUpperInvariant())));
+            using Mutex instance = new Mutex(true, @"Local\CustomPC-" + key, out bool firstInstance);
+            if (!firstInstance)
+            {
+                MessageBox.Show("CustomPC is already running for this database. Switch to its existing window.", "CustomPC");
+                return;
             }
 
-            // Run keeps the app listening for button clicks until the dashboard closes.
-            Application.Run(new DashboardForm());
+            try
+            {
+                if (AppStore.Current.NeedsSetup)
+                {
+                    using SetupForm setup = new SetupForm();
+                    if (setup.ShowDialog() != DialogResult.OK) return;
+                }
+
+                // Finish login before creating the homepage. Closing login ends the app.
+                using (LoginForm loginForm = new LoginForm())
+                {
+                    if (loginForm.ShowDialog() != DialogResult.OK) return;
+                }
+
+                // Run listens for button clicks until the dashboard closes.
+                Application.Run(new DashboardForm());
+            }
+            catch (Exception exception)
+            {
+                Ui.ShowError(new NativeWindow(), exception);
+            }
         }
     }
 }

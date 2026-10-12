@@ -33,6 +33,8 @@ User clicks a control
 | AppStore | Holds loaded records, the current session, and business rules | `AdjustStock` prevents stock from falling below reservations |
 | Database | Opens SQLite and reads/writes records | `WriteRecords<Part>` saves parts |
 | Ui | Reuses display and file-export code across forms | `Money`, `ShowError`, `Bind`, `Export`, `Receipt` |
+| StoreWindow | Base form shared by all screens; applies private fonts, logo icon and small-screen scrolling | `OnControlAdded`, `OnFontChanged`, `FitToWorkingArea` |
+| Branding | Reads the supplied image and bundled font files | `BrandLogo.cs` reads `Assets/logo.png`; `AppFonts.cs` loads Righteous and Roboto |
 
 `AppStore` is a **partial class**. The files named `AppStore.*.cs` are sections of one class, grouped by subject. They are not separate databases or separate services.
 
@@ -52,7 +54,7 @@ You can return to this table when an unfamiliar expression interrupts your readi
 | Expression | Meaning in this project |
 | --- | --- |
 | `namespace CustomPC;` | Groups the project's classes under the same name |
-| `public partial class LoginForm : Form` | `LoginForm` is a Windows Form; its class definition is split across files |
+| `public partial class LoginForm : StoreWindow` | Login inherits our small shared window class, which inherits `Form`; its class definition is split across files |
 | `public sealed partial class AppStore` | Split class; `sealed` means other classes cannot inherit from it |
 | `private` / `public` | Used only inside the class / available to other classes |
 | `static` | Belongs to the class itself; call `AppStore.Current` without creating a form-specific store |
@@ -108,11 +110,11 @@ The first line sets up WinForms defaults. The `using` block creates and displays
 
 Follow these steps in `Program.cs`, `LoginForm.cs`, `DashboardForm.cs`, and `AppStore.cs`:
 
-1. `Program.Main` creates `LoginForm`, whose constructor creates controls and connects its event handlers.
+1. `Program.Main` applies WinForms defaults, prevents a second app instance for the same database, and opens the shared store. If no accounts exist, it opens `SetupForm`; cancelling setup ends startup. Successful setup creates the chosen Admin, then login opens.
 2. `ShowDialog()` shows only login and waits for successful sign-in, guest access, or cancellation.
 3. The first use of `AppStore.Current` creates one shared `AppStore` object. Later calls reuse it for the lifetime of this process.
 4. The store constructor chooses the database path, creates missing tables, and loads the saved records into lists.
-5. If there are no users, `CreateSampleData` writes the initial demo users, supplier, parts, and rules. Existing user records are not reset at every launch.
+5. If there are no users and `CUSTOMPC_DEMO_MODE=1` is explicitly set, `CreateSampleData` writes demonstration records. Normal empty stores require `CompleteSetup`, which creates the chosen administrator and three rules without fake stock. Existing records are preserved.
 6. `ExpireOrders` cancels overdue unpaid orders.
 7. After login or guest access returns `DialogResult.OK`, `Program.Main` creates `DashboardForm`. Cancelling login returns from Main without opening a dashboard.
 8. The dashboard constructor creates its controls and connects button, `Shown`, and timer events.
@@ -138,7 +140,7 @@ Each form connects `back.Click += BackButton_Click;` and sets `CancelButton = ba
 
 ## 5. Designer files and event handlers
 
-Each of the 17 forms has these files:
+Each of the 19 forms has these files:
 
 | File | Edit it for |
 | --- | --- |
@@ -186,7 +188,7 @@ Open `LoginForm.cs`, then `AppStore.Accounts.cs`.
 6. The login handler sets `DialogResult.OK`. At startup, `Program.Main` then creates the dashboard. When switching accounts, `DashboardForm.SignIn` restores the existing dashboard with an updated menu.
 7. On failure, the exception reaches the form's `catch` block and its message appears in a warning dialog.
 
-Demo credentials are **initial seed data**. `admin@custompc.local`, `staff@custompc.local`, and `customer@custompc.local` initially use `CustomPC123!`. A saved account with a changed password or an archived status will not regain those credentials merely because the login screen shows demo information. A screenshot of a failed login needs investigation against the selected database and saved account, not just a successful compile.
+Demo credentials require explicit `CUSTOMPC_DEMO_MODE=1` in an empty practice database. The three legacy `@custompc.local` addresses initially use `CustomPC123!`; an edited or archived account keeps its saved state. Normal setup creates only a personally chosen Admin. Live order creation checks legacy default passwords and blocks orders until an Admin changes or archives those accounts. Login no longer displays public credentials. After five failed attempts for the same normalized email, a five-minute block is saved in `LoginAttempts`; success clears it.
 
 The **Show password** checkbox calls `ShowPassword_CheckedChanged`. It changes masking so you can inspect what was entered; it does not change the account's password. Passwords must match exactly, including letter case, punctuation, and any spaces. The app trims the email's outer spaces but deliberately does not trim the password. If retrying a rejected login, clear the input, type the password carefully, and inspect it with Show password before changing saved account data.
 
@@ -198,7 +200,7 @@ The **Show password** checkbox calls `ShowPassword_CheckedChanged`. It changes m
 
 ### Why the saved value is a hash
 
-The database stores `PasswordHash`, not the plain password. Current passwords are hashed with PBKDF2 using SHA-256 and a randomly generated salt. The stored text contains a Base64 salt and a Base64 hash separated by `:`.
+The database stores `PasswordHash`, not the plain password. New hashes use PBKDF2/SHA-256, 600,000 rounds and a random salt, stored as `PBKDF2-SHA256:600000:Base64Salt:Base64Hash`. Verification also accepts the earlier two-field format with 210,000 rounds, preserving existing accounts until their password changes. Normal new/reset passwords require 12–128 characters; the legacy public demo password is refused. Explicit practice mode retains the earlier eight-character minimum for lesson fixtures.
 
 A salt is random data used during hashing. It makes two users with the same password have different saved values. It is not the password and does not need to be hidden. Verification uses the saved salt to hash the entered password again, then compares the result with the saved hash. Base64 is an encoding for bytes, not encryption.
 
@@ -230,7 +232,7 @@ In `BuilderForm.cs`:
 
 1. `LoadPartChoices` refreshes the store and loads one ComboBox for each category in `AppStore.Categories`.
 2. It includes only active parts with available stock.
-3. `LoadCustomerChoices` lets a customer order for their own account. Staff and admin can choose an active customer on whose behalf to order. Guest access provides a preview but cannot submit an order.
+3. `LoadCustomerChoices` includes only the signed-in Customer. Staff and Admin cannot open the builder or place orders. Guest access provides a preview but cannot submit an order.
 4. `GetSelectedParts` reads the selected `Part` object from each ComboBox.
 5. `PartSelectionChanged` calls `UpdateBuildSummary` whenever a choice changes.
 6. `UpdateBuildSummary` adds prices, calls `CheckBuild`, displays errors, and enables submit only when the selection and session allow it.
@@ -315,7 +317,7 @@ The dashboard and orders screen have 30-second WinForms timers that refresh reco
 
 SQLite is a database in a local file. `Database.OpenConnection` builds a connection string and opens that file. There is no SQL Server process or internet request in this path.
 
-`CreateTables` creates eight tables if needed: `Users`, `Parts`, `Suppliers`, `Rules`, `Builds`, `Orders`, `Payments`, and `Movements`. Each has this shape:
+`CreateTables` preserves eight business tables: `Users`, `Parts`, `Suppliers`, `Rules`, `Builds`, `Orders`, `Payments`, and `Movements`. Each has this shape:
 
 ```sql
 CREATE TABLE IF NOT EXISTS Parts (
@@ -350,20 +352,24 @@ Business methods follow a common sequence:
 2. Reload current saved records.
 3. Check permissions and validate the requested operation.
 4. Change the in-memory records.
-5. Call `SaveData` to write all record lists and commit.
+5. Call `SaveData` to persist changed records, add the activity entry and commit.
 6. If an exception occurs, `UndoFailedChange` rolls back the transaction and reloads saved records, then the exception returns to the form.
 
 A transaction makes related writes succeed together. For example, confirming payment must save both a payment record and the Paid order status. It should not save just one of them after an error.
 
-`Database.WriteRecords` clears a table and inserts the current list within that transaction. `SaveData` applies this to all eight tables. This is a simple full-list persistence design for a small local project. It is not an `UPDATE` of only the changed row, an Entity Framework model, or a database server shared across multiple computers. Repeatedly writing all records will become more expensive as the database grows.
+`Database.WriteRecords` reads saved JSON, compares it with the current records and skips identical rows. New or changed records use `INSERT ... ON CONFLICT(Id) DO UPDATE`; removed IDs are deleted individually. `SaveData` applies this to the eight business lists and appends a successful activity entry in the same transaction. It still loads and compares lists, so this is a local store application rather than a database server for multiple computers. `CallerMemberName` supplies the business method's name to `SaveData` for the audit action without every caller repeating it.
 
-Values use SQL parameters (`$id` and `$data`) rather than being placed directly into SQL command text. Table names come from the application's fixed table list and calls. Keep application records consistent through the app's methods; a manual database edit can bypass account, stock, and order rules. Back up the file with the app closed before direct edits. Deleting it would remove saved accounts and orders as well as create a new demonstration setup next launch.
+Three supporting tables hold settings, successful activity and temporary failed-login blocks: `Settings`, `AuditLog` and `LoginAttempts`. `PRAGMA user_version=1` identifies the schema; newer schemas are refused. `AppStore.Maintenance.cs` handles first setup, store identity and recovery. Existing files get a daily startup backup before schema initialization. Admin backup uses SQLite's online snapshot API and validates the output. Restore validates business records, requires the current Admin password and preserves a safety backup before replacing data. Full operating steps are in [STORE_GUIDE.md](STORE_GUIDE.md).
+
+Values use SQL parameters (`$id` and `$data`) rather than being placed directly into SQL command text. Table names come from fixed application calls. Manage records through the app; direct SQLite edits bypass account, stock and order rules. Back up before direct edits. Deleting the database removes saved records and triggers first-store setup on the next normal launch.
 
 ## 12. Every form and what to read
 
 | Form source | Screen and main responsibilities | Methods to follow |
 | --- | --- | --- |
 | `DashboardForm.cs` | Main navigation, role menus, metrics, account switching, expiry refresh | `SignIn`, `UpdateDashboard`, `OpenScreen`, `ExpiryTimer_Tick` |
+| `SetupForm.cs` | First administrator and store name | `SaveButton_Click` → `CompleteSetup` |
+| `StoreToolsForm.cs` | Store details, backup/restore, Admin activity history | `SaveButton_Click`, `BackupButton_Click`, `RestoreButton_Click`, `LoadHistory` |
 | `LoginForm.cs` | Login, show password, register button, guest access | `LoginButton_Click`, `ShowPassword_CheckedChanged`, `RegisterButton_Click`, `GuestButton_Click` |
 | `RegisterForm.cs` | Create a customer account | `SaveButton_Click` |
 | `CatalogForm.cs` | Search/filter active components and inspect details | `LoadRows`, `PartsGrid_CellDoubleClick`, `FilterChanged` |
@@ -379,7 +385,7 @@ Values use SQL parameters (`$id` and `$data`) rather than being placed directly 
 | `UserEditForm.cs` | Add/edit account, role, password, archive flag | Constructor with ID, `SaveClicked` -> `SaveUser` |
 | `CompatibilityForm.cs` | View and select the supported rules | `LoadRows`, `EditClicked` |
 | `RuleEditForm.cs` | Edit name/kind/enabled flag | Constructor with ID, `SaveClicked` -> `SaveRule` |
-| `ReportsForm.cs` | Inventory, orders, movements, admin sales; CSV export | `LoadReport`, report-specific loaders, `IsWithinDateRange`, `ExportClicked` |
+| `ReportsForm.cs` | Admin-only inventory, orders, movements and sales reports; CSV export | `LoadReport`, report-specific loaders, `IsWithinDateRange`, `ExportClicked` |
 
 Most list screens build a `DataTable` with columns meant for display, loop over models, add rows, and call `Ui.Bind`. The table is a screen representation, not another SQLite database. The hidden `Id` column lets a selected display row identify the correct saved record. `Ui.RequireSelection` reports an error when no row is selected.
 
@@ -391,24 +397,26 @@ Most editors have two constructors: a parameterless one for adding/designing, an
 
 | Action | Guest | Customer | Staff | Admin |
 | --- | --- | --- | --- | --- |
-| Browse catalog and preview builder | Yes | Yes | Yes | Yes |
-| Place an order | No | Own account | For active customers | For active customers |
-| View receipts/orders | No | Own orders | All orders | All orders |
-| Cancel pending unpaid order | No | Own order | Yes | Yes |
-| Confirm store payment and advance order | No | No | Yes | Yes |
-| View inventory and adjust stock | No | No | Yes | Yes |
+| Browse catalog | Yes | Yes | Yes | Yes |
+| Preview builder | Yes | Yes | No | No |
+| Place an order | No | Own account | No | No |
+| View receipts/orders | No | Own orders | All orders | Read-only |
+| Cancel pending unpaid order | No | Own order | No | No |
+| Confirm store payment and advance order | No | No | Yes | No |
+| View inventory | No | No | Yes | Yes |
+| Adjust stock | No | No | Yes | No |
 | Add/edit part catalog details | No | No | No | Yes |
 | Manage suppliers, users, compatibility rules | No | No | No | Yes |
-| Inventory/orders/movements reports | No | No | Yes | Yes |
+| Inventory/orders/movements reports | No | No | No | Yes |
 | Sales report | No | No | No | Yes |
 
-`IsStaff` includes both Staff and Admin. The dashboard's enabled buttons communicate access, and business methods such as `RequireStaff` and `RequireAdmin` enforce sensitive changes again. Disabling a button alone would not be enough to validate permissions.
+`IsStaff` means exactly Staff. `IsAdmin` and `IsCustomer` also match only their own roles. Shared read access is explicit through `CanViewInventory` and `CanViewAllOrders`. The dashboard's enabled buttons communicate access, and business methods such as `RequireStaff`, `RequireCustomer` and `RequireAdmin` enforce changes again after loading the saved account. Admin does not inherit Staff/Customer actions. See [ROLES.md](ROLES.md) for assignment steps and the strict split approved for this revision.
 
 Privileged list screens call their `ValidateAccess` helper after refreshing saved data. If an account has lost access while its screen is open, the helper clears the displayed grid, disables actions, and raises a readable message. Orders refreshes payment/status button states from the current role. Report export reloads the report and checks access before saving, including the admin requirement for Sales.
 
 ### Receipts and exports
 
-`Ui.Receipt` creates the receipt text from order-line snapshots and payment records. `ReceiptForm` checks that the order is in `VisibleOrders` before displaying it. Save writes a `.txt` file. Print uses `PrintDocument` and a Windows print dialog; `PrintDocument_PrintPage` continues on another page when the receipt reaches the bottom margin.
+`Ui.Receipt` creates the receipt text from order-line snapshots and payment records. `ReceiptForm.RefreshReceipt` checks that the order is in `VisibleOrders` before displaying, saving or printing it. Losing access clears the receipt and disables saving/printing. Save writes a `.txt` file. Print uses `PrintDocument` and a Windows print dialog; `PrintDocument_PrintPage` continues on another page when the receipt reaches the bottom margin.
 
 `Ui.Export` writes the visible report grid columns into CSV. It doubles quote characters inside values, encloses values in quotes, and prefixes values starting with spreadsheet formula markers. Reports filter UTC timestamps after converting to local dates. Inventory reports describe current inventory, so their date controls are disabled. Orders reports use creation dates; sales reports use payment dates; movement reports use movement dates. An order's value and a confirmed payment's sales amount are different measurements.
 
@@ -449,10 +457,10 @@ This is a checklist with expected behavior, **not a claim that these steps have 
 6. Submit a valid order, retain its number, and save the receipt. Verify Pending Payment, seven order lines, correct total, and a 24-hour deadline. In inventory, reserved increases while on hand stays unchanged.
 7. Sign in as another customer. The first customer's order and receipt must not be visible. Sign in as staff: all orders should be visible, payment/status actions should be available, and admin-only account/supplier/rule management should remain unavailable.
 8. As staff, confirm payment once. Verify one full-amount payment and Paid status. Advance through Processing, Assembly, Ready for Pickup, and Completed. At completion, each component's on hand and reserved count drops by one, with a recorded negative movement. Repeating completion must be rejected.
-9. Create another pending order and cancel it. Verify the reservation is released without decreasing on-hand stock. Paid orders must reject cancellation.
-10. Test stock adjustment on a demonstration part: positive adjustment with a reason, zero adjustment, blank reason, and an attempt to reduce stock below reservations. Only valid adjustments should persist and appear in movement history.
+9. Sign in as Customer, create another pending order and cancel it. Verify the reservation is released without decreasing on-hand stock. Paid orders must reject cancellation. Staff and Admin must be denied manual cancellation and order creation.
+10. Sign in as Staff and test stock adjustment on a demonstration part: positive adjustment with a reason, zero adjustment, blank reason, and an attempt to reduce stock below reservations. Only valid adjustments should persist. Sign in as Admin to inspect the stock movements report. Admin must be denied stock adjustments, including a changed quantity sent through catalog saving.
 11. As admin, edit a demonstration part, supplier, account, and rule. Try invalid input and cancel an editor before saving. Reopen the screen/application to check that saved changes persist and cancelled edits do not.
-12. Open reports with a known date range. Compare inventory, order, movement, and sales summaries to the underlying test records. Export CSV and inspect it in a text editor or spreadsheet. Save a receipt and inspect its lines. Test printing only with an available printer or a chosen PDF printer.
+12. As Admin, open reports with a known date range. Compare inventory, order, movement, and sales summaries to the underlying test records. Export CSV and inspect it in a text editor or spreadsheet. Staff/Customer must be denied these reports. Save a receipt and inspect its lines. Test printing only with an available printer or a chosen PDF printer.
 13. Check deadline cancellation with an isolated test database and a deliberately expired pending test order. Opening/refreshing the app must mark it Cancelled and release its reservations. Normal testing does not require waiting 24 hours or editing real orders.
 
 Build success checks that the code compiles. Business checks exercise rules. Runtime interaction checks that users can complete flows. Designer checks confirm editable forms. Persistence checks require reopening saved data. Printer output and the closed-app deadline limitation each need their own evidence.

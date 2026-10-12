@@ -1,6 +1,6 @@
 namespace CustomPC;
 
-public partial class SupplierEditForm : Form
+public partial class SupplierEditForm : StoreWindow
 {
     private string? supplierId;
 
@@ -12,6 +12,10 @@ public partial class SupplierEditForm : Form
         {
             return;
         }
+
+        AppStore.Current.Refresh();
+        if (!AppStore.Current.IsAdmin)
+            throw new InvalidOperationException("Administrator access is required.");
 
         save.Click += SaveClicked;
     }

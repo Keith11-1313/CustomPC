@@ -4,7 +4,7 @@ namespace CustomPC;
 
 public sealed partial class AppStore
 {
-    // This runs only for a new database with no user accounts.
+    // Only explicit CUSTOMPC_DEMO_MODE=1 creates sample data in an empty database.
     private void CreateSampleData()
     {
         using (SqliteConnection connection = database.OpenConnection())

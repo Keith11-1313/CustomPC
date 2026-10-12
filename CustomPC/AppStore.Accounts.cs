@@ -8,6 +8,7 @@ public sealed partial class AppStore
 {
     public void Login(string email, string password)
     {
+        Session = null;
         // Email ignores outer spaces and letter case. Passwords must match exactly.
         // Never trim the password: spaces can be part of a user's chosen password.
         if (string.IsNullOrWhiteSpace(email) || password.Length == 0)
@@ -16,6 +17,7 @@ public sealed partial class AppStore
         }
 
         Refresh();
+        CheckLoginThrottle(email);
         UserAccount? matchingAccount = null;
 
         foreach (UserAccount account in Users)
@@ -28,11 +30,13 @@ public sealed partial class AppStore
             }
         }
 
-        if (matchingAccount == null || !VerifyPassword(password, matchingAccount.PasswordHash))
+        if (matchingAccount == null || !Roles.Contains(matchingAccount.Role) || !VerifyPassword(password, matchingAccount.PasswordHash))
         {
+            RecordLoginResult(email, false);
             throw new InvalidOperationException("Email or password is incorrect, or the account is archived.");
         }
 
+        RecordLoginResult(email, true);
         Session = matchingAccount;
     }
 
@@ -55,7 +59,7 @@ public sealed partial class AppStore
                     RequireAdmin();
                 }
 
-                if (string.IsNullOrWhiteSpace(user.Name) || !MailAddress.TryCreate(user.Email, out _))
+                if (string.IsNullOrWhiteSpace(user.Name) || user.Name.Length > 100 || user.Email.Length > 254 || !MailAddress.TryCreate(user.Email, out _))
                 {
                     throw new InvalidOperationException("Enter a name and valid email address.");
                 }
@@ -76,6 +80,7 @@ public sealed partial class AppStore
 
                 if (registration)
                 {
+                    if (NeedsSetup) throw new InvalidOperationException("Complete store setup before registering customers.");
                     if (existingAccount != null)
                     {
                         throw new InvalidOperationException("Registration must create a new account.");
@@ -93,9 +98,10 @@ public sealed partial class AppStore
 
                 if (existingAccount == null || password.Length > 0)
                 {
-                    if (password.Length < 8)
+                    int minimumLength = DemoMode ? 8 : 12;
+                    if (password.Length < minimumLength || password.Length > 128 || (!DemoMode && password == "CustomPC123!"))
                     {
-                        throw new InvalidOperationException("Use a password of at least 8 characters.");
+                        throw new InvalidOperationException($"Use a password of at least {minimumLength} characters.");
                     }
 
                     user.PasswordHash = HashPassword(password);
@@ -133,29 +139,37 @@ public sealed partial class AppStore
     {
         // A salt makes identical passwords produce different hashes.
         byte[] salt = RandomNumberGenerator.GetBytes(16);
-        byte[] hash = Rfc2898DeriveBytes.Pbkdf2(password, salt, 210000, HashAlgorithmName.SHA256, 32);
+        byte[] hash = Rfc2898DeriveBytes.Pbkdf2(password, salt, 600000, HashAlgorithmName.SHA256, 32);
 
-        return Convert.ToBase64String(salt) + ":" + Convert.ToBase64String(hash);
+        return "PBKDF2-SHA256:600000:" + Convert.ToBase64String(salt) + ":" + Convert.ToBase64String(hash);
     }
 
     private static bool VerifyPassword(string password, string savedPasswordHash)
     {
         string[] savedValues = savedPasswordHash.Split(':');
-        if (savedValues.Length != 2)
+        // Older accounts used two fields and 210,000 rounds. Keep them readable until their password changes.
+        int iterations = 210000;
+        int saltIndex = 0;
+        if (savedValues.Length == 4 && savedValues[0] == "PBKDF2-SHA256")
+        {
+            if (!int.TryParse(savedValues[1], out iterations) || iterations < 210000 || iterations > 1000000) return false;
+            saltIndex = 2;
+        }
+        else if (savedValues.Length != 2)
         {
             return false;
         }
 
         try
         {
-            byte[] salt = Convert.FromBase64String(savedValues[0]);
-            byte[] savedHash = Convert.FromBase64String(savedValues[1]);
+            byte[] salt = Convert.FromBase64String(savedValues[saltIndex]);
+            byte[] savedHash = Convert.FromBase64String(savedValues[saltIndex + 1]);
             if (salt.Length != 16 || savedHash.Length != 32)
             {
                 return false;
             }
 
-            byte[] enteredHash = Rfc2898DeriveBytes.Pbkdf2(password, salt, 210000, HashAlgorithmName.SHA256, 32);
+            byte[] enteredHash = Rfc2898DeriveBytes.Pbkdf2(password, salt, iterations, HashAlgorithmName.SHA256, 32);
             return CryptographicOperations.FixedTimeEquals(enteredHash, savedHash);
         }
         catch (FormatException)

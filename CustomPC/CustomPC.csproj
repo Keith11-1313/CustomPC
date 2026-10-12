@@ -6,10 +6,15 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
+    <Product>CustomPC</Product>
+    <Description>PC building, inventory and store order management for one Windows workstation.</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.0" />
+    <EmbeddedResource Include="Assets\logo.png" />
+    <EmbeddedResource Include="Assets\Fonts\*.ttf" />
+    <None Update="Assets\Fonts\*.txt" CopyToOutputDirectory="PreserveNewest" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.12" />
     <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.5" />
     <Compile Update="*Form.cs">
       <SubType>Form</SubType>

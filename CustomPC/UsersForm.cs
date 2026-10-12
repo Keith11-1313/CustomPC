@@ -2,7 +2,7 @@ using System.Data;
 
 namespace CustomPC;
 
-public partial class UsersForm : Form
+public partial class UsersForm : StoreWindow
 {
     public UsersForm()
     {

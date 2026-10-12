@@ -1,18 +1,26 @@
 # CustomPC Windows Forms
 
+This project is **under active revision**. Production-quality code is the goal; it is not a finished or deployed store product. There is no release package in this repository.
+
 Open `CustomPC.slnx` in Visual Studio with the **.NET desktop development** workload and .NET 10 installed. Restore NuGet packages if prompted, then press **F5**.
 
-The login window appears first. Sign in or choose **Browse as guest** to open the homepage. Closing login exits the app. On the other screens, **Back** or **Esc** returns to the previous screen. Leaving an editor this way does not save its unfinished inputs.
+For testing the store workflows, read [the store guide](docs/STORE_GUIDE.md). A new empty database opens **Set up your store** first: choose your own administrator and a password of at least 12 characters. Sample accounts and stock are created only when `CUSTOMPC_DEMO_MODE=1` is explicitly set. Existing records are preserved.
+
+After setup, login appears first. Sign in or choose **Browse as guest** to open the homepage. Closing login exits the app. **Back** or **Esc** returns without saving unfinished editor inputs. Admins have **Store tools & backups** for receipt details, verified backups, recovery and activity history.
+
+Read [who can do what](docs/ROLES.md) for the strict permission matrix and steps to assign roles. Admin manages the system and monitors orders; Staff changes stock and records payments/progress; Customers place and cancel only their own unpaid orders. Admin does not inherit Staff or Customer actions.
 
 ## Understand the code
 
 Start with [the beginner code guide](docs/CODE_GUIDE.md). Lessons 1–5 show you how to open a form, identify its controls, read Sign in's code, and watch it run in the debugger. Each lesson gives an action, the expected result, and a checkpoint with an answer. Later lessons cover accounts, the builder, and saving with a separate practice database.
 
-Use [the code reference](docs/CODE_REFERENCE.md) afterward for all 17 forms, the C# lookup table, roles, order stages, SQLite details, and the advanced manual checklist.
+Use [the code reference](docs/CODE_REFERENCE.md) afterward for all 19 forms, the C# lookup table, roles, order stages, SQLite details, and the advanced manual checklist.
 
 The guide explains expected behavior. A successful build alone does not verify login against your saved database, runtime workflows, Visual Studio Designer loading, or printer output.
 
-Read [the validation results](docs/VALIDATION.md) for the checks that actually ran, corrected issues, and remaining manual checks. The 11 October run passed 360 automated checks, including login-first startup and Back navigation. The earlier 9 October run also passed 3 separate login-button checks against a copy of the saved database.
+Read [the validation results](docs/VALIDATION.md) for executed checks and remaining manual checks. The latest source run passed 628 checks with 0 failures, including 153 strict-role checks and real font-family checks on all 19 forms. Testing does not mark the product finished. Actual printer, Designer, Windows scaling and external-drive recovery checks remain open.
+
+Pressing F5 generates `bin` and `obj` folders and a debug `.exe`; those are normal temporary build outputs used to run your code. They are ignored by Git and are not a release. The earlier published EXE folder and ZIP have been removed. Validation builds are kept outside this project.
 
 ## Edit a screen
 
@@ -41,6 +49,11 @@ These files belong to the same form. Use the visual Designer to change its layou
 | `AppStore.Compatibility.cs` | Socket, memory, and power checks. |
 | `AppStore.Orders.cs` | Order creation, reservations, payments, status changes, and expiry. |
 | `AppStore.SampleData.cs` | Initial demo accounts and sample parts. |
+| `AppStore.Maintenance.cs` | First store setup, receipt details, backups, restore, activity and login throttling. |
+| `StoreWindow.cs` | Shared form base that provides scrolling on a smaller display. |
+| `BrandLogo.cs` | Displays your supplied `Assets/logo.png` and uses it for the window icon. |
+| `AppFonts.cs` | Loads bundled Righteous and Roboto fonts for this process without installing them in Windows. |
+| `AppLog.cs` | Local diagnostic references for unexpected errors. |
 | `Database.cs` | Opens SQLite and runs the SQL commands. |
 | `Ui.cs` | Display helpers for errors, prices, grids, exports, and receipts. |
 
@@ -62,7 +75,7 @@ The usual flow is **click → read inputs → validate → save → refresh**. H
 
 ## Initial demo accounts
 
-These credentials apply when the app creates sample data in a database **with no user accounts**. They are not an automatic password reset for an existing database.
+These credentials apply only to an empty practice database started with `CUSTOMPC_DEMO_MODE=1`, or to old demo records. Normal store setup does not create them. New live orders are blocked while legacy demo accounts still use this public password; an Admin must change or archive them. Existing sample stock must be reviewed separately.
 
 | Role | Email | Password |
 | --- | --- | --- |

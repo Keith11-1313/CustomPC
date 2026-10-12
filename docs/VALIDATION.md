@@ -1,10 +1,37 @@
 # CustomPC validation results
 
-Validated on **11 October 2026**, Windows, .NET SDK 10.0.401. The final workflow run completed at **15:05 Philippine time**.
+Validated on **13 October 2026**, Windows, .NET SDK 10.0.401. This source project is under active revision. The latest run covers the strict Admin/Staff/Customer permission split, role-specific menus, EasyPC-inspired green palette, supplied logo and bundled Righteous/Roboto fonts. No published release package is retained.
 
-**Result: 360 automated checks passed, 0 failed.** This repeats the earlier 261 checks and adds 99 checks for startup and navigation. The application and test harness built with **0 warnings and 0 errors**. A separate run on **9 October** passed **3 login-button checks against a copy of your existing database**.
+**Result: 628 automated checks passed, 0 failed.** This includes 153 strict-role checks alongside the business, navigation, store-hardening and font/render checks. The earlier branding-only total of 476 is historical; one former Staff-report UI check was removed because Staff no longer has report access. The build completed with **0 warnings and 0 errors** after a successful network-enabled restore. These results verify tested code paths; they do not mean the product is finished.
+
+Separately, **6 current-database copy-upgrade checks passed** on 13 October. A read-only SQLite snapshot of your saved database was upgraded on a separate path. Account hashes and record counts were preserved, and the original file's SHA-256 remained unchanged. The earlier **9 October** run passed **3 login-button checks** against its then-current saved-database copy; those historical credentials were not retested against the newer original file.
 
 These results apply to the source saved during this validation. Start with [CODE_GUIDE.md](CODE_GUIDE.md) to learn the code. The [code reference](CODE_REFERENCE.md) contains the advanced manual validation checklist.
+
+## Strict role revision
+
+The confirmed role split is documented in [ROLES.md](ROLES.md). Admin does not inherit Staff or Customer. Shared order/inventory read access is explicitly named.
+
+- Admin is denied order creation/cancellation, payment confirmation, order progress and stock adjustment. Catalog saves also reject hidden stock changes; new parts start at zero.
+- Staff is denied Customer ordering/cancellation and Admin account, catalog, supplier, rules, settings, backup, audit and report actions.
+- Customer ordering/cancellation is limited to the signed-in account, with payment and progress restricted to Staff. Guests may browse and preview but cannot open order management or submit builds.
+- The sidebar shows only permitted screens. Order headings and action buttons distinguish monitoring, processing and personal orders.
+- Tests invoke hidden Admin handlers directly, attempt role-assignment escalation and tamper with the disabled stock input. Denied operations leave business records unchanged.
+- Tests exercise a Staff delivery during an Admin catalog edit, promotion from Staff to Admin while a stock editor is open, receipt access after account archival, and rejection of an unknown saved role.
+## Store hardening and revised screens
+
+- First store setup creates the chosen Admin and compatibility rules without public accounts or fake stock. Sample data requires an explicit practice-mode environment variable.
+- Passwords use a versioned 600,000-round hash while preserving verification of older accounts. Normal new/reset passwords require 12–128 characters. Five failed attempts persist a five-minute throttle, and a failed sign-in clears previous privileges.
+- Live order creation is blocked while recognized legacy demo accounts retain the public password. Tests changed or archived those accounts and then successfully created a store order.
+- Saves update changed rows and append successful activity inside the same transaction. A trigger-based check verified that saving a part does not delete unrelated user records. Rollback checks still passed.
+- Admin-only store details, verified backups and restore were exercised. Restore requires the current password, validates the snapshot, preserves a safety copy and clears the session. Invalid files and unauthorized actions were rejected. Failed operations produced no success audit entry.
+- All 19 forms were rendered from their real controls. Each form passed assertions for Roboto body text and Righteous headings. The supplied logo is embedded as Assets/logo.png and displayed in login, the dashboard and window icons. Its SHA-256 matches the original image exactly. Each form retains its matching Designer and resource files.
+- Simulated 125% control scaling was constrained to a 1366×768 display's working area with scrollbars; this did not change Windows' actual DPI setting. Short editor scrolling and Save behavior were separately exercised.
+- CSV escaping rejected formula-like text beginning with operators, leading spaces and control characters.
+
+Visual review caught panel layering and a clipped setup Exit button. Navigation tests caught Esc being cleared when Back moved into a header panel. These were corrected before the final clean run. The earlier failed/intermediate reports remain external evidence; they are not the final result.
+
+This is a source project being revised for one workstation. The earlier published EXE folder, release ZIP and generated build folders were removed at your request. A previous run included 9 published-executable checks; those are historical and are excluded from this current total. Complete the actual printer, file-picker, Windows scaling, Designer and external-drive recovery checks in [STORE_GUIDE.md](STORE_GUIDE.md) as development continues. Accounting, paid-order returns/refunds and multi-computer operation still require further work or separate store processes.
 
 ## Login-first startup and Back navigation
 
@@ -42,7 +69,7 @@ To retry the current build, run it from Visual Studio, enter `admin@custompc.loc
 
 ## What was exercised
 
-The 360 checks include **142 business/data checks**, **119 existing form checks**, and **99 startup/navigation checks**. Form checks created real WinForms controls, used `PerformClick` for buttons, changed selectors/search inputs, and inspected resulting saved records and displayed data. Permission checks also called reload handlers and attempted restricted screen construction. Test windows stayed hidden; native confirmation/error dialogs were answered within the test process.
+The 628 checks include 142 business/data checks, 118 existing form checks, 99 startup/navigation checks, 50 store-hardening checks, 7 setup/maintenance button checks, 59 render/font/sizing checks and 153 strict-role checks. Fixtures now sign in with Customer to create test orders and Staff to receive stock or confirm payments; they no longer rely on Admin inheriting those actions. Form checks used real controls and events, changed selectors/search inputs and inspected saved records. Test windows stayed invisible; native confirmation/error dialogs were answered within the test process.
 
 | Area | Checks | Evidence covered |
 | --- | ---: | --- |
@@ -58,10 +85,15 @@ The 360 checks include **142 business/data checks**, **119 existing form checks*
 | Short part editor | 4 | Vertical scrolling at 720px window height, whole Save button reachable, scrolled save persists |
 | Catalog and builder controls | 18 | Live search/category/availability filters, totals, invalid-build feedback, changed-price rejection, confirm and receipt |
 | Order form buttons | 11 | Pay, advance, cancel, displayed status, search/status filters |
-| Customer access and reports | 29 | Own orders/receipt, denied other-customer receipt, management permissions, report dates/totals, hidden record IDs |
+| Customer access and reports | 28 | Own orders/receipt, denied other-customer receipt, management permissions, report dates/totals, hidden record IDs |
 | Access revoked with a screen open | 29 | Clear protected grids, disable actions, block export, Sales demotion, staff archive |
 | Login-first startup and Back navigation | 99 | Initial login before dashboard creation, account switching, cancel/exit, return to parent, 15 Back buttons, Escape, discarded inputs, unchanged saved order |
-| **Full run, 11 October** | **360** | **All passed** |
+| Store hardening | 50 | Secure setup, versioned/legacy hashes, persistent throttling, backups, restore, audit, permission denial, defaults remediation, changed-row writes and CSV injection checks |
+| Setup and Store tools buttons | 7 | Actual setup save/Exit/Esc, store identity save, activity view, Back discarding unsaved input |
+| Form renders, fonts and sizing | 59 | Isolated fixture, 19 real form renders, 38 bundled font-family assertions, simulated 125% scaling with a smaller work area |
+| Strict roles and bypass attempts | 153 | Four roles, ownership, denial without saved changes, hidden-handler attempts, role-specific menus, live role changes, stock-editor race and revoked receipts |
+| **Current full run, 13 October** | **628** | **All passed** |
+| Current-database copy upgrade, separate 13 October run | 6 | Integrity, preserved business counts and hashes, isolated migration, unchanged original SHA-256 |
 | Existing-database login buttons, separate 9 October run | 3 | Admin, Staff, Customer login using the saved database copy; all passed |
 
 Rollback checks deliberately caused a SQLite insert to fail. Both the persisted records and in-memory records returned to their original state. This checks failure behavior as well as successful operations.
@@ -83,7 +115,7 @@ Rollback checks deliberately caused a SQLite insert to fail. Both the persisted 
 - **Visual Studio Designer:** open the forms with View Designer / Shift+F7. Compilation and runtime form creation do not prove the Visual Studio design host loads them.
 - **Printing:** receipt text was checked, but a Windows print dialog, printer driver, page layout, and physical/PDF output were not exercised.
 - **Successful file saving:** report access checks were tested, including blocked export after access revocation. A successful CSV save through the Windows file picker and receipt `.txt` save still need the manual walkthrough in the code reference.
-- **Full visual/keyboard use:** rendered login and scrolled part-editor images were inspected. This does not cover every screen at every DPI, window size, or keyboard sequence.
+- **Full visual/keyboard use:** rendered screens and the simulated scaling image were reviewed. This does not cover every actual Windows DPI, monitor size, focus sequence or assistive-technology combination.
 - **Compatibility scope:** automatic rules cover recorded socket, RAM type, and PSU wattage/headroom. BIOS support, clearances, dimensions, and connectors require store review.
 - **Closed app:** expiry runs on startup/refresh and the running dashboard timer. No background process cancels orders while the application is closed.
 
@@ -91,20 +123,20 @@ Rollback checks deliberately caused a SQLite insert to fail. Both the persisted 
 
 The harness and generated databases were kept outside the application project. `.qa` and `Verification` were not recreated.
 
-In PowerShell:
+In PowerShell, build the external harness with an external output directory:
 
 ```powershell
 Set-Location 'C:\Users\Jerald\.codex\visualizations\2026\10\07\01a11539-e782-7ae3-bb38-3eafc37ec703\custompc-runtime-validation'
-dotnet build RuntimeValidation.csproj --no-restore
-dotnet bin\Debug\net10.0-windows\RuntimeValidation.dll --ui
-dotnet bin\Debug\net10.0-windows\RuntimeValidation.dll --ui --copy-only --database-copy actual-database-copy.db
+dotnet build RuntimeValidation.csproj --artifacts-path '..\custompc-brand-revision\build' -p:UseAppHost=false
+dotnet '..\custompc-brand-revision\build\bin\RuntimeValidation\debug\RuntimeValidation.dll' --ui
 ```
 
-Wait for the build to succeed before running the commands. The full run creates fresh test databases in a timestamped folder. The copy-only command uses the previously captured database copy; it does not inspect newer edits to the real file. A future login investigation needs a new copy.
+The full run creates fresh test databases and uses the current project source. It does not publish a release or require a packaged EXE. The harness explicitly opts in to sample fixtures, then disables demo mode for normal-store cases. The separate saved-database checks below are historical; this branding run did not read or change your real database.
 
 Machine-readable evidence on this computer:
 
-- [Full run results, 11 October](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/custompc-runtime-validation/run-20261011-150436-189/report.json)
+- [Full run results, 13 October](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/custompc-runtime-validation/run-20261013-023717-508/report.json)
+- [Current saved database copy upgrade](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/custompc-runtime-validation/run-20261013-013839-218/report.json)
 - [Existing-database login results](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/custompc-runtime-validation/run-20261009-224736-007/report.json)
 - [Read-only database inspection](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/custompc-runtime-validation/actual-database-evidence.json)
 
