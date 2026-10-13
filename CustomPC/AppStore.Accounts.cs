@@ -30,7 +30,8 @@ public sealed partial class AppStore
             }
         }
 
-        if (matchingAccount == null || !Roles.Contains(matchingAccount.Role) || !VerifyPassword(password, matchingAccount.PasswordHash))
+        if (matchingAccount == null || !Roles.Contains(matchingAccount.Role) || !VerifyPassword(password, matchingAccount.PasswordHash)
+            || (!DemoMode && password == "CustomPC123!"))
         {
             RecordLoginResult(email, false);
             throw new InvalidOperationException("Email or password is incorrect, or the account is archived.");

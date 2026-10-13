@@ -27,18 +27,20 @@ The variables apply to that terminal and its child app. They do not change a Vis
 5. Add distributors through **Suppliers**, then add actual components through **Parts & inventory → Add part**. Check price and specifications. New parts start at zero stock; sign in as Staff and use Adjust stock to record received quantities. New stores contain no fake stock.
 6. Add individual Staff accounts through **User accounts**. Customers can register from login.
 
-An existing database opens login directly. Its old accounts, parts, orders and payments remain saved. For old demo data: use **User accounts → Edit account** to change the signed-in Admin's password, then change or archive the default Staff and Customer accounts. You cannot archive your currently signed-in Admin. Store tools checks the three legacy demo addresses for the public password. Live order creation is blocked until those defaults are removed. Review sample prices and stock separately before selling.
+An existing database opens login directly. Its old accounts, parts, orders and payments remain saved. Normal mode refuses the public demo password. Sign in with your own Admin account and create the Staff/Customer accounts you need. You cannot archive your currently signed-in Admin. Secure Customer accounts are not blocked from ordering because of unrelated sample accounts. Review sample prices and stock separately before selling.
 
 ## Daily order workflow
 
 1. The Customer registers and signs in with their own account. Staff and Admin cannot place orders for another customer.
-2. The Customer chooses seven components in PC builder and checks compatibility and total. Staff must also check actual dimensions, connectors and other specifications; automatic checks cover recorded socket, RAM type and PSU wattage/headroom.
+2. The Customer chooses the six required components and a dedicated GPU when needed, then checks compatibility and total. Staff must also check actual dimensions, connectors and other specifications; automatic checks cover recorded socket, RAM type and PSU wattage/headroom.
 3. Click **Confirm build & order**. The receipt opens. Components become reserved and the order awaits payment for 24 hours.
-4. Switch to a Staff account. After receiving the full amount at the physical store, use **Orders & payments → Confirm payment**. This records the payment and Staff identity. Admin and Customer accounts cannot confirm payment. It does not collect money or verify external payments.
+4. Switch to a Staff account. After receiving the full amount at the physical store, open **Orders & payments**, select the pending order, and click **Confirm store payment**. This records the payment and Staff identity. Admin and Customer accounts cannot confirm payment. It does not collect money or verify external payments.
 5. Advance through Processing, Assembly and Ready for Pickup. Mark Completed when the customer collects the PC. Completion deducts stock once and records movements.
 6. A Customer can cancel only their own unpaid order. Staff and Admin cannot cancel it manually. Automatic expiry is processed on startup/refresh and the running timer; a closed app processes it when next opened.
 
 Admin-only reports show recorded inventory, orders, stock movements and sales, with CSV export. Staff monitors daily work through inventory and Orders; Admin monitors orders read-only. The receipt is the PC order record. Accounting/tax invoicing and paid-order returns/refunds remain part of your separate store process.
+
+Order actions start disabled until you select a row. A pending order enables Staff payment or its Customer's cancellation; a paid/in-progress order enables Staff's next stage. Completed/cancelled orders allow reading the receipt, with transaction actions disabled. The selected row stays selected after payment/progress if it still matches the filters. If a search or status filter removes that row, select another visible order before acting.
 
 ## Backups and recovery
 
@@ -61,7 +63,7 @@ Five failed attempts for the same email block further attempts for five minutes.
 
 Unexpected failures display a diagnostic reference. Logs are in `%LOCALAPPDATA%\CustomPC\Logs`; they contain error types and stack locations, not entered passwords or database contents. Input errors such as insufficient stock display their validation message directly. **Store tools → Activity history** shows the latest 500 successful changes and their users. History begins with this version and cannot reconstruct earlier activity. Local history is not tamper-proof against direct database access.
 
-Lock Windows or close the app when leaving the workstation. Back does not sign out; use **Sign out / Switch account**.
+Lock Windows or close the app when leaving the workstation. Back does not sign out; use **Sign out**.
 
 ## Before the first real customer
 

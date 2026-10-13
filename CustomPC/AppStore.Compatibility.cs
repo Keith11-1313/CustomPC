@@ -19,7 +19,11 @@ public sealed partial class AppStore
                 }
             }
 
-            if (selectedCount != 1)
+            if (category == "GPU")
+            {
+                if (selectedCount > 1) errors.Add("Select at most one GPU.");
+            }
+            else if (selectedCount != 1)
             {
                 errors.Add("Select one " + category + ".");
             }
@@ -29,6 +33,7 @@ public sealed partial class AppStore
         Part? motherboard = null;
         Part? ram = null;
         Part? powerSupply = null;
+        bool hasDedicatedGpu = false;
         int componentWatts = 0;
 
         foreach (Part part in selectedParts)
@@ -52,12 +57,24 @@ public sealed partial class AppStore
                 case "Power Supply":
                     powerSupply = part;
                     break;
+                case "GPU":
+                    hasDedicatedGpu = true;
+                    break;
             }
 
             if (part.Category != "Power Supply")
             {
                 componentWatts += part.Watts;
             }
+        }
+
+        // Graphics output is required even when the dedicated GPU is optional.
+        if (!hasDedicatedGpu && cpu != null)
+        {
+            if (!cpu.HasIntegratedGraphics)
+                errors.Add("This CPU requires a dedicated GPU.");
+            else if (motherboard != null && !motherboard.HasVideoOutput)
+                errors.Add("The motherboard needs a video output to use integrated graphics.");
         }
 
         if (RuleIsEnabled("Socket") && cpu != null && motherboard != null)

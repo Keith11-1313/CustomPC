@@ -19,6 +19,8 @@ public partial class PartEditForm : StoreWindow
 
         category.Items.AddRange(AppStore.Categories);
         category.SelectedIndex = 0;
+        category.SelectedIndexChanged += CategoryChanged;
+        UpdateGraphicsFields();
 
         List<Supplier> activeSuppliers = new List<Supplier>();
         foreach (Supplier savedSupplier in AppStore.Current.Suppliers)
@@ -65,6 +67,8 @@ public partial class PartEditForm : StoreWindow
         specifications.Text = part.Specifications;
         socket.Text = part.Socket;
         memory.Text = part.MemoryType;
+        integratedGraphics.Checked = part.HasIntegratedGraphics;
+        videoOutput.Checked = part.HasVideoOutput;
         watts.Value = part.Watts;
         low.Value = part.LowStock;
         archived.Checked = part.Archived;
@@ -101,6 +105,19 @@ public partial class PartEditForm : StoreWindow
         Close();
     }
 
+    private void CategoryChanged(object? sender, EventArgs e)
+    {
+        UpdateGraphicsFields();
+    }
+
+    private void UpdateGraphicsFields()
+    {
+        integratedGraphics.Enabled = category.Text == "CPU";
+        videoOutput.Enabled = category.Text == "Motherboard";
+        if (!integratedGraphics.Enabled) integratedGraphics.Checked = false;
+        if (!videoOutput.Enabled) videoOutput.Checked = false;
+    }
+
     private void PartEditForm_Shown(object? sender, EventArgs e)
     {
         // Small laptop displays can be shorter than this editor. Fit the window, then scroll.
@@ -134,6 +151,8 @@ public partial class PartEditForm : StoreWindow
             part.Specifications = specifications.Text.Trim();
             part.Socket = socket.Text.Trim();
             part.MemoryType = memory.Text.Trim();
+            part.HasIntegratedGraphics = category.Text == "CPU" && integratedGraphics.Checked;
+            part.HasVideoOutput = category.Text == "Motherboard" && videoOutput.Checked;
             part.Watts = (int)watts.Value;
             part.LowStock = (int)low.Value;
             part.Archived = archived.Checked;

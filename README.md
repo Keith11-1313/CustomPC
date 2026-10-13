@@ -10,6 +10,10 @@ After setup, login appears first. Sign in or choose **Browse as guest** to open 
 
 Read [who can do what](docs/ROLES.md) for the strict permission matrix and steps to assign roles. Admin manages the system and monitors orders; Staff changes stock and records payments/progress; Customers place and cancel only their own unpaid orders. Admin does not inherit Staff or Customer actions.
 
+On this computer, `jerald@gmail.com` is Admin and keeps its existing password. The old public-password demo accounts were archived; add your own Staff and Customer accounts through User accounts. This is saved account data, not an Admin email hardcoded into the application.
+
+The builder uses the signed-in Customer automatically. Choose CPU, motherboard, RAM, storage, PSU and case. A dedicated GPU can be omitted only when the catalog records CPU integrated graphics and motherboard video output. Admin sets those two verified fields in the part editor; older records default to false until checked.
+
 ## Understand the code
 
 Start with [the beginner code guide](docs/CODE_GUIDE.md). Lessons 1–5 show you how to open a form, identify its controls, read Sign in's code, and watch it run in the debugger. Each lesson gives an action, the expected result, and a checkpoint with an answer. Later lessons cover accounts, the builder, and saving with a separate practice database.
@@ -18,7 +22,9 @@ Use [the code reference](docs/CODE_REFERENCE.md) afterward for all 19 forms, the
 
 The guide explains expected behavior. A successful build alone does not verify login against your saved database, runtime workflows, Visual Studio Designer loading, or printer output.
 
-Read [the validation results](docs/VALIDATION.md) for executed checks and remaining manual checks. The latest source run passed 628 checks with 0 failures, including 153 strict-role checks and real font-family checks on all 19 forms. Testing does not mark the product finished. Actual printer, Designer, Windows scaling and external-drive recovery checks remain open.
+Read [the validation results](docs/VALIDATION.md) for executed checks and remaining manual checks. The latest source run passed 667 checks with 0 failures, including 153 strict-role checks and real font-family checks on all 19 forms. Testing does not mark the product finished. Actual printer, Designer, Windows scaling and external-drive recovery checks remain open.
+
+Read [the role screen audit](docs/SCREEN_VALIDATION.md) for the actual dashboard routes, buttons tested per role, normal store workflow and disabled-action explanation. Its separate 627 checks include a correction for payment/progress buttons on completed orders.
 
 Pressing F5 generates `bin` and `obj` folders and a debug `.exe`; those are normal temporary build outputs used to run your code. They are ignored by Git and are not a release. The earlier published EXE folder and ZIP have been removed. Validation builds are kept outside this project.
 
@@ -75,7 +81,7 @@ The usual flow is **click → read inputs → validate → save → refresh**. H
 
 ## Initial demo accounts
 
-These credentials apply only to an empty practice database started with `CUSTOMPC_DEMO_MODE=1`, or to old demo records. Normal store setup does not create them. New live orders are blocked while legacy demo accounts still use this public password; an Admin must change or archive them. Existing sample stock must be reviewed separately.
+These credentials work only in explicitly enabled practice mode (`CUSTOMPC_DEMO_MODE=1`). Normal store setup does not create them. Normal mode refuses this public password at login. Your own Customer account can place orders independently of unused sample records. Existing sample stock must be reviewed separately.
 
 | Role | Email | Password |
 | --- | --- | --- |

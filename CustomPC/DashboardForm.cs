@@ -218,13 +218,16 @@ public partial class DashboardForm : StoreWindow
         AppStore store = AppStore.Current;
         store.Refresh();
 
+        heading.Text = store.CanViewAllOrders ? "Store overview" : store.Session == null ? "Welcome to CustomPC" : "My dashboard";
+        Text = "CustomPC | " + heading.Text;
+
         if (store.Session == null)
         {
             identity.Text = "Guest workspace";
         }
         else
         {
-            identity.Text = $"Welcome, {store.Session.Name}   /   {store.Session.Role}";
+            identity.Text = $"Welcome, {store.Session.Name}";
         }
 
         inventory.Enabled = store.CanViewInventory;
@@ -314,15 +317,15 @@ public partial class DashboardForm : StoreWindow
             statOrdersCaption.Text = "Awaiting payment";
             statStockCaption.Text = "Low / out of stock";
         }
-        health.Text = "Review stock and specifications before assembly. Double-click a recent order to view its receipt.";
-        if (store.IsAdmin && store.DefaultPasswordAccounts() > 0)
-            health.Text = "Before store use: change or archive the legacy demo accounts in User accounts. Review sample prices and stock. Store tools includes backups and activity history.";
-
         DataTable recentOrders = new DataTable();
         recentOrders.Columns.Add("Id"); recentOrders.Columns.Add("Order");
-        recentOrders.Columns.Add("Customer"); recentOrders.Columns.Add("Status");
+        if (store.CanViewAllOrders) recentOrders.Columns.Add("Customer");
+        recentOrders.Columns.Add("Status");
         foreach (CustomerOrder order in store.VisibleOrders().OrderByDescending(o => o.CreatedUtc).Take(6))
-            recentOrders.Rows.Add(order.Id, order.Number, order.CustomerName, order.Status);
+        {
+            if (store.CanViewAllOrders) recentOrders.Rows.Add(order.Id, order.Number, order.CustomerName, order.Status);
+            else recentOrders.Rows.Add(order.Id, order.Number, order.Status);
+        }
         Ui.Bind(recent, recentOrders);
     }
 

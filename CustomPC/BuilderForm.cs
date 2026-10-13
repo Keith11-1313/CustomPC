@@ -22,7 +22,6 @@ public partial class BuilderForm : StoreWindow
         submit.Click += SubmitButton_Click;
 
         LoadPartChoices();
-        LoadCustomerChoices();
         UpdateBuildSummary();
     }
 
@@ -42,7 +41,8 @@ public partial class BuilderForm : StoreWindow
         for (int index = 0; index < partSelectors.Length; index++)
         {
             string partCategory = AppStore.Categories[index];
-            List<Part> availableParts = new List<Part>();
+            List<object> availableParts = new List<object>();
+            if (partCategory == "GPU") availableParts.Add("No dedicated GPU (integrated graphics)");
 
             foreach (Part part in store.Parts)
             {
@@ -55,29 +55,9 @@ public partial class BuilderForm : StoreWindow
             ComboBox selector = partSelectors[index];
             selector.SelectedIndexChanged -= PartSelectionChanged;
             selector.DataSource = availableParts;
-            selector.SelectedIndex = -1;
+            selector.SelectedIndex = partCategory == "GPU" ? 0 : -1;
             selector.SelectedIndexChanged += PartSelectionChanged;
         }
-    }
-
-    private void LoadCustomerChoices()
-    {
-        AppStore store = AppStore.Current;
-        List<UserAccount> customers = new List<UserAccount>();
-
-        foreach (UserAccount account in store.Users)
-        {
-            bool canOrderForCustomer = store.IsCustomer && account.Id == store.Session?.Id;
-            if (!account.Archived && account.Role == "Customer" && canOrderForCustomer)
-            {
-                customers.Add(account);
-            }
-        }
-
-        customer.DisplayMember = "Name";
-        customer.ValueMember = "Id";
-        customer.DataSource = customers;
-        customer.Enabled = false;
     }
 
     private List<Part> GetSelectedParts()
@@ -125,7 +105,7 @@ public partial class BuilderForm : StoreWindow
             validation.ForeColor = Color.FromArgb(153, 27, 27);
         }
 
-        submit.Enabled = store.IsCustomer && errors.Count == 0 && customer.Items.Count > 0;
+        submit.Enabled = store.IsCustomer && errors.Count == 0;
         submit.BackColor = submit.Enabled ? Color.FromArgb(84, 177, 55) : Color.FromArgb(226, 232, 224);
 
         if (store.Session == null)
@@ -149,10 +129,11 @@ public partial class BuilderForm : StoreWindow
                 return;
             }
 
-            UserAccount? selectedCustomer = customer.SelectedItem as UserAccount;
-            if (selectedCustomer == null)
+            AppStore store = AppStore.Current;
+            store.Refresh();
+            if (!store.IsCustomer)
             {
-                throw new InvalidOperationException("Choose a customer account.");
+                throw new InvalidOperationException("Sign in with a Customer account to place an order.");
             }
 
             List<string> selectedPartIds = new List<string>();
@@ -161,7 +142,8 @@ public partial class BuilderForm : StoreWindow
                 selectedPartIds.Add(part.Id);
             }
 
-            CustomerOrder newOrder = AppStore.Current.CreateOrder(selectedPartIds, selectedCustomer.Id, confirmedTotal);
+            // Ownership comes from the signed-in account, never a dropdown or typed customer ID.
+            CustomerOrder newOrder = store.CreateOrder(selectedPartIds, store.Session!.Id, confirmedTotal);
             using (ReceiptForm receiptForm = new ReceiptForm(newOrder.Id))
             {
                 receiptForm.ShowDialog(this);
@@ -187,11 +169,6 @@ public partial class BuilderForm : StoreWindow
     {
         // Keep the chosen IDs while replacing old ComboBox objects with current records.
         List<string> chosenIds = new List<string>();
-        string chosenCustomerId = "";
-        if (customer.SelectedItem is UserAccount selectedCustomer)
-        {
-            chosenCustomerId = selectedCustomer.Id;
-        }
         foreach (ComboBox selector in partSelectors)
         {
             string chosenId = "";
@@ -205,9 +182,9 @@ public partial class BuilderForm : StoreWindow
         LoadPartChoices();
         for (int index = 0; index < partSelectors.Length; index++)
         {
-            foreach (Part part in partSelectors[index].Items)
+            foreach (object item in partSelectors[index].Items)
             {
-                if (part.Id == chosenIds[index])
+                if (item is Part part && part.Id == chosenIds[index])
                 {
                     partSelectors[index].SelectedItem = part;
                     break;
@@ -215,15 +192,6 @@ public partial class BuilderForm : StoreWindow
             }
         }
 
-        LoadCustomerChoices();
-        foreach (UserAccount account in customer.Items)
-        {
-            if (account.Id == chosenCustomerId)
-            {
-                customer.SelectedItem = account;
-                break;
-            }
-        }
         UpdateBuildSummary();
     }
 }

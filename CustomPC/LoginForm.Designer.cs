@@ -73,16 +73,6 @@ partial class LoginForm
         heading.ForeColor = Color.FromArgb(32, 41, 35);
         heading.UseMnemonic = false;
         Controls.Add(heading);
-        subheading = new Label();
-        subheading.Name = "subheading";
-        subheading.Location = new Point(458, 100);
-        subheading.Size = new Size(470, 48);
-        subheading.TabIndex = 6;
-        subheading.Text = "Sign in to manage your builds and store orders.";
-        subheading.Font = new Font("Roboto", 11F, FontStyle.Regular);
-        subheading.ForeColor = Color.FromArgb(76, 92, 78);
-        subheading.UseMnemonic = false;
-        Controls.Add(subheading);
         emailLabel = new Label();
         emailLabel.Name = "emailLabel";
         emailLabel.Location = new Point(458, 166);
@@ -215,7 +205,6 @@ partial class LoginForm
     private BrandLogo logo = null!;
     private Label brandFooter = null!;
     private Label heading = null!;
-    private Label subheading = null!;
     private Label emailLabel = null!;
     private TextBox email = null!;
     private Label passwordLabel = null!;

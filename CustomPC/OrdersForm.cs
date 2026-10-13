@@ -23,8 +23,6 @@ public partial class OrdersForm : StoreWindow
         if (!AppStore.Current.CanViewAllOrders && !AppStore.Current.IsCustomer)
             throw new InvalidOperationException("Sign in with an authorized account to view orders.");
 
-        pay.Enabled = AppStore.Current.IsStaff;
-        advance.Enabled = AppStore.Current.IsStaff;
         status.Items.Add("All statuses");
         status.Items.AddRange(AppStore.Statuses);
         status.SelectedIndex = 0;
@@ -36,6 +34,8 @@ public partial class OrdersForm : StoreWindow
         pay.Click += PayButton_Click;
         advance.Click += AdvanceButton_Click;
         cancel.Click += CancelButton_Click;
+        grid.SelectionChanged += OrderSelectionChanged;
+        Shown += OrdersForm_Shown;
         refreshTimer.Tick += RefreshTimer_Tick;
         FormClosed += OrdersForm_FormClosed;
 
@@ -169,29 +169,22 @@ public partial class OrdersForm : StoreWindow
 
     private void LoadRows()
     {
+        string? selectedOrderId = Ui.Selected(grid);
         AppStore store = AppStore.Current;
         store.Refresh();
         // A role change in another running copy must also update these buttons.
-        pay.Enabled = store.IsStaff;
-        advance.Enabled = store.IsStaff;
-        cancel.Enabled = store.IsCustomer;
         pay.Visible = store.IsStaff;
         advance.Visible = store.IsStaff;
         cancel.Visible = store.IsCustomer;
-        receipt.Enabled = store.CanViewAllOrders || store.IsCustomer;
         heading.Text = store.IsAdmin ? "Order monitoring" : store.IsStaff ? "Orders & payments" : "My orders";
         Text = "CustomPC | " + heading.Text;
-        subheading.Text = store.IsAdmin
-            ? "Read-only monitoring. Staff records payment and progress; Customers cancel their own unpaid orders."
-            : store.IsStaff
-                ? "Staff workspace: confirm store payments and update processing, assembly and pickup."
-                : "Your orders only. You can cancel an unpaid order; Staff confirms payment and progress.";
         string searchText = search.Text.Trim();
 
         DataTable table = new DataTable();
         table.Columns.Add("Id", typeof(string));
         table.Columns.Add("Order", typeof(string));
-        table.Columns.Add("Customer", typeof(string));
+        if (store.CanViewAllOrders) table.Columns.Add("Customer", typeof(string));
+        searchLabel.Text = store.CanViewAllOrders ? "Order number or customer" : "Order number";
         table.Columns.Add("Total", typeof(string));
         table.Columns.Add("Status", typeof(string));
         table.Columns.Add("Payment", typeof(string));
@@ -222,10 +215,71 @@ public partial class OrdersForm : StoreWindow
             }
 
             string paymentDeadline = order.DeadlineUtc.ToLocalTime().ToString("MMM dd, hh:mm tt");
-            table.Rows.Add(order.Id, order.Number, order.CustomerName,
-                Ui.Money(order.Total), order.Status, paymentStatus, paymentDeadline);
+            if (store.CanViewAllOrders)
+                table.Rows.Add(order.Id, order.Number, order.CustomerName,
+                    Ui.Money(order.Total), order.Status, paymentStatus, paymentDeadline);
+            else
+                table.Rows.Add(order.Id, order.Number,
+                    Ui.Money(order.Total), order.Status, paymentStatus, paymentDeadline);
         }
 
         Ui.Bind(grid, table);
+        // Keep the same order selected after payment/progress, if it still matches the filters.
+        foreach (DataGridViewRow row in grid.Rows)
+        {
+            if (row.Cells["Id"].Value?.ToString() == selectedOrderId)
+            {
+                grid.CurrentCell = row.Cells["Order"];
+                row.Selected = true;
+                break;
+            }
+        }
+        UpdateOrderActions();
+    }
+
+    private void OrderSelectionChanged(object? sender, EventArgs e)
+    {
+        UpdateOrderActions();
+    }
+
+    private void OrdersForm_Shown(object? sender, EventArgs e)
+    {
+        // WinForms may select its first bound row while showing the grid. Require an explicit choice.
+        grid.ClearSelection();
+        UpdateOrderActions();
+    }
+
+    private void UpdateOrderActions()
+    {
+        AppStore store = AppStore.Current;
+        CustomerOrder? selectedOrder = null;
+        string? selectedId = grid.Columns.Contains("Id") ? Ui.Selected(grid) : null;
+        foreach (CustomerOrder order in store.VisibleOrders())
+        {
+            if (order.Id == selectedId)
+            {
+                selectedOrder = order;
+                break;
+            }
+        }
+
+        // Permission decides who sees an action; selection and status decide when it works.
+        bool pending = selectedOrder != null && selectedOrder.Status == "Pending Payment"
+            && selectedOrder.DeadlineUtc > DateTime.UtcNow;
+        bool inProgress = selectedOrder != null && (selectedOrder.Status == "Paid"
+            || selectedOrder.Status == "Processing" || selectedOrder.Status == "Assembly"
+            || selectedOrder.Status == "Ready for Pickup");
+
+        receipt.Enabled = selectedOrder != null;
+        pay.Enabled = store.IsStaff && pending;
+        advance.Enabled = store.IsStaff && inProgress;
+        cancel.Enabled = store.IsCustomer && pending;
+
+        // Muted buttons show that this order cannot use the action yet.
+        Color inactive = Color.FromArgb(226, 232, 224);
+        Color green = Color.FromArgb(84, 177, 55);
+        pay.BackColor = pay.Enabled ? green : inactive;
+        advance.BackColor = advance.Enabled ? green : inactive;
+        cancel.BackColor = cancel.Enabled ? Color.FromArgb(180, 35, 56) : inactive;
     }
 }

@@ -209,9 +209,17 @@ public partial class InventoryForm : StoreWindow
         edit.Enabled = store.IsAdmin;
         adjust.Enabled = store.IsStaff;
         history.Enabled = store.IsAdmin;
-        subheading.Text = store.IsAdmin
-            ? "Admin maintains component details. Stock quantities are updated through Staff transactions."
-            : "Staff can adjust stock with a reason. Catalog details, suppliers and reports belong to Admin.";
+        // An unavailable role action should not look like a working button.
+        int nextLeft = grid.Left;
+        foreach (Button button in new[] { add, edit, adjust, history, refresh })
+        {
+            button.Visible = button.Enabled;
+            if (button.Enabled)
+            {
+                button.Left = nextLeft;
+                nextLeft += button.Width + 12;
+            }
+        }
 
         if (!store.CanViewInventory)
         {

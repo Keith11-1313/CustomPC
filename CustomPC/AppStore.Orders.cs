@@ -14,9 +14,6 @@ public sealed partial class AppStore
                 LoadData(connection);
                 RequireCustomer();
 
-                if (!DemoMode && DefaultPasswordAccounts() > 0)
-                    throw new InvalidOperationException("Before taking store orders, an administrator must change or archive all legacy demo accounts using the public password. Open User accounts, then check Store tools.");
-
                 if (customerId != Session!.Id)
                 {
                     throw new InvalidOperationException("You can only order for your own account.");

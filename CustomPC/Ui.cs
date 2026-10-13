@@ -56,7 +56,7 @@ internal static class Ui
         Rectangle area = grid.ClientRectangle;
         area.Y += grid.ColumnHeadersHeight;
         area.Height -= grid.ColumnHeadersHeight;
-        TextRenderer.DrawText(e.Graphics, "No records in this view.\nTry another filter or add a record.", grid.Font,
+        TextRenderer.DrawText(e.Graphics, "No records found.", grid.Font,
             area, Color.FromArgb(76, 92, 78), TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.WordBreak);
     }
 

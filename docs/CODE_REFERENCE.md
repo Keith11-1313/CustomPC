@@ -132,11 +132,11 @@ The database path is chosen in this order: a path explicitly passed to the `AppS
 
 `ShowDialog(this)` opens a modal child window. The owner waits until that dialog closes. A `using` statement disposes of the child afterward. `DialogResult.OK` indicates that the dialog completed its action; it is not an order status.
 
-`DashboardForm.SignIn` handles **Sign out / Switch account** after startup. It stops the timer, hides the dashboard, clears the current session, and opens login without a dashboard owner. An OK result updates and shows the dashboard, activates it, and restarts the timer. Cancelling login closes the dashboard and ends the app.
+`DashboardForm.SignIn` handles **Sign out** after startup. It stops the timer, hides the dashboard, clears the current session, and opens login without a dashboard owner. An OK result updates and shows the dashboard, activates it, and restarts the timer. Cancelling login closes the dashboard and ends the app.
 
-The 15 forms other than Dashboard and Login have a **Back** button. **Esc** activates the same button through the form's `CancelButton` property. Back closes the current dialog and returns to its previous screen: catalog to dashboard, an inventory editor to inventory, registration to login, or a receipt to the screen that opened it. It does not save unfinished editor inputs. Records already saved by an earlier action remain saved; closing a receipt after confirming an order does not cancel that order.
+The 17 forms other than Dashboard and Login have a navigation button. **Esc** activates the same button through the form's `CancelButton` property. Back closes the current dialog and returns to its previous screen: catalog to dashboard, an inventory editor to inventory, registration to login, or a receipt to the screen that opened it. The first-time setup screen uses Exit instead, because cancelling setup ends startup. These actions do not save unfinished editor inputs. Records already saved by an earlier action remain saved; closing a receipt after confirming an order does not cancel that order.
 
-Each form connects `back.Click += BackButton_Click;` and sets `CancelButton = back;`. `BackButton_Click` sets `DialogResult.Cancel` and calls `Close()`. This uses the ordinary button declared in that form's Designer file, so you can select and move Back through View Designer. Login is the starting screen, and the dashboard is the main menu; neither has a previous screen to return to. Use Sign out / Switch account on the dashboard to return to login.
+Each form connects `back.Click += BackButton_Click;` and sets `CancelButton = back;`. `BackButton_Click` sets `DialogResult.Cancel` and calls `Close()`. This uses the ordinary button declared in that form's Designer file, so you can select and move Back through View Designer. Login is the starting screen, and the dashboard is the main menu; neither has a previous screen to return to. Use Sign out on the dashboard to return to login.
 
 ## 5. Designer files and event handlers
 
@@ -232,7 +232,7 @@ In `BuilderForm.cs`:
 
 1. `LoadPartChoices` refreshes the store and loads one ComboBox for each category in `AppStore.Categories`.
 2. It includes only active parts with available stock.
-3. `LoadCustomerChoices` includes only the signed-in Customer. Staff and Admin cannot open the builder or place orders. Guest access provides a preview but cannot submit an order.
+3. There is no customer selector. The order owner is taken directly from the signed-in session. Staff and Admin cannot open the builder or place orders. Guest access provides a preview but cannot submit an order.
 4. `GetSelectedParts` reads the selected `Part` object from each ComboBox.
 5. `PartSelectionChanged` calls `UpdateBuildSummary` whenever a choice changes.
 6. `UpdateBuildSummary` adds prices, calls `CheckBuild`, displays errors, and enables submit only when the selection and session allow it.
@@ -242,7 +242,7 @@ If saved prices have changed since the user chose the parts, `CreateOrder` rejec
 
 `CheckBuild` in `AppStore.Compatibility.cs` returns a `List<string>` of errors. An empty list means its configured checks passed. The checks are:
 
-- Exactly one CPU, motherboard, RAM, GPU, storage, power supply, and case.
+- Exactly one CPU, motherboard, RAM, storage, power supply and case. A dedicated GPU is optional when the CPU has verified integrated graphics and the motherboard has a recorded video output. At most one dedicated GPU is allowed.
 - Every selected part is active and available.
 - If the socket rule is enabled, CPU and motherboard sockets must match and be specified.
 - If the memory rule is enabled, RAM and motherboard memory types must match and be specified.
@@ -251,6 +251,8 @@ If saved prices have changed since the user chose the parts, `CreateOrder` rejec
 Rule names are labels. Rule behavior comes from the hardcoded `Kind` checks in `CheckBuild`. Editing a name does not create a new algorithm. `RuleIsEnabled` controls whether a supported check runs.
 
 These checks cover saved socket, memory, and wattage fields. They do not automatically verify case clearance, BIOS support, physical dimensions, connectors, or every real-world compatibility issue. Staff must verify those details before assembly.
+
+Graphics output is an additional required check, independent of configurable socket/memory/power rules. `Part.HasIntegratedGraphics` applies to CPUs; `Part.HasVideoOutput` applies to motherboards. Admin records them in the component editor. Older JSON records load both as false. The GPU ComboBox contains a string for No dedicated GPU alongside Part objects; `GetSelectedParts` includes only objects that are Parts, so that placeholder adds no price, reservation or receipt line. For example, Intel desktop F models require a discrete GPU according to [Intel's documentation](https://www.intel.com/content/www/us/en/support/articles/000058487/processors.html); do not mark them as having integrated graphics.
 
 ## 9. Stock: on hand, reserved, available
 
@@ -279,7 +281,7 @@ Example with one component:
 
 Cancelling an unpaid order releases its reservation: on hand remains 10 and available returns to 10. The code does not subtract stock when placing the order and again at pickup.
 
-`SavePart` validates catalog edits and records changes to on-hand stock. `AdjustStock` requires staff access, a nonzero quantity, and a reason. Both prevent stock from falling below the quantity already reserved. `RecordStockMovement` writes an audit entry containing the quantity change, reason, user, and timestamp.
+`SavePart` requires Admin and validates catalog edits. A new part starts at zero stock; editing an existing part must preserve its current stock. `AdjustStock` requires Staff, a nonzero quantity, and a reason, and prevents stock from falling below the quantity already reserved. `RecordStockMovement` saves the quantity change, reason, user, and timestamp.
 
 The `MaximumStock` constant limits the saved physical count to 10,000,000 units. Stock adjustment calculates the result using `long` before converting to `int`, so adding a very large number cannot wrap an integer into an invalid quantity.
 
@@ -294,7 +296,7 @@ It verifies the session and target customer, finds the selected parts, runs `Che
 | Status | How it is reached | Holds a reservation? |
 | --- | --- | --- |
 | `Pending Payment` | `CreateOrder` | Yes |
-| `Paid` | Staff/admin calls `ConfirmPayment` before the deadline | Yes |
+| `Paid` | Staff calls `ConfirmPayment` before the deadline | Yes |
 | `Processing` | `AdvanceOrder` from Paid | Yes |
 | `Assembly` | `AdvanceOrder` from Processing | Yes |
 | `Ready for Pickup` | `AdvanceOrder` from Assembly | Yes |
@@ -305,7 +307,9 @@ It verifies the session and target customer, finds the selected parts, runs `Che
 
 `AdvanceOrder` uses a `switch` to allow one stage at a time. At completion, `DeductCompletedOrderStock` reduces `Part.Stock` and records negative inventory movements. A completed order cannot be completed again through that method.
 
-`CancelOrder` allows staff/admin, or the order's own customer, to cancel an unpaid pending order. Paid and completed orders cannot be cancelled through this method. `VisibleOrders` returns all orders for staff/admin and only the signed-in customer's own orders for a customer.
+`CancelOrder` allows only the order's own Customer to cancel an unpaid pending order. Staff and Admin are denied manual cancellation. Paid and completed orders cannot be cancelled through this method. `VisibleOrders` returns all orders for Staff/Admin and only the signed-in Customer's own orders for a Customer.
+
+In `OrdersForm.cs`, `OrderSelectionChanged` calls `UpdateOrderActions`. The signed-in role decides which buttons are visible. The selected row and its saved status decide which visible buttons are enabled: Staff can pay an unexpired pending order or advance a paid/in-progress order; Customer can cancel their own unexpired pending order. Receipt requires a selected visible order. Completed/cancelled orders cannot enable payment, progress or cancellation. `LoadRows` preserves the selected order after an action if it still matches the filters, so Staff can continue to the next stage. AppStore still rechecks permission and status inside the transaction.
 
 ### Deadline and timer
 
@@ -373,7 +377,7 @@ Values use SQL parameters (`$id` and `$data`) rather than being placed directly 
 | `LoginForm.cs` | Login, show password, register button, guest access | `LoginButton_Click`, `ShowPassword_CheckedChanged`, `RegisterButton_Click`, `GuestButton_Click` |
 | `RegisterForm.cs` | Create a customer account | `SaveButton_Click` |
 | `CatalogForm.cs` | Search/filter active components and inspect details | `LoadRows`, `PartsGrid_CellDoubleClick`, `FilterChanged` |
-| `BuilderForm.cs` | Choose seven components, calculate total, create order | `LoadPartChoices`, `GetSelectedParts`, `UpdateBuildSummary`, `SubmitButton_Click`, `RefreshSelectedParts` |
+| `BuilderForm.cs` | Choose required components and optional GPU, calculate total, create own order | `LoadPartChoices`, `GetSelectedParts`, `UpdateBuildSummary`, `SubmitButton_Click`, `RefreshSelectedParts` |
 | `OrdersForm.cs` | Search/filter orders, view receipt, pay, advance, cancel | `LoadRows`, `PayButton_Click`, `AdvanceButton_Click`, `CancelButton_Click` |
 | `ReceiptForm.cs` | Display, save a text receipt, print it | Constructor with ID, `SaveButton_Click`, `PrintReceipt`, `PrintDocument_PrintPage` |
 | `InventoryForm.cs` | View on-hand/reserved/available stock; open editors/history | `LoadRows`, `EditClicked`, `AdjustStockClicked`, `HistoryClicked` |
@@ -412,7 +416,7 @@ Most editors have two constructors: a parameterless one for adding/designing, an
 
 `IsStaff` means exactly Staff. `IsAdmin` and `IsCustomer` also match only their own roles. Shared read access is explicit through `CanViewInventory` and `CanViewAllOrders`. The dashboard's enabled buttons communicate access, and business methods such as `RequireStaff`, `RequireCustomer` and `RequireAdmin` enforce changes again after loading the saved account. Admin does not inherit Staff/Customer actions. See [ROLES.md](ROLES.md) for assignment steps and the strict split approved for this revision.
 
-Privileged list screens call their `ValidateAccess` helper after refreshing saved data. If an account has lost access while its screen is open, the helper clears the displayed grid, disables actions, and raises a readable message. Orders refreshes payment/status button states from the current role. Report export reloads the report and checks access before saving, including the admin requirement for Sales.
+Privileged list screens call their `ValidateAccess` helper after refreshing saved data. If an account has lost access while its screen is open, the helper clears the displayed grid, disables actions, and raises a readable message. Orders refreshes action availability from the current role, selected order and status. Report export reloads the report and checks access before saving, including the admin requirement for Sales.
 
 ### Receipts and exports
 

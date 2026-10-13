@@ -172,8 +172,9 @@ public sealed partial class AppStore
         check.CommandText = "PRAGMA user_version";
         if (Convert.ToInt32(check.ExecuteScalar()) > 1) throw new InvalidOperationException("Install the newer CustomPC version before restoring this backup.");
         List<UserAccount> accounts = database.ReadRecords<UserAccount>(from, "Users");
-        if (!accounts.Any(u => u.Role == "Admin" && !u.Archived && ValidStoredHash(u.PasswordHash)))
-            throw new InvalidOperationException("The backup must contain an active administrator.");
+        if (!accounts.Any(u => u.Role == "Admin" && !u.Archived && ValidStoredHash(u.PasswordHash)
+            && (DemoMode || !VerifyPassword("CustomPC123!", u.PasswordHash))))
+            throw new InvalidOperationException("The backup must contain an active administrator with a personal password.");
         List<Part> parts = database.ReadRecords<Part>(from, "Parts");
         List<Supplier> suppliers = database.ReadRecords<Supplier>(from, "Suppliers");
         database.ReadRecords<CompatibilityRule>(from, "Rules");

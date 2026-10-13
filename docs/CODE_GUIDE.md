@@ -241,6 +241,8 @@ public int Stock { get; set; }
 
 `Name` stores text. `Price` stores a decimal number suitable for money. `Stock` stores a whole number. `{ get; set; }` permits code to read and assign the property. The empty string `""` is Name's starting value. `Part : DatabaseRecord` also gives the part an `Id`, used to identify the same record even if its name changes.
 
+Two more Part properties describe graphics support: `HasIntegratedGraphics` for a CPU and `HasVideoOutput` for a motherboard. Admin records these through the two checkboxes in the part editor after checking the actual specifications. Existing records default to false. `CheckBuild` permits omitting a dedicated GPU only when both properties are true. The receipt then contains six components, and only those six are reserved and deducted.
+
 Open `BuilderForm.cs` and find `UpdateBuildSummary`. Read this excerpt:
 
 ```csharp
@@ -361,7 +363,7 @@ Application.Run(new DashboardForm());
 
 `new LoginForm()` creates the login window. `ShowDialog()` displays it and waits for its result. `!=` means “is not equal to.” If login closes without an OK result, `return` ends `Main`, so the homepage is never created. Sign in and Browse as guest both return OK. Only then does `Application.Run(new DashboardForm())` create the homepage and keep the app running. The `using` block releases the login window's resources after it closes.
 
-When you click **Sign out / Switch account**, `DashboardForm.SignIn` hides the homepage and shows login. A successful sign-in or guest choice brings the homepage back with the new menu. Closing that login window ends the app.
+When you click **Sign out**, `DashboardForm.SignIn` hides the homepage and shows login. A successful sign-in or guest choice brings the homepage back with the new menu. Closing that login window ends the app.
 
 The `AppStore.*.cs` files use `partial` just like the form files: they are sections of **one class**, grouped by subject. `AppStore.Accounts.cs` is not a second store or a second database.
 

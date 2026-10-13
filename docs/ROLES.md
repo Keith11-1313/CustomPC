@@ -23,6 +23,8 @@ This is the strict split you approved. It replaces the proposal's broader permis
 
 Guests can register their own Customer account from login. Registration always assigns Customer; it cannot assign Admin or Staff. An existing order receipt can be viewed, saved or printed by its Customer owner or by Staff/Admin with read access. Reading a receipt does not confirm payment or change the order.
 
+A permitted action can still be disabled because of the selected record. On Orders, select a row first. Payment applies to an unexpired pending order; progress applies to a paid/in-progress order; cancellation applies to the Customer's own pending order. Completed/cancelled rows enable receipt viewing only. This differs from a prohibited action, which is hidden for that role.
+
 Automatic unpaid-order expiry is a system action. It runs on startup/refresh even when the current user cannot cancel orders manually.
 
 ## Assign a role in the app
@@ -30,7 +32,7 @@ Automatic unpaid-order expiry is a system action. It runs on startup/refresh eve
 1. Sign in with an Admin account. Open **User accounts**.
 2. Select an account and click **Edit account**, or use **Add account** for a new employee.
 3. Choose **Admin**, **Staff** or **Customer** in **Role**, then save.
-4. Use **Sign out / Switch account** and sign in as that user to check their workspace. An open screen also rechecks the saved role when loading or saving data.
+4. Use **Sign out** and sign in as that user to check their workspace. An open screen also rechecks the saved role when loading or saving data.
 5. Expect Staff to have stock adjustment and payment/progress actions. Expect Admin to have account, catalog and report actions, with order monitoring read-only.
 
 You cannot archive or demote your currently signed-in Admin account. Sign in as another active Admin if that account must be changed. Choosing Admin for a Staff account removes its Staff actions; a person who performs a different job must sign in with the appropriate account.
