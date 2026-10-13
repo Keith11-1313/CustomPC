@@ -171,7 +171,7 @@ public partial class InventoryForm : StoreWindow
         table.Columns.Add("Reserved", typeof(int));
         table.Columns.Add("Available", typeof(int));
         table.Columns.Add("Status");
-        table.Columns.Add("Supplier");
+
         table.Columns.Add("Archived", typeof(bool));
 
         foreach (Part part in store.Parts)
@@ -196,18 +196,8 @@ public partial class InventoryForm : StoreWindow
                 continue;
             }
 
-            string supplierName = "Unassigned";
-            foreach (Supplier supplier in store.Suppliers)
-            {
-                if (supplier.Id == part.SupplierId)
-                {
-                    supplierName = supplier.Name;
-                    break;
-                }
-            }
-
             table.Rows.Add(part.Id, part.Name, part.Category, Ui.Money(part.Price),
-                part.Stock, store.Reserved(part.Id), availableStock, stockStatus, supplierName, part.Archived);
+                part.Stock, store.Reserved(part.Id), availableStock, stockStatus, part.Archived);
         }
 
         Ui.Bind(grid, table);

@@ -1,4 +1,4 @@
-using Microsoft.Data.Sqlite;
+
 
 namespace CustomPC;
 
@@ -77,7 +77,7 @@ public sealed partial class AppStore
                 errors.Add("The motherboard needs a video output to use integrated graphics.");
         }
 
-        if (RuleIsEnabled("Socket") && cpu != null && motherboard != null)
+        if (cpu != null && motherboard != null)
         {
             bool matchingSockets = cpu.Socket.Equals(motherboard.Socket, StringComparison.OrdinalIgnoreCase);
             if (cpu.Socket.Length == 0 || !matchingSockets)
@@ -86,7 +86,7 @@ public sealed partial class AppStore
             }
         }
 
-        if (RuleIsEnabled("Memory") && ram != null && motherboard != null)
+        if (ram != null && motherboard != null)
         {
             bool matchingMemory = ram.MemoryType.Equals(motherboard.MemoryType, StringComparison.OrdinalIgnoreCase);
             if (ram.MemoryType.Length == 0 || !matchingMemory)
@@ -95,7 +95,7 @@ public sealed partial class AppStore
             }
         }
 
-        if (RuleIsEnabled("Power") && powerSupply != null)
+        if (powerSupply != null)
         {
             long requiredWatts = Math.Max(componentWatts + 100, selectedParts.Select(part => part.RecommendedPsuWatts).DefaultIfEmpty(0).Max());
             if (powerSupply.Watts <= 0 || powerSupply.Watts < requiredWatts)
@@ -107,61 +107,4 @@ public sealed partial class AppStore
         return errors;
     }
 
-    private bool RuleIsEnabled(string kind)
-    {
-        foreach (CompatibilityRule rule in Rules)
-        {
-            if (rule.Kind == kind && rule.Enabled)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public void SaveRule(CompatibilityRule rule)
-    {
-        using (SqliteConnection connection = database.OpenConnection())
-        using (SqliteTransaction transaction = connection.BeginTransaction())
-        {
-            try
-            {
-                LoadData(connection);
-                RequireAdmin();
-
-                bool supportedKind = rule.Kind == "Socket" || rule.Kind == "Memory" || rule.Kind == "Power";
-                if (string.IsNullOrWhiteSpace(rule.Name) || !supportedKind)
-                {
-                    throw new InvalidOperationException("Enter a rule name and supported rule type.");
-                }
-
-                CompatibilityRule? existingRule = null;
-                foreach (CompatibilityRule savedRule in Rules)
-                {
-                    if (savedRule.Id == rule.Id)
-                    {
-                        existingRule = savedRule;
-                    }
-                    else if (savedRule.Kind == rule.Kind)
-                    {
-                        throw new InvalidOperationException("Edit the existing rule of this type.");
-                    }
-                }
-
-                if (existingRule != null)
-                {
-                    Rules.Remove(existingRule);
-                }
-
-                Rules.Add(rule);
-                SaveData(connection, transaction);
-            }
-            catch
-            {
-                UndoFailedChange(connection, transaction);
-                throw;
-            }
-        }
-    }
 }

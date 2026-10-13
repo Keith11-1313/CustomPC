@@ -16,10 +16,9 @@ This is the strict split you approved. It replaces the proposal's broader permis
 | View inventory quantities | No | No | Yes | Yes |
 | Add/edit/archive catalog details and prices | No | No | No | Yes |
 | Change stock quantities with a reason | No | No | Yes | No |
-| Maintain suppliers and compatibility rules | No | No | No | Yes |
 | Create/edit/archive accounts and assign roles | No | No | No | Yes |
 | View/export inventory, orders, movements and sales reports | No | No | No | Yes |
-| Store details, audit history, manual backup/restore | No | No | No | Yes |
+| Audit history, manual backup/restore | No | No | No | Yes |
 
 Guests can register their own Customer account from login. Registration always assigns Customer; it cannot assign Admin or Staff. An existing order receipt can be viewed, saved or printed by its Customer owner or by Staff/Admin with read access. Reading a receipt does not confirm payment or change the order.
 
@@ -81,4 +80,7 @@ Finally open `OrdersForm.cs` and find `LoadRows`. `pay.Enabled = store.IsStaff` 
 
 Admin alone adds/changes products and their photographs, and sees confirmed-payment sales and top-selling-part quantities. Staff alone records real stock receipts and sees incoming-order counts, current work queue and stock readiness. Both can read current inventory and permitted order records. Customers and Guests cannot access operational charts. Chart drill-downs apply filters after permission checks and never expand access.
 
-The prepared products have zero stock. Admin reviews reference prices and supplier assignments; Staff receives actual deliveries. See [the catalog manifest](CATALOG_MANIFEST.md) and [modern code walkthrough](MODERN_UI_GUIDE.md).
+The prepared products have zero stock. Admin reviews reference prices ; Staff receives actual deliveries. See [the catalog manifest](CATALOG_MANIFEST.md) and [modern code walkthrough](MODERN_UI_GUIDE.md).
+Compatibility checks are mandatory application logic in AppStore.Compatibility.cs. There is no Admin rules page, rule editor, Rules table or toggle. Socket, memory, graphics output and PSU checks run during preview and checkout.
+
+Supplier management is removed: no supplier pages, part selector, inventory column, model association or Suppliers table. Existing product sources in the research manifest are documentation, not supplier records.

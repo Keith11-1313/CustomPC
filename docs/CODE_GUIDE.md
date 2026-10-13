@@ -223,7 +223,7 @@ Click Sign in → LoginButton_Click → AppStore.Login
 
 For a successful retry, use the administrator email/password you chose during store setup. In an explicit practice database, the demo Admin is `admin@custompc.local` with `CustomPC123!`. An edited account keeps its saved password.
 
-An account's **role** determines its permitted actions: Customer orders for themselves, Staff handles store operations such as payments and stock adjustments, and Admin also manages accounts, parts, suppliers, and rules. The reference has the full permissions table.
+An account's **role** determines its permitted actions: Customer orders for themselves, Staff handles store operations such as payments and stock adjustments, and Admin also manages accounts and parts. The reference has the full permissions table.
 
 **Checkpoint:** Which object checks the password: the login window or AppStore?
 
@@ -347,7 +347,7 @@ You can now follow one button at a time. Open its form, find the event connectio
 | Build errors | `BuilderForm.cs`: `UpdateBuildSummary` | `CheckBuild` in `AppStore.Compatibility.cs` |
 | Creating an order | `BuilderForm.cs`: `SubmitButton_Click` | `CreateOrder` in `AppStore.Orders.cs` |
 | Payment and assembly stages | `OrdersForm.cs`: `PayButton_Click`, `AdvanceButton_Click` | `ConfirmPayment`, `AdvanceOrder` in `AppStore.Orders.cs` |
-| Supplier, user, part, or rule edits | The corresponding edit form's `SaveClicked` | `SaveSupplier`, `SaveUser`, `SavePart`, or `SaveRule` |
+| User or part edits | The corresponding edit form's `SaveClicked` | `SaveUser` or `SavePart` |
 | Report totals | `ReportsForm.cs`: `LoadReport` | The selected report's loader in the same file |
 | Saved data returning after restart | `AppStore.cs`: `LoadData` | `ReadRecords` in `Database.cs` |
 
@@ -387,3 +387,7 @@ For any feature, answer these four questions before moving on:
 4. Does this action only change the screen, or does it save records?
 
 If you cannot answer one, return to that part of the flow. You do not need to memorize all 19 forms. The [reference](CODE_REFERENCE.md) provides their map, less common C# expressions, password hashing, database details, and the advanced manual validation checklist. The [store guide](STORE_GUIDE.md) explains setup, backups and daily operation.
+
+Compatibility checks are mandatory application logic in AppStore.Compatibility.cs. There is no Admin rules page, rule editor, Rules table or toggle. Socket, memory, graphics output and PSU checks run during preview and checkout.
+
+Supplier management is removed: no supplier pages, part selector, inventory column, model association or Suppliers table. Existing product sources in the research manifest are documentation, not supplier records.

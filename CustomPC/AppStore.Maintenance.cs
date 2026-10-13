@@ -28,13 +28,6 @@ public sealed partial class AppStore
             if (password.Length < 12 || password == "CustomPC123!")
                 throw new InvalidOperationException("Choose your own password with at least 12 characters.");
             Users.Add(new UserAccount { Name = adminName.Trim(), Email = email.Trim(), Role = "Admin", PasswordHash = HashPassword(password) });
-            if (Rules.Count == 0)
-            {
-                AddSampleRule("CPU / motherboard socket", "Socket");
-                AddSampleRule("RAM / motherboard memory", "Memory");
-                AddSampleRule("PSU capacity (+100 W)", "Power");
-            }
-
             SaveData(connection, transaction);
         }
         catch { UndoFailedChange(connection, transaction); throw; }
@@ -70,7 +63,6 @@ public sealed partial class AppStore
             {
                 "CompleteSetup" => "Store set up", "CreateSampleData" => "Demo data created",
                 "SaveUser" => "Account saved", "SavePart" => "Part saved",
-                "SaveSupplier" => "Supplier saved", "SaveRule" => "Compatibility rule saved",
                 "AdjustStock" => "Stock adjusted", "CreateOrder" => "Order confirmed",
                 "ConfirmPayment" => "Payment recorded", "AdvanceOrder" => "Order stage updated",
                 "CancelOrder" => "Order cancelled", "ExpireOrders" => "Unpaid orders expired",
@@ -150,8 +142,6 @@ public sealed partial class AppStore
             && (DemoMode || !VerifyPassword("CustomPC123!", u.PasswordHash))))
             throw new InvalidOperationException("The backup must contain an active administrator with a personal password.");
         List<Part> parts = database.ReadRecords<Part>(from, "Parts");
-        List<Supplier> suppliers = database.ReadRecords<Supplier>(from, "Suppliers");
-        database.ReadRecords<CompatibilityRule>(from, "Rules");
         List<PcBuild> builds = database.ReadRecords<PcBuild>(from, "Builds");
         List<CustomerOrder> orders = database.ReadRecords<CustomerOrder>(from, "Orders");
         List<Payment> payments = database.ReadRecords<Payment>(from, "Payments");
@@ -159,8 +149,8 @@ public sealed partial class AppStore
         bool invalid = accounts.Any(u => !MailAddress.TryCreate(u.Email, out _) || !Roles.Contains(u.Role) || !ValidStoredHash(u.PasswordHash))
             || parts.Any(p => p.Stock < 0 || p.Stock > MaximumStock || p.Price <= 0 || !Categories.Contains(p.Category)
                 || p.Watts < 0 || p.Watts > MaximumComponentWatts || p.RecommendedPsuWatts < 0 || p.RecommendedPsuWatts > MaximumComponentWatts
-                || p.LowStock < 0 || p.LowStock > MaximumStock || string.IsNullOrWhiteSpace(p.Name) || string.IsNullOrWhiteSpace(p.Brand) ||
-                (!string.IsNullOrEmpty(p.SupplierId) && !suppliers.Any(s => s.Id == p.SupplierId)))
+                || p.LowStock < 0 || p.LowStock > MaximumStock || string.IsNullOrWhiteSpace(p.Name) || string.IsNullOrWhiteSpace(p.Brand))
+
             || orders.Any(o => !accounts.Any(u => u.Id == o.CustomerId) || !builds.Any(b => b.Id == o.BuildId) ||
                 !Statuses.Contains(o.Status) || o.Lines == null || o.Lines.Any(l => l.Quantity <= 0 || l.Price <= 0 || !parts.Any(p => p.Id == l.PartId)))
             || payments.Any(p => p.Amount <= 0 || !orders.Any(o => o.Id == p.OrderId) || !accounts.Any(u => u.Id == p.StaffId))

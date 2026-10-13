@@ -46,7 +46,7 @@ Order actions start disabled until you select a row. A pending order enables Sta
 
 One automatic backup per date is created **before opening an existing database**, in `Database\Backups`. An app left open across days gets its next startup backup when restarted. Old backups are not silently deleted.
 
-At the end of each working day, sign in as Admin and select **Store tools & backups → Save backup**. Choose a new filename on an external drive. Expect the screen to show a verified-backup confirmation. Existing files are refused rather than overwritten. Keep the drive securely: backups contain customer records and password hashes. The app does not encrypt database or backup files; protect them through your Windows account and backup location.
+At the end of each working day, sign in as Admin and select **Activity & Backups → Save backup**. Choose a new filename on an external drive. Expect the screen to show a verified-backup confirmation. Existing files are refused rather than overwritten. Keep the drive securely: backups contain customer records and password hashes. The app does not encrypt database or backup files; protect them through your Windows account and backup location.
 
 To restore:
 
@@ -107,7 +107,7 @@ Sources: [Righteous font files and license](https://github.com/google/fonts/tree
 
 ## Modern catalog, charts and photos
 
-The prepared Database folder already contains 42 ordinary products with photos and zero stock. Review the [manifest](CATALOG_MANIFEST.md), prices and supplier assignments. Admin adds/edits products; Staff records actual receipts. The old accounts and orders were reset after a safety backup. Sign in as admin@gmail.com with password admin@gmail.com, then add your Staff and Customer accounts.
+The prepared Database folder already contains 42 ordinary products with photos and zero stock. Review the [manifest](CATALOG_MANIFEST.md), prices . Admin adds/edits products; Staff records actual receipts. The old accounts and orders were reset after a safety backup. Sign in as admin@gmail.com with password admin@gmail.com, then add your Staff and Customer accounts.
 
 Admin can Choose photo or Remove photo in the part editor. Choose JPG/PNG up to 15 MB; the app copies and normalizes it into ProductImages beside custompc.db. Deleting the original upload does not affect the saved photo. Removing the reference retains old copied files for recovery. Missing photos show a placeholder.
 
@@ -119,3 +119,7 @@ Separate forms are hosted inside one main window. Overview and Back return to th
 
 For the implementation, read [MODERN_UI_GUIDE.md](MODERN_UI_GUIDE.md). For current test evidence and manual checks, read [VALIDATION.md](VALIDATION.md).
 CustomPC branding is fixed. Setup and Store tools do not offer business-name, receipt-header or business-contact customization.
+
+Compatibility checks are mandatory application logic in AppStore.Compatibility.cs. There is no Admin rules page, rule editor, Rules table or toggle. Socket, memory, graphics output and PSU checks run during preview and checkout.
+
+Supplier management is removed: no supplier pages, part selector, inventory column, model association or Suppliers table. Existing product sources in the research manifest are documentation, not supplier records.

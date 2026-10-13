@@ -130,38 +130,6 @@ public sealed partial class AppStore
         if (part.Watts > MaximumComponentWatts || part.RecommendedPsuWatts > MaximumComponentWatts || part.LowStock > MaximumStock)
             throw new InvalidOperationException("Wattage must be at most 10,000 W, and the low-stock threshold at most 10,000,000 units.");
 
-        if (part.SupplierId.Length > 0)
-        {
-            bool allowedSupplierFound = false;
-            foreach (Supplier supplier in Suppliers)
-            {
-                if (supplier.Id != part.SupplierId)
-                {
-                    continue;
-                }
-
-                if (!supplier.Archived)
-                {
-                    allowedSupplierFound = true;
-                    break;
-                }
-
-                // Archiving a supplier must not erase historical component associations.
-                foreach (Part existingPart in Parts)
-                {
-                    if (existingPart.Id == part.Id && existingPart.SupplierId == supplier.Id)
-                    {
-                        allowedSupplierFound = true;
-                        break;
-                    }
-                }
-            }
-
-            if (!allowedSupplierFound)
-            {
-                throw new InvalidOperationException("Choose an active supplier.");
-            }
-        }
     }
 
     public void AdjustStock(string partId, int quantity, string reason)
@@ -214,38 +182,4 @@ public sealed partial class AppStore
         Movements.Add(movement);
     }
 
-    public void SaveSupplier(Supplier supplier)
-    {
-        using (SqliteConnection connection = database.OpenConnection())
-        using (SqliteTransaction transaction = connection.BeginTransaction())
-        {
-            try
-            {
-                LoadData(connection);
-                RequireAdmin();
-
-                if (string.IsNullOrWhiteSpace(supplier.Name) || string.IsNullOrWhiteSpace(supplier.Contact))
-                {
-                    throw new InvalidOperationException("Supplier name and contact are required.");
-                }
-
-                for (int index = 0; index < Suppliers.Count; index++)
-                {
-                    if (Suppliers[index].Id == supplier.Id)
-                    {
-                        Suppliers.RemoveAt(index);
-                        break;
-                    }
-                }
-
-                Suppliers.Add(supplier);
-                SaveData(connection, transaction);
-            }
-            catch
-            {
-                UndoFailedChange(connection, transaction);
-                throw;
-            }
-        }
-    }
 }

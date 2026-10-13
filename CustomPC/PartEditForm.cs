@@ -25,17 +25,6 @@ public partial class PartEditForm : StoreWindow
         category.SelectedIndexChanged += CategoryChanged;
         UpdateGraphicsFields();
 
-        List<Supplier> activeSuppliers = new List<Supplier>();
-        foreach (Supplier savedSupplier in AppStore.Current.Suppliers)
-        {
-            if (!savedSupplier.Archived)
-            {
-                activeSuppliers.Add(savedSupplier);
-            }
-        }
-        supplier.DataSource = activeSuppliers;
-        supplier.SelectedIndex = -1;
-
         low.Value = 3;
         save.Click += SaveClicked;
         choosePhoto.Click += ChoosePhoto_Click;
@@ -90,29 +79,6 @@ public partial class PartEditForm : StoreWindow
         low.Value = part.LowStock;
         archived.Checked = part.Archived;
 
-        List<Supplier> supplierChoices = new List<Supplier>();
-        foreach (Supplier savedSupplier in AppStore.Current.Suppliers)
-        {
-            if (!savedSupplier.Archived || savedSupplier.Id == part.SupplierId)
-            {
-                supplierChoices.Add(savedSupplier);
-            }
-        }
-
-        supplier.DataSource = supplierChoices;
-        supplier.SelectedIndex = -1;
-        foreach (Supplier savedSupplier in supplierChoices)
-        {
-            if (savedSupplier.Id == part.SupplierId)
-            {
-                supplier.SelectedItem = savedSupplier;
-                if (savedSupplier.Archived)
-                {
-                    supplierLabel.Text = "Supplier (current supplier is archived)";
-                }
-                break;
-            }
-        }
     }
 
     private void BackButton_Click(object? sender, EventArgs e)
@@ -176,11 +142,6 @@ public partial class PartEditForm : StoreWindow
             part.RecommendedPsuWatts = (int)recommendedPsu.Value;
             part.LowStock = (int)low.Value;
             part.Archived = archived.Checked;
-
-            if (supplier.SelectedItem is Supplier selectedSupplier)
-            {
-                part.SupplierId = selectedSupplier.Id;
-            }
 
             if (partId != null)
             {

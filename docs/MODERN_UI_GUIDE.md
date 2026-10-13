@@ -64,3 +64,7 @@ Read [CATALOG_MANIFEST.md](CATALOG_MANIFEST.md) and CATALOG_DATA.json for source
 
 The `AppStore.*` files are parts of one `partial` class. Read the form's click handler first, then the one store method it calls. You do not need to understand every helper before changing one screen.
 Management pages keep action buttons in actionRow, a FlowLayoutPanel in the Designer file. It docks at the bottom and wraps buttons. The table anchors on all sides and reserves space above actionRow. Edit this panel in View Designer instead of placing bottom buttons individually.
+
+Compatibility checks are mandatory application logic in AppStore.Compatibility.cs. There is no Admin rules page, rule editor, Rules table or toggle. Socket, memory, graphics output and PSU checks run during preview and checkout.
+
+Supplier management is removed: no supplier pages, part selector, inventory column, model association or Suppliers table. Existing product sources in the research manifest are documentation, not supplier records.

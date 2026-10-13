@@ -33,7 +33,6 @@ public class Part : DatabaseRecord
     public decimal Price { get; set; }
     public int Stock { get; set; }
     public int LowStock { get; set; } = 3;
-    public string SupplierId { get; set; } = "";
     public bool Archived { get; set; }
 
     // ComboBoxes in the PC builder display this text for each part.
@@ -41,27 +40,6 @@ public class Part : DatabaseRecord
     {
         return Name + "  |  PHP " + Price.ToString("N2");
     }
-}
-
-public class Supplier : DatabaseRecord
-{
-    public string Name { get; set; } = "";
-    public string Contact { get; set; } = "";
-    public string Email { get; set; } = "";
-    public string Address { get; set; } = "";
-    public bool Archived { get; set; }
-
-    public override string ToString()
-    {
-        return Name;
-    }
-}
-
-public class CompatibilityRule : DatabaseRecord
-{
-    public string Name { get; set; } = "";
-    public string Kind { get; set; } = "Socket";
-    public bool Enabled { get; set; } = true;
 }
 
 public class OrderLine

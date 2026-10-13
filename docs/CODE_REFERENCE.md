@@ -43,7 +43,7 @@ User clicks a control
 | `AppStore.cs` | Shared state, initialization, database loading/saving, access checks | `Current`, constructor, `Refresh`, `LoadData`, `SaveData`, `RequireAdmin`, `RequireStaff` |
 | `AppStore.Accounts.cs` | Accounts, session, password handling | `Login`, `Logout`, `SaveUser`, `HashPassword`, `VerifyPassword` |
 | `AppStore.Inventory.cs` | Parts, suppliers, stock | `Reserved`, `Available`, `StockState`, `SavePart`, `ValidatePart`, `AdjustStock`, `SaveSupplier` |
-| `AppStore.Compatibility.cs` | Build checks and configurable rules | `CheckBuild`, `RuleIsEnabled`, `SaveRule` |
+| `AppStore.Compatibility.cs` | Mandatory build checks | `CheckBuild` |
 | `AppStore.Orders.cs` | Order lifecycle, payment, cancellation | `CreateOrder`, `VisibleOrders`, `ExpireOrders`, `ConfirmPayment`, `AdvanceOrder`, `CancelOrder` |
 | `AppStore.SampleData.cs` | Initial demonstration records | `CreateSampleData`, `AddSamplePart`, `AddSampleRule` |
 
@@ -248,11 +248,11 @@ If saved prices have changed since the user chose the parts, `CreateOrder` rejec
 - If the memory rule is enabled, RAM and motherboard memory types must match and be specified.
 - If the power rule is enabled, the PSU capacity must cover the sum of the other components' stored wattages plus 100 W.
 
-Rule names are labels. Rule behavior comes from the hardcoded `Kind` checks in `CheckBuild`. Editing a name does not create a new algorithm. `RuleIsEnabled` controls whether a supported check runs.
+CheckBuild always checks socket, RAM type and PSU capacity. These checks are mandatory; no saved rule or Admin switch controls them.
 
 These checks cover saved socket, memory, and wattage fields. They do not automatically verify case clearance, BIOS support, physical dimensions, connectors, or every real-world compatibility issue. Staff must verify those details before assembly.
 
-Graphics output is an additional required check, independent of configurable socket/memory/power rules. `Part.HasIntegratedGraphics` applies to CPUs; `Part.HasVideoOutput` applies to motherboards. Admin records them in the component editor. Older JSON records load both as false. The GPU ComboBox contains a string for No dedicated GPU alongside Part objects; `GetSelectedParts` includes only objects that are Parts, so that placeholder adds no price, reservation or receipt line. For example, Intel desktop F models require a discrete GPU according to [Intel's documentation](https://www.intel.com/content/www/us/en/support/articles/000058487/processors.html); do not mark them as having integrated graphics.
+Graphics output is an additional required check, alongside mandatory socket/memory/power checks. `Part.HasIntegratedGraphics` applies to CPUs; `Part.HasVideoOutput` applies to motherboards. Admin records them in the component editor. Older JSON records load both as false. The GPU ComboBox contains a string for No dedicated GPU alongside Part objects; `GetSelectedParts` includes only objects that are Parts, so that placeholder adds no price, reservation or receipt line. For example, Intel desktop F models require a discrete GPU according to [Intel's documentation](https://www.intel.com/content/www/us/en/support/articles/000058487/processors.html); do not mark them as having integrated graphics.
 
 ## 9. Stock: on hand, reserved, available
 
@@ -383,12 +383,8 @@ Values use SQL parameters (`$id` and `$data`) rather than being placed directly 
 | `InventoryForm.cs` | View on-hand/reserved/available stock; open editors/history | `LoadRows`, `EditClicked`, `AdjustStockClicked`, `HistoryClicked` |
 | `PartEditForm.cs` | Add/edit catalog details and archive flag | Constructor with ID, `SaveClicked` -> `SavePart` |
 | `StockAdjustmentForm.cs` | Record a stock change with a reason | `SaveClicked` -> `AdjustStock` |
-| `SuppliersForm.cs` | Search suppliers and list their components | `LoadRows`, `EditClicked`, `SuppliedPartsClicked` |
-| `SupplierEditForm.cs` | Add/edit supplier contact and archive flag | Constructor with ID, `SaveClicked` -> `SaveSupplier` |
 | `UsersForm.cs` | Search active/archived user accounts | `LoadRows`, `AddClicked`, `EditClicked` |
 | `UserEditForm.cs` | Add/edit account, role, password, archive flag | Constructor with ID, `SaveClicked` -> `SaveUser` |
-| `CompatibilityForm.cs` | View and select the supported rules | `LoadRows`, `EditClicked` |
-| `RuleEditForm.cs` | Edit name/kind/enabled flag | Constructor with ID, `SaveClicked` -> `SaveRule` |
 | `ReportsForm.cs` | Admin-only inventory, orders, movements and sales reports; CSV export | `LoadReport`, report-specific loaders, `IsWithinDateRange`, `ExportClicked` |
 
 Most list screens build a `DataTable` with columns meant for display, loop over models, add rows, and call `Ui.Bind`. The table is a screen representation, not another SQLite database. The hidden `Id` column lets a selected display row identify the correct saved record. `Ui.RequireSelection` reports an error when no row is selected.
@@ -410,7 +406,6 @@ Most editors have two constructors: a parameterless one for adding/designing, an
 | View inventory | No | No | Yes | Yes |
 | Adjust stock | No | No | Yes | No |
 | Add/edit part catalog details | No | No | No | Yes |
-| Manage suppliers, users, compatibility rules | No | No | No | Yes |
 | Inventory/orders/movements reports | No | No | No | Yes |
 | Sales report | No | No | No | Yes |
 
@@ -459,11 +454,11 @@ This is a checklist with expected behavior, **not a claim that these steps have 
 4. Register a new customer. Try mismatched passwords and a duplicate email before using valid details. Sign in with the newly created account, close/reopen the app, and sign in again to verify persistence.
 5. Choose Ryzen 5 5600 with B550M motherboard and DDR4 RAM, plus GPU, storage, the 650 W PSU, and case. Check total and compatibility messages. Change to the Intel CPU while retaining the AM4 motherboard; submit must become unavailable with a socket message. Try DDR5 RAM with the DDR4 motherboard for a memory message.
 6. Submit a valid order, retain its number, and save the receipt. Verify Pending Payment, seven order lines, correct total, and a 24-hour deadline. In inventory, reserved increases while on hand stays unchanged.
-7. Sign in as another customer. The first customer's order and receipt must not be visible. Sign in as staff: all orders should be visible, payment/status actions should be available, and admin-only account/supplier/rule management should remain unavailable.
+7. Sign in as another customer. The first customer's order and receipt must not be visible. Sign in as staff: all orders should be visible, payment/status actions should be available, and admin-only account/account management should remain unavailable.
 8. As staff, confirm payment once. Verify one full-amount payment and Paid status. Advance through Processing, Assembly, Ready for Pickup, and Completed. At completion, each component's on hand and reserved count drops by one, with a recorded negative movement. Repeating completion must be rejected.
 9. Sign in as Customer, create another pending order and cancel it. Verify the reservation is released without decreasing on-hand stock. Paid orders must reject cancellation. Staff and Admin must be denied manual cancellation and order creation.
 10. Sign in as Staff and test stock adjustment on a demonstration part: positive adjustment with a reason, zero adjustment, blank reason, and an attempt to reduce stock below reservations. Only valid adjustments should persist. Sign in as Admin to inspect the stock movements report. Admin must be denied stock adjustments, including a changed quantity sent through catalog saving.
-11. As admin, edit a demonstration part, supplier, account, and rule. Try invalid input and cancel an editor before saving. Reopen the screen/application to check that saved changes persist and cancelled edits do not.
+11. As admin, edit a demonstration part and account. Try invalid input and cancel an editor before saving. Reopen the screen/application to check that saved changes persist and cancelled edits do not.
 12. As Admin, open reports with a known date range. Compare inventory, order, movement, and sales summaries to the underlying test records. Export CSV and inspect it in a text editor or spreadsheet. Staff/Customer must be denied these reports. Save a receipt and inspect its lines. Test printing only with an available printer or a chosen PDF printer.
 13. Check deadline cancellation with an isolated test database and a deliberately expired pending test order. Opening/refreshing the app must mark it Cancelled and release its reservations. Normal testing does not require waiting 24 hours or editing real orders.
 
@@ -478,3 +473,7 @@ You can use this explanation in your own words:
 For a concrete demonstration, explain `StockAdjustmentForm.SaveClicked` and `AppStore.AdjustStock` together, then show the resulting movement entry. For the main feature, explain `BuilderForm.SubmitButton_Click` -> `CreateOrder` -> `SaveData`. Those two paths illustrate most of the project's structure.
 
 CustomPC branding is fixed. Setup and Store tools do not offer business-name, receipt-header or business-contact customization.
+
+Compatibility checks are mandatory application logic in AppStore.Compatibility.cs. There is no Admin rules page, rule editor, Rules table or toggle. Socket, memory, graphics output and PSU checks run during preview and checkout.
+
+Supplier management is removed: no supplier pages, part selector, inventory column, model association or Suppliers table. Existing product sources in the research manifest are documentation, not supplier records.

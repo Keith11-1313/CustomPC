@@ -42,9 +42,9 @@ public partial class DashboardForm : StoreWindow
         builder.Click += BuilderButton_Click;
         orders.Click += OrdersButton_Click;
         inventory.Click += InventoryButton_Click;
-        suppliers.Click += SuppliersButton_Click;
+
         users.Click += UsersButton_Click;
-        rules.Click += RulesButton_Click;
+
         reports.Click += ReportsButton_Click;
         tools.Click += ToolsButton_Click;
         recent.CellDoubleClick += RecentOrder_DoubleClick;
@@ -74,19 +74,9 @@ public partial class DashboardForm : StoreWindow
         OpenScreen("Inventory");
     }
 
-    private void SuppliersButton_Click(object? sender, EventArgs e)
-    {
-        OpenScreen("Suppliers");
-    }
-
     private void UsersButton_Click(object? sender, EventArgs e)
     {
         OpenScreen("Users");
-    }
-
-    private void RulesButton_Click(object? sender, EventArgs e)
-    {
-        OpenScreen("Compatibility");
     }
 
     private void ReportsButton_Click(object? sender, EventArgs e)
@@ -193,14 +183,8 @@ public partial class DashboardForm : StoreWindow
                 case "Inventory":
                     form = inventoryFilter == null ? new InventoryForm() : new InventoryForm(inventoryFilter);
                     break;
-                case "Suppliers":
-                    form = new SuppliersForm();
-                    break;
                 case "Users":
                     form = new UsersForm();
-                    break;
-                case "Compatibility":
-                    form = new CompatibilityForm();
                     break;
                 case "Reports":
                     form = new ReportsForm();
@@ -353,9 +337,9 @@ public partial class DashboardForm : StoreWindow
 
         inventory.Enabled = store.CanViewInventory;
         reports.Enabled = store.IsAdmin;
-        suppliers.Enabled = store.IsAdmin;
+
         users.Enabled = store.IsAdmin;
-        rules.Enabled = store.IsAdmin;
+
         tools.Enabled = store.IsAdmin;
         orders.Enabled = store.CanViewAllOrders || store.IsCustomer;
         builder.Enabled = store.IsCustomer || store.Session == null;
@@ -416,7 +400,7 @@ public partial class DashboardForm : StoreWindow
             statSalesCaption.Text = store.IsAdmin ? "Recorded sales (PHP)" : "Ready for pickup";
 
             guide.Text = store.IsAdmin
-                ? "Manage accounts and assign roles in User accounts.\n\nMaintain parts, suppliers and rules.\n\nMonitor orders and reports."
+                ? "Manage accounts and assign roles in User accounts.\n\nMaintain parts.\n\nMonitor orders and reports."
                 : "Confirm payment after receiving it at the store.\n\nUpdate assembly and pickup in Orders.\n\nAdjust stock in Inventory.";
         }
         else
@@ -544,8 +528,8 @@ public partial class DashboardForm : StoreWindow
     private void StyleMenu(string screen)
     {
         var menu = new Dictionary<Button, string> { [home] = "Overview", [catalog] = "Catalog", [builder] = "Builder",
-            [orders] = "Orders", [inventory] = "Inventory", [suppliers] = "Suppliers", [users] = "Users",
-            [rules] = "Compatibility", [reports] = "Reports", [tools] = "Store tools" };
+            [orders] = "Orders", [inventory] = "Inventory", [users] = "Users",
+            [reports] = "Reports", [tools] = "Store tools" };
         foreach (var item in menu)
         {
             bool selected = item.Value == screen;
@@ -563,7 +547,7 @@ public partial class DashboardForm : StoreWindow
         int nextTop = catalog.Top;
         int left = catalog.Left;
         int spacing = catalog.Height + 6;
-        Button[] menu = { catalog, builder, orders, inventory, suppliers, users, rules, reports, tools };
+        Button[] menu = { catalog, builder, orders, inventory, users, reports, tools };
         foreach (Button button in menu)
         {
             button.Visible = button.Enabled;

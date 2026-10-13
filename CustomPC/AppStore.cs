@@ -44,8 +44,6 @@ public sealed partial class AppStore
 
     public List<UserAccount> Users { get; private set; } = new List<UserAccount>();
     public List<Part> Parts { get; private set; } = new List<Part>();
-    public List<Supplier> Suppliers { get; private set; } = new List<Supplier>();
-    public List<CompatibilityRule> Rules { get; private set; } = new List<CompatibilityRule>();
     public List<PcBuild> Builds { get; private set; } = new List<PcBuild>();
     public List<CustomerOrder> Orders { get; private set; } = new List<CustomerOrder>();
     public List<Payment> Payments { get; private set; } = new List<Payment>();
@@ -114,8 +112,6 @@ public sealed partial class AppStore
         // Forms use these typed lists instead of writing SQL themselves.
         Users = database.ReadRecords<UserAccount>(connection, "Users");
         Parts = database.ReadRecords<Part>(connection, "Parts");
-        Suppliers = database.ReadRecords<Supplier>(connection, "Suppliers");
-        Rules = database.ReadRecords<CompatibilityRule>(connection, "Rules");
         Builds = database.ReadRecords<PcBuild>(connection, "Builds");
         Orders = database.ReadRecords<CustomerOrder>(connection, "Orders");
         Payments = database.ReadRecords<Payment>(connection, "Payments");
@@ -145,8 +141,6 @@ public sealed partial class AppStore
         database.ChangedRecords.Clear();
         int changed = database.WriteRecords(connection, transaction, "Users", Users);
         changed += database.WriteRecords(connection, transaction, "Parts", Parts);
-        changed += database.WriteRecords(connection, transaction, "Suppliers", Suppliers);
-        changed += database.WriteRecords(connection, transaction, "Rules", Rules);
         changed += database.WriteRecords(connection, transaction, "Builds", Builds);
         changed += database.WriteRecords(connection, transaction, "Orders", Orders);
         changed += database.WriteRecords(connection, transaction, "Payments", Payments);
@@ -161,7 +155,6 @@ public sealed partial class AppStore
                     "Orders" => "Order " + Orders.Find(x => x.Id == record.Id)?.Number,
                     "Parts" => "Part " + Parts.Find(x => x.Id == record.Id)?.Name,
                     "Users" => "Account " + Users.Find(x => x.Id == record.Id)?.Name,
-                    "Suppliers" => "Supplier " + Suppliers.Find(x => x.Id == record.Id)?.Name,
                     _ => record.Table + " " + record.Id[..Math.Min(8, record.Id.Length)]
                 };
                 details.Add(description);

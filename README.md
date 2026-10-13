@@ -12,7 +12,7 @@ The prepared database contains 42 ordinary product records and 42 local images, 
 
 Admin has payment-sales, top-parts and inventory charts. Staff has incoming-order, current-work-queue and stock-readiness charts. Date charts offer 7/30/90 days; queue and inventory stay current snapshots. Chart selection lists and labelled buttons open filtered pages.
 
-After setup, login appears first. Sign in or choose **Browse as guest** to open the homepage. Closing login exits the app. **Back** or **Esc** returns without saving unfinished editor inputs. Admins have **Store tools & backups** for verified backups, recovery and activity history.
+After setup, login appears first. Sign in or choose **Browse as guest** to open the homepage. Closing login exits the app. **Back** or **Esc** returns without saving unfinished editor inputs. Admins have **Activity & Backups** for verified backups, recovery and activity history.
 
 The Guest homepage offers **Sign in**. Guests first choose a valid build, then click **Confirm build & order** to open login. Customer login continues that same checkout using the selected parts; after the normal order confirmation, the build and linked order are saved to that Customer account and its receipt opens. No second click on the checkout button is required. Cancelling login keeps the preview; Admin/Staff login returns to their dashboard. Cancelling Sign in from the Guest homepage returns there.
 
@@ -53,7 +53,7 @@ These files belong to the same form. Use the visual Designer to change its layou
 | `LoginForm.cs`, `RegisterForm.cs` | Sign-in, registration, and guest access. |
 | `CatalogForm.cs`, `BuilderForm.cs` | Browse parts, choose components, check compatibility, and create an order. |
 | `OrdersForm.cs`, `ReceiptForm.cs` | Track orders, confirm store payment, update status, and print receipts. |
-| Inventory, supplier, user, compatibility, and report forms | Staff and admin screens. Each screen keeps its own event handlers. |
+| Inventory, user and report forms | Staff and admin screens. Each screen keeps its own event handlers. |
 | `Models.cs` | Record classes such as `Part`, `UserAccount`, and `CustomerOrder`. |
 | `AppStore.cs` | Shared records, the signed-in user, loading, and saving. |
 | `AppStore.Accounts.cs` | Account validation, roles, and passwords. |
@@ -111,3 +111,7 @@ Each table has `Id` and `Data` columns. `Data` contains the record's fields as J
 Orders have a 24-hour payment deadline. The desktop app cancels expired unpaid orders during refresh and while its timer is running. If the app is closed, cancellation happens when it next opens. Store payment and pickup are recorded by staff.
 
 CustomPC branding is fixed. Setup and Store tools do not offer business-name, receipt-header or business-contact customization.
+
+Compatibility checks are mandatory application logic in AppStore.Compatibility.cs. There is no Admin rules page, rule editor, Rules table or toggle. Socket, memory, graphics output and PSU checks run during preview and checkout.
+
+Supplier management is removed: no supplier pages, part selector, inventory column, model association or Suppliers table. Existing product sources in the research manifest are documentation, not supplier records.

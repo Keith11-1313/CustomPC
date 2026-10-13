@@ -27,7 +27,7 @@ partial class StoreToolsForm
         heading.Location = new Point(32, 24);
         heading.Size = new Size(890, 40);
         heading.TabIndex = 1;
-        heading.Text = "Store tools & backups";
+        heading.Text = "Activity & Backups";
         heading.Font = new Font("Righteous", 22F, FontStyle.Regular);
         heading.ForeColor = Color.FromArgb(32, 41, 35);
         heading.BackColor = Color.White;
@@ -178,7 +178,7 @@ partial class StoreToolsForm
         ClientSize = new Size(1100, 688);
         MinimumSize = new Size(1116, 727);
         StartPosition = FormStartPosition.CenterScreen;
-        Text = "CustomPC | Store tools & backups";
+        Text = "CustomPC | Activity & Backups";
         Name = "StoreToolsForm";
         headerSurface.SendToBack();
         headerSurface.Controls.Add(back);

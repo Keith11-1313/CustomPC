@@ -10,7 +10,7 @@ internal class Database
     private readonly string databasePath;
     private readonly string[] tableNames =
     {
-        "Users", "Parts", "Suppliers", "Rules", "Builds", "Orders", "Payments", "Movements"
+        "Users", "Parts", "Builds", "Orders", "Payments", "Movements"
     };
 
     public Database(string path)
@@ -53,6 +53,8 @@ internal class Database
             using SqliteCommand support = connection.CreateCommand();
             support.Transaction = transaction;
             support.CommandText = """
+                DROP TABLE IF EXISTS Rules;
+                DROP TABLE IF EXISTS Suppliers;
                 CREATE TABLE IF NOT EXISTS AuditLog (Id INTEGER PRIMARY KEY AUTOINCREMENT, CreatedUtc TEXT NOT NULL,
                     ActorId TEXT NOT NULL, Action TEXT NOT NULL, Details TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS LoginAttempts (Key TEXT PRIMARY KEY, Failures INTEGER NOT NULL, LockedUntilUtc TEXT NOT NULL);
