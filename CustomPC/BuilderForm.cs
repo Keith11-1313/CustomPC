@@ -3,6 +3,25 @@ namespace CustomPC;
 public partial class BuilderForm : StoreWindow
 {
     private ComboBox[] partSelectors = Array.Empty<ComboBox>();
+    private BuildDraft draft = new();
+    private bool restoringDraft;
+
+    public BuilderForm(BuildDraft sharedDraft) : this()
+    {
+        draft = sharedDraft;
+        RestoreDraft();
+    }
+
+    private void RestoreDraft()
+    {
+        restoringDraft = true;
+        for (int i = 0; i < partSelectors.Length; i++)
+            foreach (object item in partSelectors[i].Items)
+                if (item is Part part && part.Id == draft.SelectedId(AppStore.Categories[i]))
+                    partSelectors[i].SelectedItem = part;
+        restoringDraft = false;
+        UpdateBuildSummary();
+    }
 
     public BuilderForm()
     {
@@ -77,6 +96,8 @@ public partial class BuilderForm : StoreWindow
 
     private void PartSelectionChanged(object? sender, EventArgs e)
     {
+        if (!restoringDraft) for (int i = 0; i < partSelectors.Length; i++)
+            draft.Select(AppStore.Categories[i], (partSelectors[i].SelectedItem as Part)?.Id);
         UpdateBuildSummary();
     }
 
@@ -85,6 +106,13 @@ public partial class BuilderForm : StoreWindow
         AppStore store = AppStore.Current;
         List<Part> selectedParts = GetSelectedParts();
         List<string> errors = store.CheckBuild(selectedParts);
+        ProductThumbnail[] photos = { photo0, photo1, photo2, photo3, photo4, photo5, photo6 };
+        for (int i = 0; i < partSelectors.Length; i++)
+            photos[i].Display(partSelectors[i].SelectedItem as Part, store.DatabasePath);
+        if (part3.SelectedItem is string) photo3.PlaceholderText = "Integrated graphics";
+        for (int i = 0; i < partSelectors.Length; i++)
+            if (AppStore.Categories[i] != "GPU" && partSelectors[i].Items.Count == 0)
+                errors.Add("No available " + AppStore.Categories[i] + " products. The store must receive stock before checkout.");
         decimal buildTotal = 0;
 
         foreach (Part part in selectedParts)
@@ -96,7 +124,7 @@ public partial class BuilderForm : StoreWindow
 
         if (errors.Count == 0)
         {
-            validation.Text = "Compatibility checks passed.\nReview your selection before confirming.";
+            validation.Text = "Socket, memory and power checks passed.\nReview your selection before confirming. Staff will review physical fit and BIOS support.";
             validation.ForeColor = Color.FromArgb(15, 98, 84);
         }
         else
@@ -124,7 +152,7 @@ public partial class BuilderForm : StoreWindow
             if (store.Session == null)
             {
                 SignInFromBuilder();
-                if (!store.IsCustomer) return;
+                if (IsDisposed || !store.IsCustomer) return;
                 if (store.CheckBuild(GetSelectedParts()).Count > 0) return;
                 // Continue this checkout with the retained parts and the newly signed-in owner.
             }
@@ -156,12 +184,14 @@ public partial class BuilderForm : StoreWindow
 
             // Ownership comes from the signed-in account, never a dropdown or typed customer ID.
             CustomerOrder newOrder = store.CreateOrder(selectedPartIds, store.Session!.Id, confirmedTotal);
+            draft.Clear();
             using (ReceiptForm receiptForm = new ReceiptForm(newOrder.Id))
             {
                 receiptForm.ShowDialog(this);
             }
 
             DialogResult = DialogResult.OK;
+            if (!TopLevel) Close();
         }
         catch (Exception exception)
         {
@@ -179,10 +209,14 @@ public partial class BuilderForm : StoreWindow
 
     private void SignInFromBuilder()
     {
-        Form? dashboard = Owner;
+        Form? dashboard = TopLevel ? Owner : Parent?.FindForm();
         bool dashboardWasVisible = dashboard != null && dashboard.Visible;
         Hide();
-        if (dashboardWasVisible) dashboard!.Hide();
+        if (dashboardWasVisible)
+        {
+            if (dashboard is DashboardForm main) main.PauseForCheckoutLogin();
+            else dashboard!.Hide();
+        }
         try
         {
             using LoginForm loginForm = new LoginForm();
@@ -190,10 +224,15 @@ public partial class BuilderForm : StoreWindow
         }
         finally
         {
-            if (dashboardWasVisible && !dashboard!.IsDisposed) dashboard.Show();
-            Show();
+            if (dashboardWasVisible && !dashboard!.IsDisposed)
+            {
+                if (dashboard is DashboardForm main) main.ResumeAfterCheckoutLogin();
+                else dashboard.Show();
+            }
+            if (!IsDisposed) Show();
         }
 
+        if (IsDisposed) return;
         AppStore.Current.Refresh();
         if (AppStore.Current.Session != null && !AppStore.Current.IsCustomer)
         {

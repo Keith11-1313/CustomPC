@@ -50,60 +50,9 @@ partial class StoreToolsForm
         back.Cursor = Cursors.Hand;
         back.UseMnemonic = false;
         Controls.Add(back);
-        storeNameLabel = new Label();
-        storeNameLabel.Name = "storeNameLabel";
-        storeNameLabel.Location = new Point(32, 100);
-        storeNameLabel.Size = new Size(460, 24);
-        storeNameLabel.TabIndex = 4;
-        storeNameLabel.Text = "Store name on receipts";
-        storeNameLabel.Font = new Font("Roboto", 10F, FontStyle.Bold);
-        storeNameLabel.ForeColor = Color.FromArgb(32, 41, 35);
-        storeNameLabel.UseMnemonic = false;
-        Controls.Add(storeNameLabel);
-        storeName = new TextBox();
-        storeName.Name = "storeName";
-        storeName.Location = new Point(32, 128);
-        storeName.Size = new Size(460, 30);
-        storeName.TabIndex = 5;
-        storeName.MaxLength = 200;
-        Controls.Add(storeName);
-        contactLabel = new Label();
-        contactLabel.Name = "contactLabel";
-        contactLabel.Location = new Point(518, 100);
-        contactLabel.Size = new Size(550, 24);
-        contactLabel.TabIndex = 6;
-        contactLabel.Text = "Address / contact on receipts";
-        contactLabel.Font = new Font("Roboto", 10F, FontStyle.Bold);
-        contactLabel.ForeColor = Color.FromArgb(32, 41, 35);
-        contactLabel.UseMnemonic = false;
-        Controls.Add(contactLabel);
-        contact = new TextBox();
-        contact.Name = "contact";
-        contact.Location = new Point(518, 128);
-        contact.Size = new Size(550, 30);
-        contact.TabIndex = 7;
-        contact.MaxLength = 200;
-        Controls.Add(contact);
-        save = new Button();
-        save.Name = "save";
-        save.Location = new Point(32, 179);
-        save.Size = new Size(220, 44);
-        save.TabIndex = 8;
-        save.Text = "Save store details";
-        save.Font = new Font("Roboto", 10F, FontStyle.Bold);
-        save.ForeColor = Color.FromArgb(32, 41, 35);
-        save.BackColor = Color.FromArgb(84, 177, 55);
-        save.FlatStyle = FlatStyle.Flat;
-        save.FlatAppearance.BorderSize = 0;
-        save.FlatAppearance.BorderColor = Color.FromArgb(112, 133, 107);
-        save.FlatAppearance.MouseOverBackColor = Color.FromArgb(123, 195, 92);
-        save.FlatAppearance.MouseDownBackColor = Color.FromArgb(102, 184, 71);
-        save.Cursor = Cursors.Hand;
-        save.UseMnemonic = false;
-        Controls.Add(save);
         backup = new Button();
         backup.Name = "backup";
-        backup.Location = new Point(274, 179);
+        backup.Location = new Point(32, 127);
         backup.Size = new Size(220, 44);
         backup.TabIndex = 9;
         backup.Text = "Save backup";
@@ -120,7 +69,7 @@ partial class StoreToolsForm
         Controls.Add(backup);
         adminPasswordLabel = new Label();
         adminPasswordLabel.Name = "adminPasswordLabel";
-        adminPasswordLabel.Location = new Point(518, 172);
+        adminPasswordLabel.Location = new Point(300, 100);
         adminPasswordLabel.Size = new Size(302, 24);
         adminPasswordLabel.TabIndex = 10;
         adminPasswordLabel.Text = "Your password to restore";
@@ -130,7 +79,7 @@ partial class StoreToolsForm
         Controls.Add(adminPasswordLabel);
         adminPassword = new TextBox();
         adminPassword.Name = "adminPassword";
-        adminPassword.Location = new Point(518, 200);
+        adminPassword.Location = new Point(300, 128);
         adminPassword.Size = new Size(302, 30);
         adminPassword.TabIndex = 11;
         adminPassword.MaxLength = 128;
@@ -138,7 +87,7 @@ partial class StoreToolsForm
         Controls.Add(adminPassword);
         restore = new Button();
         restore.Name = "restore";
-        restore.Location = new Point(842, 199);
+        restore.Location = new Point(650, 127);
         restore.Size = new Size(226, 44);
         restore.TabIndex = 12;
         restore.Text = "Restore backup";
@@ -155,7 +104,7 @@ partial class StoreToolsForm
         Controls.Add(restore);
         health = new Label();
         health.Name = "health";
-        health.Location = new Point(32, 263);
+        health.Location = new Point(32, 195);
         health.Size = new Size(1036, 54);
         health.TabIndex = 13;
         health.Text = "Account and recovery check";
@@ -165,7 +114,7 @@ partial class StoreToolsForm
         Controls.Add(health);
         historyTitle = new Label();
         historyTitle.Name = "historyTitle";
-        historyTitle.Location = new Point(32, 331);
+        historyTitle.Location = new Point(32, 263);
         historyTitle.Size = new Size(790, 30);
         historyTitle.TabIndex = 14;
         historyTitle.Text = "Activity history";
@@ -175,7 +124,7 @@ partial class StoreToolsForm
         Controls.Add(historyTitle);
         refresh = new Button();
         refresh.Name = "refresh";
-        refresh.Location = new Point(848, 327);
+        refresh.Location = new Point(848, 259);
         refresh.Size = new Size(220, 40);
         refresh.TabIndex = 15;
         refresh.Text = "Refresh activity";
@@ -192,7 +141,7 @@ partial class StoreToolsForm
         Controls.Add(refresh);
         grid = new DataGridView();
         grid.Name = "grid";
-        grid.Location = new Point(32, 383);
+        grid.Location = new Point(32, 315);
         grid.Size = new Size(1036, 202);
         grid.TabIndex = 16;
         grid.BackColor = Color.White;
@@ -221,24 +170,6 @@ partial class StoreToolsForm
         grid.RowTemplate.Height = 42;
         grid.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(248, 251, 246);
         Controls.Add(grid);
-        locationLabel = new Label();
-        locationLabel.Name = "locationLabel";
-        locationLabel.Location = new Point(32, 606);
-        locationLabel.Size = new Size(1000, 23);
-        locationLabel.TabIndex = 17;
-        locationLabel.Text = "Current database";
-        locationLabel.Font = new Font("Roboto", 9.5F, FontStyle.Bold);
-        locationLabel.ForeColor = Color.FromArgb(76, 92, 78);
-        locationLabel.UseMnemonic = false;
-        Controls.Add(locationLabel);
-        databaseLocation = new TextBox();
-        databaseLocation.Name = "databaseLocation";
-        databaseLocation.Location = new Point(32, 631);
-        databaseLocation.Size = new Size(1036, 28);
-        databaseLocation.TabIndex = 18;
-        databaseLocation.ReadOnly = true;
-        databaseLocation.BorderStyle = BorderStyle.None;
-        Controls.Add(databaseLocation);
         AutoScaleDimensions = new SizeF(7F, 17F);
         AutoScaleMode = AutoScaleMode.Font;
         Font = new Font("Roboto", 10F);
@@ -261,11 +192,11 @@ partial class StoreToolsForm
     private Panel headerSurface = null!;
     private Label heading = null!;
     private Button back = null!;
-    private Label storeNameLabel = null!;
-    private TextBox storeName = null!;
-    private Label contactLabel = null!;
-    private TextBox contact = null!;
-    private Button save = null!;
+
+
+
+
+
     private Button backup = null!;
     private Label adminPasswordLabel = null!;
     private TextBox adminPassword = null!;
@@ -274,6 +205,6 @@ partial class StoreToolsForm
     private Label historyTitle = null!;
     private Button refresh = null!;
     private DataGridView grid = null!;
-    private Label locationLabel = null!;
-    private TextBox databaseLocation = null!;
+
+
 }

@@ -5,6 +5,7 @@ namespace CustomPC;
 public sealed partial class AppStore
 {
     public const int MaximumStock = 10000000;
+    public const int MaximumComponentWatts = 10000;
     public int Reserved(string partId)
     {
         int reservedQuantity = 0;
@@ -41,7 +42,7 @@ public sealed partial class AppStore
     {
         int availableQuantity = Available(part);
 
-        if (availableQuantity == 0)
+        if (availableQuantity <= 0)
         {
             return "Out of stock";
         }
@@ -101,6 +102,7 @@ public sealed partial class AppStore
 
     private void ValidatePart(Part part)
     {
+        if (part.PhotoFileName.Length > 0) ProductPhotos.Resolve(DatabasePath, part.PhotoFileName);
         if (string.IsNullOrWhiteSpace(part.Name) || string.IsNullOrWhiteSpace(part.Brand))
         {
             throw new InvalidOperationException("Enter a component name and brand.");
@@ -121,10 +123,12 @@ public sealed partial class AppStore
             throw new InvalidOperationException("Stock cannot exceed 10,000,000 units.");
         }
 
-        if (part.LowStock < 0 || part.Watts < 0)
+        if (part.LowStock < 0 || part.Watts < 0 || part.RecommendedPsuWatts < 0)
         {
             throw new InvalidOperationException("Low-stock threshold and wattage cannot be negative.");
         }
+        if (part.Watts > MaximumComponentWatts || part.RecommendedPsuWatts > MaximumComponentWatts || part.LowStock > MaximumStock)
+            throw new InvalidOperationException("Wattage must be at most 10,000 W, and the low-stock threshold at most 10,000,000 units.");
 
         if (part.SupplierId.Length > 0)
         {

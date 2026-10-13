@@ -75,3 +75,10 @@ Finally open `OrdersForm.cs` and find `LoadRows`. `pay.Enabled = store.IsStaff` 
 **Checkpoint:** Would making the Admin's payment button visible grant permission to pay?
 
 **Answer:** No. `ConfirmPayment` still calls `RequireStaff`, so Admin is rejected and no payment is saved.
+
+
+## Modern dashboards and photographs
+
+Admin alone adds/changes products and their photographs, and sees confirmed-payment sales and top-selling-part quantities. Staff alone records real stock receipts and sees incoming-order counts, current work queue and stock readiness. Both can read current inventory and permitted order records. Customers and Guests cannot access operational charts. Chart drill-downs apply filters after permission checks and never expand access.
+
+The prepared products have zero stock. Admin reviews reference prices and supplier assignments; Staff receives actual deliveries. See [the catalog manifest](CATALOG_MANIFEST.md) and [modern code walkthrough](MODERN_UI_GUIDE.md).

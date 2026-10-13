@@ -181,9 +181,22 @@ partial class ReportsForm
         headerSurface.Controls.Add(heading);
         heading.Location = new Point(32, 24);
         CancelButton = back;
+        actionRow = new FlowLayoutPanel();
+        actionRow.Name = "actionRow";
+        actionRow.Dock = DockStyle.Bottom;
+        actionRow.Height = 104;
+        actionRow.Padding = new Padding(32, 8, 32, 8);
+        actionRow.WrapContents = true;
+        actionRow.AutoScroll = true;
+        Controls.Add(actionRow);
+        export.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+        export.Margin = new Padding(0, 0, 12, 8);
+        actionRow.Controls.Add(export);
+        grid.Height = ClientSize.Height - grid.Top - actionRow.Height - 16;
         ResumeLayout(false);
         PerformLayout();
     }
+    private FlowLayoutPanel actionRow = null!;
     private Panel headerSurface = null!;
     private Label heading = null!;
     private Label reportLabel = null!;

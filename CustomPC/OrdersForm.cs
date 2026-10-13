@@ -4,6 +4,8 @@ namespace CustomPC;
 
 public partial class OrdersForm : StoreWindow
 {
+    private OrderViewFilter? viewFilter;
+    public OrdersForm(OrderViewFilter filter) : this() { viewFilter = filter; LoadRows(); }
     private readonly System.Windows.Forms.Timer refreshTimer = new System.Windows.Forms.Timer
     {
         Interval = 30000
@@ -30,6 +32,8 @@ public partial class OrdersForm : StoreWindow
         search.TextChanged += FilterChanged;
         status.SelectedIndexChanged += FilterChanged;
         refresh.Click += RefreshButton_Click;
+        emptyOrders.ActionClicked += EmptyOrders_Click;
+        clearDashboardFilter.Click += (_, _) => { viewFilter = null; LoadRows(); };
         receipt.Click += ReceiptButton_Click;
         pay.Click += PayButton_Click;
         advance.Click += AdvanceButton_Click;
@@ -38,6 +42,7 @@ public partial class OrdersForm : StoreWindow
         Shown += OrdersForm_Shown;
         refreshTimer.Tick += RefreshTimer_Tick;
         FormClosed += OrdersForm_FormClosed;
+        Disposed += (_, _) => refreshTimer.Dispose();
 
         refreshTimer.Start();
         LoadRows();
@@ -179,6 +184,11 @@ public partial class OrdersForm : StoreWindow
         heading.Text = store.IsAdmin ? "Order monitoring" : store.IsStaff ? "Orders & payments" : "My orders";
         Text = "CustomPC | " + heading.Text;
         string searchText = search.Text.Trim();
+        filterCaption.Visible = viewFilter != null;
+        clearDashboardFilter.Visible = viewFilter != null;
+        filterCaption.Text = viewFilter?.Description ?? "";
+        grid.Top = viewFilter == null ? 170 : 196;
+        grid.Height = ClientSize.Height - grid.Top - 110;
 
         DataTable table = new DataTable();
         table.Columns.Add("Id", typeof(string));
@@ -193,6 +203,7 @@ public partial class OrdersForm : StoreWindow
         // VisibleOrders already limits customers to their own orders.
         foreach (CustomerOrder order in store.VisibleOrders())
         {
+            if (viewFilter != null && !viewFilter.Matches(order, store)) continue;
             if (status.SelectedIndex != 0 && order.Status != status.Text)
             {
                 continue;
@@ -224,6 +235,15 @@ public partial class OrdersForm : StoreWindow
         }
 
         Ui.Bind(grid, table);
+        emptyOrders.Visible = table.Rows.Count == 0;
+        if (emptyOrders.Visible)
+        {
+            bool firstBuild = store.IsCustomer && store.VisibleOrders().Count == 0;
+            emptyOrders.Message = firstBuild ? "Your first build starts here" : store.IsStaff ? "No orders need this action right now" : "No orders match this view";
+            emptyOrders.Detail = firstBuild ? "Choose your parts and save your build with an order." : "Try another status or view all orders.";
+            emptyOrders.ActionText = firstBuild ? "Open PC builder" : "View all orders";
+            emptyOrders.BringToFront();
+        }
         // Keep the same order selected after payment/progress, if it still matches the filters.
         foreach (DataGridViewRow row in grid.Rows)
         {
@@ -235,6 +255,20 @@ public partial class OrdersForm : StoreWindow
             }
         }
         UpdateOrderActions();
+    }
+
+    private void EmptyOrders_Click(object? sender, EventArgs e)
+    {
+        AppStore store = AppStore.Current;
+        store.Refresh();
+        if (store.IsCustomer && store.VisibleOrders().Count == 0)
+        {
+            if (Parent?.FindForm() is DashboardForm dashboard) dashboard.OpenScreen("Builder");
+            else { using BuilderForm builder = new(); builder.ShowDialog(this); }
+            return;
+        }
+        viewFilter = null;
+        search.Clear(); status.SelectedIndex = 0; LoadRows();
     }
 
     private void OrderSelectionChanged(object? sender, EventArgs e)

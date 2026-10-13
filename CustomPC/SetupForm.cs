@@ -15,7 +15,7 @@ public partial class SetupForm : StoreWindow
         try
         {
             if (password.Text != confirm.Text) throw new InvalidOperationException("Passwords do not match.");
-            AppStore.Current.CompleteSetup(storeName.Text, fullName.Text, email.Text, password.Text);
+            AppStore.Current.CompleteSetup(fullName.Text, email.Text, password.Text);
             DialogResult = DialogResult.OK;
         }
         catch (Exception exception) { Ui.ShowError(this, exception); }

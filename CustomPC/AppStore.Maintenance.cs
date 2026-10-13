@@ -11,10 +11,10 @@ namespace CustomPC;
 public sealed partial class AppStore
 {
     public string BackupFolder => Path.Combine(Path.GetDirectoryName(DatabasePath)!, "Backups");
-    public string StoreName => ReadSetting("StoreName", "CustomPC");
-    public string StoreContact => ReadSetting("StoreContact", "");
 
-    public void CompleteSetup(string storeName, string adminName, string email, string password)
+
+
+    public void CompleteSetup(string adminName, string email, string password)
     {
         using SqliteConnection connection = database.OpenConnection();
         using SqliteTransaction transaction = connection.BeginTransaction();
@@ -22,9 +22,9 @@ public sealed partial class AppStore
         {
             LoadData(connection);
             if (!NeedsSetup) throw new InvalidOperationException("Store setup has already been completed.");
-            if (string.IsNullOrWhiteSpace(storeName) || storeName.Length > 100 ||
+            if (
                 string.IsNullOrWhiteSpace(adminName) || adminName.Length > 100 || !MailAddress.TryCreate(email, out _))
-                throw new InvalidOperationException("Enter a store name, administrator name and valid email address.");
+                throw new InvalidOperationException("Enter an administrator name and valid email address.");
             if (password.Length < 12 || password == "CustomPC123!")
                 throw new InvalidOperationException("Choose your own password with at least 12 characters.");
             Users.Add(new UserAccount { Name = adminName.Trim(), Email = email.Trim(), Role = "Admin", PasswordHash = HashPassword(password) });
@@ -34,44 +34,8 @@ public sealed partial class AppStore
                 AddSampleRule("RAM / motherboard memory", "Memory");
                 AddSampleRule("PSU capacity (+100 W)", "Power");
             }
-            WriteSetting(connection, transaction, "StoreName", storeName.Trim());
+
             SaveData(connection, transaction);
-        }
-        catch { UndoFailedChange(connection, transaction); throw; }
-    }
-
-    private string ReadSetting(string key, string fallback)
-    {
-        using SqliteConnection connection = database.OpenConnection();
-        using SqliteCommand command = connection.CreateCommand();
-        command.CommandText = "SELECT Value FROM Settings WHERE Key = $key";
-        command.Parameters.AddWithValue("$key", key);
-        return command.ExecuteScalar()?.ToString() ?? fallback;
-    }
-
-    private void WriteSetting(SqliteConnection connection, SqliteTransaction transaction, string key, string value)
-    {
-        using SqliteCommand command = connection.CreateCommand();
-        command.Transaction = transaction;
-        command.CommandText = "INSERT INTO Settings (Key, Value) VALUES ($key, $value) ON CONFLICT(Key) DO UPDATE SET Value = excluded.Value";
-        command.Parameters.AddWithValue("$key", key);
-        command.Parameters.AddWithValue("$value", value);
-        command.ExecuteNonQuery();
-    }
-
-    public void SaveStoreDetails(string name, string contact)
-    {
-        using SqliteConnection connection = database.OpenConnection();
-        using SqliteTransaction transaction = connection.BeginTransaction();
-        try
-        {
-            LoadData(connection); RequireAdmin();
-            if (string.IsNullOrWhiteSpace(name) || name.Length > 100 || contact.Length > 200)
-                throw new InvalidOperationException("Enter a store name up to 100 characters and contact details up to 200 characters.");
-            WriteSetting(connection, transaction, "StoreName", name.Trim());
-            WriteSetting(connection, transaction, "StoreContact", contact.Trim());
-            WriteAudit(connection, transaction, "Store details updated", "Receipt header changed");
-            transaction.Commit();
         }
         catch { UndoFailedChange(connection, transaction); throw; }
     }
@@ -128,13 +92,18 @@ public sealed partial class AppStore
     {
         if (!File.Exists(DatabasePath) || new FileInfo(DatabasePath).Length == 0) return;
         Directory.CreateDirectory(BackupFolder);
-        string target = Path.Combine(BackupFolder, "automatic-" + DateTime.Today.ToString("yyyy-MM-dd") + ".db");
-        if (!File.Exists(target)) CopyDatabase(DatabasePath, target);
+        string target = Path.Combine(BackupFolder, "automatic-" + DateTime.Today.ToString("yyyy-MM-dd") + ".zip");
+        if (!File.Exists(target)) CreateCompleteBackup(target);
     }
 
     public void CreateBackup(string target)
     {
         Refresh(); RequireAdmin();
+        if (Path.GetExtension(target).Equals(".zip", StringComparison.OrdinalIgnoreCase))
+        {
+            CreateCompleteBackup(target);
+            return;
+        }
         CopyDatabase(DatabasePath, target);
     }
 
@@ -161,6 +130,11 @@ public sealed partial class AppStore
     {
         Refresh(); RequireAdmin();
         if (!VerifyPassword(adminPassword, Session!.PasswordHash)) throw new InvalidOperationException("Administrator password is incorrect.");
+        if (Path.GetExtension(source).Equals(".zip", StringComparison.OrdinalIgnoreCase))
+        {
+            RestoreCompleteBackup(source, adminPassword);
+            return;
+        }
         source = Path.GetFullPath(source);
         if (source.Equals(DatabasePath, StringComparison.OrdinalIgnoreCase) || !File.Exists(source))
             throw new InvalidOperationException("Select a different, existing CustomPC backup file.");
@@ -183,13 +157,18 @@ public sealed partial class AppStore
         List<Payment> payments = database.ReadRecords<Payment>(from, "Payments");
         List<InventoryMovement> movements = database.ReadRecords<InventoryMovement>(from, "Movements");
         bool invalid = accounts.Any(u => !MailAddress.TryCreate(u.Email, out _) || !Roles.Contains(u.Role) || !ValidStoredHash(u.PasswordHash))
-            || parts.Any(p => p.Stock < 0 || p.Price <= 0 || !Categories.Contains(p.Category) ||
+            || parts.Any(p => p.Stock < 0 || p.Stock > MaximumStock || p.Price <= 0 || !Categories.Contains(p.Category)
+                || p.Watts < 0 || p.Watts > MaximumComponentWatts || p.RecommendedPsuWatts < 0 || p.RecommendedPsuWatts > MaximumComponentWatts
+                || p.LowStock < 0 || p.LowStock > MaximumStock || string.IsNullOrWhiteSpace(p.Name) || string.IsNullOrWhiteSpace(p.Brand) ||
                 (!string.IsNullOrEmpty(p.SupplierId) && !suppliers.Any(s => s.Id == p.SupplierId)))
             || orders.Any(o => !accounts.Any(u => u.Id == o.CustomerId) || !builds.Any(b => b.Id == o.BuildId) ||
                 !Statuses.Contains(o.Status) || o.Lines == null || o.Lines.Any(l => l.Quantity <= 0 || l.Price <= 0 || !parts.Any(p => p.Id == l.PartId)))
             || payments.Any(p => p.Amount <= 0 || !orders.Any(o => o.Id == p.OrderId) || !accounts.Any(u => u.Id == p.StaffId))
             || movements.Any(m => !parts.Any(p => p.Id == m.PartId));
         if (invalid) throw new InvalidOperationException("The backup contains invalid or disconnected records. Select a verified CustomPC backup.");
+        foreach (Part part in parts)
+            if (part.PhotoFileName.Length > 0) ProductPhotos.Resolve(DatabasePath, part.PhotoFileName);
+        CreateCompleteBackup(Path.Combine(BackupFolder, "before-restore-" + DateTime.Now.ToString("yyyyMMdd-HHmmss-fff") + "-" + Guid.NewGuid().ToString("N") + ".zip"));
         string safety = Path.Combine(BackupFolder, "before-restore-" + DateTime.Now.ToString("yyyyMMdd-HHmmss-fff") + ".db");
         CopyDatabase(DatabasePath, safety);
         using SqliteConnection destination = database.OpenConnection();

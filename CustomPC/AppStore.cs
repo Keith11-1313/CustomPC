@@ -77,8 +77,7 @@ public sealed partial class AppStore
 
         if (string.IsNullOrWhiteSpace(customPath))
         {
-            string appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            customPath = Path.Combine(appData, "CustomPC", "custompc.db");
+            customPath = StoreDataPath.DefaultDatabase();
         }
 
         DatabasePath = Path.GetFullPath(customPath);

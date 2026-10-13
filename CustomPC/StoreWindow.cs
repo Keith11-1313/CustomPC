@@ -5,6 +5,7 @@ public class StoreWindow : Form
 {
     public StoreWindow()
     {
+        if (Ui.IsDesign) return;
         Icon = BrandLogo.WindowIcon;
         AppFonts.Apply(this);
     }
@@ -12,18 +13,22 @@ public class StoreWindow : Form
     protected override void OnControlAdded(ControlEventArgs e)
     {
         base.OnControlAdded(e);
-        if (e.Control != null) AppFonts.Apply(e.Control);
+        if (!Ui.IsDesign && e.Control != null) AppFonts.Apply(e.Control);
     }
 
     protected override void OnFontChanged(EventArgs e)
     {
         base.OnFontChanged(e);
-        AppFonts.Apply(this);
+        if (!Ui.IsDesign) AppFonts.Apply(this);
     }
 
     protected override void OnLoad(EventArgs e)
     {
-        if (!Ui.IsDesign) FitToWorkingArea(Screen.FromControl(this).WorkingArea);
+        if (!Ui.IsDesign)
+        {
+            StoreTheme.Apply(this);
+            FitToWorkingArea(Screen.FromControl(this).WorkingArea);
+        }
         base.OnLoad(e);
     }
 

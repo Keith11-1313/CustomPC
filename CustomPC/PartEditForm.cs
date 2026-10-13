@@ -3,6 +3,9 @@ namespace CustomPC;
 public partial class PartEditForm : StoreWindow
 {
     private string? partId;
+    private string photoFileName = "";
+    private string? photoImportPath;
+    private bool photoRemoved;
 
     public PartEditForm()
     {
@@ -35,6 +38,14 @@ public partial class PartEditForm : StoreWindow
 
         low.Value = 3;
         save.Click += SaveClicked;
+        choosePhoto.Click += ChoosePhoto_Click;
+        removePhoto.Click += (_, _) =>
+        {
+            photoImportPath = null; photoRemoved = true;
+            photoPreview.Image?.Dispose(); photoPreview.Image = null;
+            photoStatus.Text = "Photo will be removed when you save.";
+        };
+        FormClosed += (_, _) => photoPreview.Image?.Dispose();
         Shown += PartEditForm_Shown;
     }
 
@@ -58,6 +69,9 @@ public partial class PartEditForm : StoreWindow
         }
 
         partName.Text = part.Name;
+        photoFileName = part.PhotoFileName;
+        photoPreview.Image = ProductPhotos.Read(AppStore.Current.DatabasePath, photoFileName);
+        photoStatus.Text = photoPreview.Image == null ? "Photo unavailable" : "Saved product photograph";
         category.SelectedItem = part.Category;
         brand.Text = part.Brand;
         price.Value = part.Price;
@@ -69,7 +83,10 @@ public partial class PartEditForm : StoreWindow
         memory.Text = part.MemoryType;
         integratedGraphics.Checked = part.HasIntegratedGraphics;
         videoOutput.Checked = part.HasVideoOutput;
+        watts.Maximum = Math.Max(watts.Maximum, part.Watts);
         watts.Value = part.Watts;
+        recommendedPsu.Maximum = Math.Max(recommendedPsu.Maximum, part.RecommendedPsuWatts);
+        recommendedPsu.Value = part.RecommendedPsuWatts;
         low.Value = part.LowStock;
         archived.Checked = part.Archived;
 
@@ -144,6 +161,8 @@ public partial class PartEditForm : StoreWindow
             store.Refresh();
             Part part = new Part();
             part.Name = partName.Text.Trim();
+            part.PhotoFileName = photoFileName;
+            part.CatalogCode = partId == null ? "" : store.Parts.First(p => p.Id == partId).CatalogCode;
             part.Category = category.Text;
             part.Brand = brand.Text.Trim();
             part.Price = price.Value;
@@ -154,6 +173,7 @@ public partial class PartEditForm : StoreWindow
             part.HasIntegratedGraphics = category.Text == "CPU" && integratedGraphics.Checked;
             part.HasVideoOutput = category.Text == "Motherboard" && videoOutput.Checked;
             part.Watts = (int)watts.Value;
+            part.RecommendedPsuWatts = (int)recommendedPsu.Value;
             part.LowStock = (int)low.Value;
             part.Archived = archived.Checked;
 
@@ -167,12 +187,27 @@ public partial class PartEditForm : StoreWindow
                 part.Id = partId;
             }
 
-            AppStore.Current.SavePart(part);
+            AppStore.Current.SavePartWithPhoto(part, photoImportPath, photoRemoved);
             DialogResult = DialogResult.OK;
         }
         catch (Exception exception)
         {
             Ui.ShowError(this, exception);
         }
+    }
+
+    private void ChoosePhoto_Click(object? sender, EventArgs e)
+    {
+        using OpenFileDialog picker = new() { Filter = "Product photograph (*.jpg;*.jpeg;*.png)|*.jpg;*.jpeg;*.png", CheckFileExists = true };
+        if (picker.ShowDialog(this) != DialogResult.OK) return;
+        try
+        {
+            using Image original = Image.FromFile(picker.FileName);
+            Image preview = new Bitmap(original);
+            photoPreview.Image?.Dispose(); photoPreview.Image = preview;
+            photoImportPath = picker.FileName; photoRemoved = false;
+            photoStatus.Text = "New photograph will be copied when you save.";
+        }
+        catch (Exception error) { Ui.ShowError(this, new InvalidOperationException("This photograph could not be opened.", error)); }
     }
 }

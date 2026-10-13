@@ -27,32 +27,15 @@ partial class SetupForm
         heading.Location = new Point(32, 24);
         heading.Size = new Size(580, 42);
         heading.TabIndex = 1;
-        heading.Text = "Set up your store";
+        heading.Text = "Set up CustomPC";
         heading.Font = new Font("Righteous", 24F, FontStyle.Regular);
         heading.ForeColor = Color.FromArgb(32, 41, 35);
         heading.BackColor = Color.White;
         heading.UseMnemonic = false;
         Controls.Add(heading);
-        storeNameLabel = new Label();
-        storeNameLabel.Name = "storeNameLabel";
-        storeNameLabel.Location = new Point(34, 107);
-        storeNameLabel.Size = new Size(592, 24);
-        storeNameLabel.TabIndex = 3;
-        storeNameLabel.Text = "Store name";
-        storeNameLabel.Font = new Font("Roboto", 10F, FontStyle.Bold);
-        storeNameLabel.ForeColor = Color.FromArgb(32, 41, 35);
-        storeNameLabel.UseMnemonic = false;
-        Controls.Add(storeNameLabel);
-        storeName = new TextBox();
-        storeName.Name = "storeName";
-        storeName.Location = new Point(34, 135);
-        storeName.Size = new Size(592, 30);
-        storeName.TabIndex = 4;
-        storeName.MaxLength = 200;
-        Controls.Add(storeName);
         fullNameLabel = new Label();
         fullNameLabel.Name = "fullNameLabel";
-        fullNameLabel.Location = new Point(34, 187);
+        fullNameLabel.Location = new Point(34, 107);
         fullNameLabel.Size = new Size(592, 24);
         fullNameLabel.TabIndex = 5;
         fullNameLabel.Text = "Administrator name";
@@ -62,14 +45,14 @@ partial class SetupForm
         Controls.Add(fullNameLabel);
         fullName = new TextBox();
         fullName.Name = "fullName";
-        fullName.Location = new Point(34, 215);
+        fullName.Location = new Point(34, 135);
         fullName.Size = new Size(592, 30);
         fullName.TabIndex = 6;
         fullName.MaxLength = 200;
         Controls.Add(fullName);
         emailLabel = new Label();
         emailLabel.Name = "emailLabel";
-        emailLabel.Location = new Point(34, 267);
+        emailLabel.Location = new Point(34, 187);
         emailLabel.Size = new Size(592, 24);
         emailLabel.TabIndex = 7;
         emailLabel.Text = "Administrator email";
@@ -79,14 +62,14 @@ partial class SetupForm
         Controls.Add(emailLabel);
         email = new TextBox();
         email.Name = "email";
-        email.Location = new Point(34, 295);
+        email.Location = new Point(34, 215);
         email.Size = new Size(592, 30);
         email.TabIndex = 8;
         email.MaxLength = 200;
         Controls.Add(email);
         passwordLabel = new Label();
         passwordLabel.Name = "passwordLabel";
-        passwordLabel.Location = new Point(34, 347);
+        passwordLabel.Location = new Point(34, 267);
         passwordLabel.Size = new Size(592, 24);
         passwordLabel.TabIndex = 9;
         passwordLabel.Text = "Password (at least 12 characters)";
@@ -96,7 +79,7 @@ partial class SetupForm
         Controls.Add(passwordLabel);
         password = new TextBox();
         password.Name = "password";
-        password.Location = new Point(34, 375);
+        password.Location = new Point(34, 295);
         password.Size = new Size(592, 30);
         password.TabIndex = 10;
         password.MaxLength = 128;
@@ -104,7 +87,7 @@ partial class SetupForm
         Controls.Add(password);
         confirmLabel = new Label();
         confirmLabel.Name = "confirmLabel";
-        confirmLabel.Location = new Point(34, 427);
+        confirmLabel.Location = new Point(34, 347);
         confirmLabel.Size = new Size(592, 24);
         confirmLabel.TabIndex = 11;
         confirmLabel.Text = "Confirm password";
@@ -114,7 +97,7 @@ partial class SetupForm
         Controls.Add(confirmLabel);
         confirm = new TextBox();
         confirm.Name = "confirm";
-        confirm.Location = new Point(34, 455);
+        confirm.Location = new Point(34, 375);
         confirm.Size = new Size(592, 30);
         confirm.TabIndex = 12;
         confirm.MaxLength = 128;
@@ -122,7 +105,7 @@ partial class SetupForm
         Controls.Add(confirm);
         help = new Label();
         help.Name = "help";
-        help.Location = new Point(34, 513);
+        help.Location = new Point(34, 433);
         help.Size = new Size(592, 42);
         help.TabIndex = 13;
         help.Text = "Save your password securely. You will use it to manage accounts and restore backups.";
@@ -132,7 +115,7 @@ partial class SetupForm
         Controls.Add(help);
         save = new Button();
         save.Name = "save";
-        save.Location = new Point(34, 579);
+        save.Location = new Point(34, 499);
         save.Size = new Size(424, 46);
         save.TabIndex = 14;
         save.Text = "Create store administrator";
@@ -149,7 +132,7 @@ partial class SetupForm
         Controls.Add(save);
         back = new Button();
         back.Name = "back";
-        back.Location = new Point(478, 579);
+        back.Location = new Point(478, 499);
         back.Size = new Size(148, 46);
         back.TabIndex = 15;
         back.Text = "Exit";
@@ -173,10 +156,10 @@ partial class SetupForm
         ClientSize = new Size(660, 658);
         MinimumSize = new Size(676, 697);
         StartPosition = FormStartPosition.CenterScreen;
-        Text = "CustomPC | Set up your store";
+        Text = "CustomPC | Set up CustomPC";
         Name = "SetupForm";
         headerSurface.SendToBack();
-        back.Location = new Point(478, 579);
+        back.Location = new Point(478, 499);
         headerSurface.Controls.Add(heading);
         heading.Location = new Point(32, 24);
         CancelButton = back;
@@ -185,8 +168,8 @@ partial class SetupForm
     }
     private Panel headerSurface = null!;
     private Label heading = null!;
-    private Label storeNameLabel = null!;
-    private TextBox storeName = null!;
+
+
     private Label fullNameLabel = null!;
     private TextBox fullName = null!;
     private Label emailLabel = null!;

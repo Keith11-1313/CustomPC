@@ -211,9 +211,40 @@ partial class InventoryForm
         headerSurface.Controls.Add(heading);
         heading.Location = new Point(32, 24);
         CancelButton = back;
+        emptyInventory = new EmptyStateControl();
+        emptyInventory.Name = "emptyInventory";
+        emptyInventory.Location = new Point(320, 250);
+        emptyInventory.Size = new Size(420, 220);
+        emptyInventory.Visible = false;
+        Controls.Add(emptyInventory);
+        actionRow = new FlowLayoutPanel();
+        actionRow.Name = "actionRow";
+        actionRow.Dock = DockStyle.Bottom;
+        actionRow.Height = 104;
+        actionRow.Padding = new Padding(32, 8, 32, 8);
+        actionRow.WrapContents = true;
+        actionRow.AutoScroll = true;
+        Controls.Add(actionRow);
+        add.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+        add.Margin = new Padding(0, 0, 12, 8);
+        actionRow.Controls.Add(add);
+        edit.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+        edit.Margin = new Padding(0, 0, 12, 8);
+        actionRow.Controls.Add(edit);
+        adjust.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+        adjust.Margin = new Padding(0, 0, 12, 8);
+        actionRow.Controls.Add(adjust);
+        history.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+        history.Margin = new Padding(0, 0, 12, 8);
+        actionRow.Controls.Add(history);
+        refresh.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+        refresh.Margin = new Padding(0, 0, 12, 8);
+        actionRow.Controls.Add(refresh);
+        grid.Height = ClientSize.Height - grid.Top - actionRow.Height - 16;
         ResumeLayout(false);
         PerformLayout();
     }
+    private FlowLayoutPanel actionRow = null!;
     private Panel headerSurface = null!;
     private Label heading = null!;
     private Label searchLabel = null!;
@@ -228,4 +259,5 @@ partial class InventoryForm
     private Button history = null!;
     private Button refresh = null!;
     private Button back = null!;
+    private EmptyStateControl emptyInventory = null!;
 }

@@ -2,17 +2,23 @@
 
 This project is **under active revision**. Production-quality code is the goal; it is not a finished or deployed store product. There is no release package in this repository.
 
-Open `CustomPC.slnx` in Visual Studio with the **.NET desktop development** workload and .NET 10 installed. Restore NuGet packages if prompted, then press **F5**.
+Open `CustomPC.slnx` in Visual Studio with the **.NET desktop development** workload and .NET 10 installed. Restore NuGet packages if prompted, then press **F5**. The project targets Windows 10 build 19041 or later for its chart libraries; use Windows 10/11 with a supported .NET 10 installation.
 
 For testing the store workflows, read [the store guide](docs/STORE_GUIDE.md). A new empty database opens **Set up your store** first: choose your own administrator and a password of at least 12 characters. Sample accounts and stock are created only when `CUSTOMPC_DEMO_MODE=1` is explicitly set. Existing records are preserved.
 
-After setup, login appears first. Sign in or choose **Browse as guest** to open the homepage. Closing login exits the app. **Back** or **Esc** returns without saving unfinished editor inputs. Admins have **Store tools & backups** for receipt details, verified backups, recovery and activity history.
+Catalog, builder and management forms now run inside one main window with a persistent sidebar. Each page still has its own Designer file. Login, editors and receipts remain dialogs. Read [the modern UI walkthrough](docs/MODERN_UI_GUIDE.md) for the code flow.
+
+The prepared database contains 42 ordinary product records and 42 local images, with zero stock and no transactions. There is no embedded product pack or starter import button. Close the app, then copy the whole **Database** folder to keep the database and its photos together. [Review the product sources](docs/CATALOG_MANIFEST.md).
+
+Admin has payment-sales, top-parts and inventory charts. Staff has incoming-order, current-work-queue and stock-readiness charts. Date charts offer 7/30/90 days; queue and inventory stay current snapshots. Chart selection lists and labelled buttons open filtered pages.
+
+After setup, login appears first. Sign in or choose **Browse as guest** to open the homepage. Closing login exits the app. **Back** or **Esc** returns without saving unfinished editor inputs. Admins have **Store tools & backups** for verified backups, recovery and activity history.
 
 The Guest homepage offers **Sign in**. Guests first choose a valid build, then click **Confirm build & order** to open login. Customer login continues that same checkout using the selected parts; after the normal order confirmation, the build and linked order are saved to that Customer account and its receipt opens. No second click on the checkout button is required. Cancelling login keeps the preview; Admin/Staff login returns to their dashboard. Cancelling Sign in from the Guest homepage returns there.
 
 Read [who can do what](docs/ROLES.md) for the strict permission matrix and steps to assign roles. Admin manages the system and monitors orders; Staff changes stock and records payments/progress; Customers place and cancel only their own unpaid orders. Admin does not inherit Staff or Customer actions.
 
-On this computer, `jerald@gmail.com` is Admin and keeps its existing password. The old public-password demo accounts were archived; add your own Staff and Customer accounts through User accounts. This is saved account data, not an Admin email hardcoded into the application.
+The prepared database has exactly one account: **admin**, email **admin@gmail.com**, password **admin@gmail.com**, role **Admin**. Add Staff and Customer accounts through User accounts. Old accounts and transactions were reset after a safety backup. This account is stored in SQLite; it is not a login bypass.
 
 The builder uses the signed-in Customer automatically. Choose CPU, motherboard, RAM, storage, PSU and case. A dedicated GPU can be omitted only when the catalog records CPU integrated graphics and motherboard video output. Admin sets those two verified fields in the part editor; older records default to false until checked.
 
@@ -24,9 +30,7 @@ Use [the code reference](docs/CODE_REFERENCE.md) afterward for all 19 forms, the
 
 The guide explains expected behavior. A successful build alone does not verify login against your saved database, runtime workflows, Visual Studio Designer loading, or printer output.
 
-Read [the validation results](docs/VALIDATION.md) for executed checks and remaining manual checks. The latest source run passed 750 checks with 0 failures, including 83 Guest sign-in/checkout checks, 153 strict-role checks and real font-family checks on all 19 forms. Testing does not mark the product finished. Actual printer, Designer, Windows scaling and external-drive recovery checks remain open.
-
-Read [the role screen audit](docs/SCREEN_VALIDATION.md) for the actual dashboard routes, buttons tested per role, normal store workflow and disabled-action explanation. Its separate 627 checks include a correction for payment/progress buttons on completed orders.
+Read [the validation results](docs/VALIDATION.md) and [role screen audit](docs/SCREEN_VALIDATION.md) for current executed checks, rendered previews and outstanding manual checks. Runtime construction and managed scaling do not prove Visual Studio Designer loading, physical printer output or real Windows DPI behavior.
 
 Pressing F5 generates `bin` and `obj` folders and a debug `.exe`; those are normal temporary build outputs used to run your code. They are ignored by Git and are not a release. The earlier published EXE folder and ZIP have been removed. Validation builds are kept outside this project.
 
@@ -62,6 +66,11 @@ These files belong to the same form. Use the visual Designer to change its layou
 | `BrandLogo.cs` | Displays your supplied `Assets/logo.png` and uses it for the window icon. |
 | `AppFonts.cs` | Loads bundled Righteous and Roboto fonts for this process without installing them in Windows. |
 | `AppLog.cs` | Local diagnostic references for unexpected errors. |
+| `BuildDraft.cs` | Keeps unfinished category selections across hosted pages. |
+| `ProductCard`, `ProductThumbnail`, `EmptyStateControl` | Designer-editable reusable controls. |
+| `DashboardChart.cs`, `AppStore.Dashboards.cs` | Runtime charts, role-checked saved data and drill-downs. |
+| `ProductPhotos.cs`, `AppStore.Photos.cs` | Local photo copies and part saving. |
+| `AppStore.BackupPhotos.cs` | Complete ZIP database/photo recovery. |
 | `Database.cs` | Opens SQLite and runs the SQL commands. |
 | `Ui.cs` | Display helpers for errors, prices, grids, exports, and receipts. |
 
@@ -95,8 +104,10 @@ Existing accounts retain saved password changes and archive status. If a demo em
 
 ## Saved data and order deadline
 
-The local SQLite file is `%LOCALAPPDATA%\CustomPC\custompc.db`, normally `C:\Users\Jerald\AppData\Local\CustomPC\custompc.db`. Closing the app keeps your records.
+The local SQLite file is `Database\custompc.db`, normally `C:\Users\Jerald\AppData\Local\CustomPC\custompc.db`. Closing the app keeps your records.
 
 Each table has `Id` and `Data` columns. `Data` contains the record's fields as JSON. This format is unchanged, so existing records remain usable. Manage records through the app's admin and staff screens.
 
 Orders have a 24-hour payment deadline. The desktop app cancels expired unpaid orders during refresh and while its timer is running. If the app is closed, cancellation happens when it next opens. Store payment and pickup are recorded by staff.
+
+CustomPC branding is fixed. Setup and Store tools do not offer business-name, receipt-header or business-contact customization.

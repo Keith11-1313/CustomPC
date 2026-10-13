@@ -122,7 +122,7 @@ Follow these steps in `Program.cs`, `LoginForm.cs`, `DashboardForm.cs`, and `App
 
 Dashboard button handlers call `OpenScreen` with a screen name. That method refreshes saved data, uses a `switch` to construct the requested form, and opens it inside `try/catch`. Keeping construction inside that block means an access or loading error raised by a child form can be displayed instead of escaping the button handler.
 
-The database path is chosen in this order: a path explicitly passed to the `AppStore` constructor, the `CUSTOMPC_DATABASE_PATH` environment variable, then `%LOCALAPPDATA%\CustomPC\custompc.db`. Normally the last choice is used.
+The database path is chosen in this order: a path explicitly passed to the `AppStore` constructor, the `CUSTOMPC_DATABASE_PATH` environment variable, then the solution-root `Database\custompc.db`. Normally the last choice is used. See StoreDataPath.cs for how the solution folder is found.
 
 ### Session and window lifetime
 
@@ -130,11 +130,11 @@ The database path is chosen in this order: a path explicitly passed to the `AppS
 
 `Refresh` reloads the database. `LoadData` finds the signed-in account again by its `Id`, so an archived account loses its session and a changed role takes effect in the loaded account. Lists are replaced during refresh; do not assume an old reference is always the latest saved record.
 
-`ShowDialog(this)` opens a modal child window. The owner waits until that dialog closes. A `using` statement disposes of the child afterward. `DialogResult.OK` indicates that the dialog completed its action; it is not an order status.
+Page forms are hosted by `DashboardForm.OpenScreen`: TopLevel is false and the page fills pageHost. Login, editors and receipts use dialogs. `ShowDialog(this)` opens a modal child window. The owner waits until that dialog closes. A `using` statement disposes of the child afterward. `DialogResult.OK` indicates that the dialog completed its action; it is not an order status.
 
-`DashboardForm.SignIn` handles **Sign out** after startup. It stops the timer, hides the dashboard, clears the current session, and opens login without a dashboard owner. An OK result updates and shows the dashboard, activates it, and restarts the timer. Cancelling login closes the dashboard and ends the app.
+`DashboardForm.SignIn` handles **Sign out** after startup. It stops the timer, hides the dashboard, clears the current session, and opens login without a dashboard owner. An OK result updates and shows the dashboard, activates it, and restarts the timer. Cancelling login after signing out closes the dashboard. Cancelling Guest Sign in returns to the Guest workspace.
 
-The 17 forms other than Dashboard and Login have a navigation button. **Esc** activates the same button through the form's `CancelButton` property. Back closes the current dialog and returns to its previous screen: catalog to dashboard, an inventory editor to inventory, registration to login, or a receipt to the screen that opened it. The first-time setup screen uses Exit instead, because cancelling setup ends startup. These actions do not save unfinished editor inputs. Records already saved by an earlier action remain saved; closing a receipt after confirming an order does not cancel that order.
+The 17 forms other than Dashboard and Login have a navigation button. **Esc** activates the same button through the form's `CancelButton` property. Back closes a hosted page or focused dialog and returns to its previous screen: catalog to dashboard, an inventory editor to inventory, registration to login, or a receipt to the screen that opened it. The first-time setup screen uses Exit instead, because cancelling setup ends startup. These actions do not save unfinished editor inputs. Records already saved by an earlier action remain saved; closing a receipt after confirming an order does not cancel that order.
 
 Each form connects `back.Click += BackButton_Click;` and sets `CancelButton = back;`. `BackButton_Click` sets `DialogResult.Cancel` and calls `Close()`. This uses the ordinary button declared in that form's Designer file, so you can select and move Back through View Designer. Login is the starting screen, and the dashboard is the main menu; neither has a previous screen to return to. Use Sign out on the dashboard to return to login.
 
@@ -372,7 +372,7 @@ Values use SQL parameters (`$id` and `$data`) rather than being placed directly 
 | Form source | Screen and main responsibilities | Methods to follow |
 | --- | --- | --- |
 | `DashboardForm.cs` | Main navigation, role menus, metrics, account switching, expiry refresh | `SignIn`, `UpdateDashboard`, `OpenScreen`, `ExpiryTimer_Tick` |
-| `SetupForm.cs` | First administrator and store name | `SaveButton_Click` → `CompleteSetup` |
+| `SetupForm.cs` | First administrator for CustomPC | `SaveButton_Click` → `CompleteSetup` |
 | `StoreToolsForm.cs` | Store details, backup/restore, Admin activity history | `SaveButton_Click`, `BackupButton_Click`, `RestoreButton_Click`, `LoadHistory` |
 | `LoginForm.cs` | Login, show password, register button, guest access | `LoginButton_Click`, `ShowPassword_CheckedChanged`, `RegisterButton_Click`, `GuestButton_Click` |
 | `RegisterForm.cs` | Create a customer account | `SaveButton_Click` |
@@ -476,3 +476,5 @@ You can use this explanation in your own words:
 > CustomPC is a Windows Forms application for selecting a PC build and managing store orders. Forms handle user interaction. Models describe users, parts, orders, payments, and inventory records. A shared AppStore applies role, compatibility, stock, and order rules. Database saves those records in a local SQLite file. An order reserves stock first, staff records the physical-store payment and assembly stages, and pickup completion deducts physical inventory. The form layout is kept in Designer files so it remains editable in Visual Studio.
 
 For a concrete demonstration, explain `StockAdjustmentForm.SaveClicked` and `AppStore.AdjustStock` together, then show the resulting movement entry. For the main feature, explain `BuilderForm.SubmitButton_Click` -> `CreateOrder` -> `SaveData`. Those two paths illustrate most of the project's structure.
+
+CustomPC branding is fixed. Setup and Store tools do not offer business-name, receipt-header or business-contact customization.

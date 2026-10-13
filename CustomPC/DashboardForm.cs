@@ -4,6 +4,10 @@ namespace CustomPC;
 
 public partial class DashboardForm : StoreWindow
 {
+    public BuildDraft Draft { get; } = new();
+    private Form? hostedPage;
+    private string dashboardIdentity = "";
+    private Action? retryPage;
     private readonly System.Windows.Forms.Timer expiryTimer = new System.Windows.Forms.Timer
     {
         Interval = 30000
@@ -19,6 +23,22 @@ public partial class DashboardForm : StoreWindow
         }
 
         catalog.Click += CatalogButton_Click;
+        home.Click += (_, _) => ShowOverview();
+        pageError.ActionClicked += (_, _) => retryPage?.Invoke();
+        emptyRecent.ActionClicked += (_, _) => OpenScreen("Builder");
+        period.SelectedIndexChanged += (_, _) => { if (period.SelectedIndex >= 0) RefreshCharts(); };
+        trendChart.ChartActivated += (_, _) => OpenChartOrders(false);
+        distributionChart.ChartActivated += (_, _) => OpenChartOrders(true);
+        stockChart.ChartActivated += (_, _) => OpenScreen("Inventory");
+        trendChart.SelectionOpened += selection => OpenChartSelection(selection);
+        distributionChart.SelectionOpened += selection => OpenChartSelection(selection);
+        stockChart.SelectionOpened += selection => OpenChartSelection(selection);
+        trendChart.EmptyActionRequested += (_, _) => { period.Focus(); period.DroppedDown = true; };
+        distributionChart.EmptyActionRequested += (_, _) => OpenScreen("Orders");
+        stockChart.EmptyActionRequested += (_, _) => OpenScreen("Inventory");
+        viewPeriodOrders.Click += (_, _) => OpenChartOrders(false);
+        viewQueueOrders.Click += (_, _) => OpenChartOrders(true);
+        viewStock.Click += (_, _) => OpenScreen("Inventory");
         builder.Click += BuilderButton_Click;
         orders.Click += OrdersButton_Click;
         inventory.Click += InventoryButton_Click;
@@ -106,8 +126,7 @@ public partial class DashboardForm : StoreWindow
         }
         catch (Exception exception)
         {
-            Ui.ShowError(this, exception);
-            Close();
+            ShowDashboardFailure(exception);
         }
     }
 
@@ -120,17 +139,40 @@ public partial class DashboardForm : StoreWindow
         }
         catch (Exception exception)
         {
-            Ui.ShowError(this, exception);
+            ShowDashboardFailure(exception);
         }
     }
 
     private void DashboardForm_FormClosed(object? sender, FormClosedEventArgs e)
     {
         expiryTimer.Dispose();
+        pageError.Dispose();
     }
 
-    private void OpenScreen(string screenName)
+    private void ShowDashboardFailure(Exception error)
     {
+        AppLog.Write(error);
+        trendChart.ClearRuntimeData(); distributionChart.ClearRuntimeData(); stockChart.ClearRuntimeData();
+        hostedPage?.Dispose(); hostedPage = null;
+        pageHost.Controls.Clear();
+        pageError.Message = "The dashboard could not be loaded";
+        pageError.Detail = "Check file access and available disk space, then retry.";
+        pageError.ActionText = "Retry";
+        pageError.Visible = true;
+        pageHost.Controls.Add(pageError);
+        retryPage = () =>
+        {
+            try { ShowOverview(); expiryTimer.Start(); }
+            catch (Exception retryError) { ShowDashboardFailure(retryError); }
+        };
+        foreach (Control control in Controls)
+            if (control != sidebar && control != pageHost) control.Visible = false;
+        pageHost.Visible = true; pageHost.BringToFront();
+    }
+
+    public void OpenScreen(string screenName, OrderViewFilter? orderFilter = null, InventoryViewFilter? inventoryFilter = null)
+    {
+        UseWaitCursor = true;
         try
         {
             // Construct the screen inside the try block too: loading its data can fail.
@@ -140,16 +182,16 @@ public partial class DashboardForm : StoreWindow
             switch (screenName)
             {
                 case "Catalog":
-                    form = new CatalogForm();
+                    form = new CatalogForm(Draft);
                     break;
                 case "Builder":
-                    form = new BuilderForm();
+                    form = new BuilderForm(Draft);
                     break;
                 case "Orders":
-                    form = new OrdersForm();
+                    form = orderFilter == null ? new OrdersForm() : new OrdersForm(orderFilter);
                     break;
                 case "Inventory":
-                    form = new InventoryForm();
+                    form = inventoryFilter == null ? new InventoryForm() : new InventoryForm(inventoryFilter);
                     break;
                 case "Suppliers":
                     form = new SuppliersForm();
@@ -170,16 +212,69 @@ public partial class DashboardForm : StoreWindow
                     throw new InvalidOperationException("This screen is not available.");
             }
 
-            using (form)
-            {
-                form.ShowDialog(this);
-            }
-
-            UpdateDashboard();
+            hostedPage?.Dispose();
+            hostedPage = form;
+            foreach (Control control in Controls)
+                if (control != sidebar && control != pageHost) control.Visible = false;
+            form.TopLevel = false;
+            form.FormBorderStyle = FormBorderStyle.None;
+            form.MinimumSize = Size.Empty;
+            form.Dock = DockStyle.Fill;
+            form.AutoScroll = true;
+            form.AutoScrollMinSize = new Size(screenName is "Catalog" or "Builder" ? 820 : 1100, 650);
+            pageHost.Controls.Clear();
+            pageError.Visible = false;
+            pageHost.Controls.Add(form);
+            pageHost.Visible = true;
+            pageHost.BringToFront();
+            form.FormClosed += (_, _) => { if (!IsDisposed) ShowOverview(); };
+            form.Show();
+            Text = form.Text;
+            StyleMenu(screenName);
         }
         catch (Exception exception)
         {
-            Ui.ShowError(this, exception);
+            hostedPage?.Dispose(); hostedPage = null;
+            foreach (Control control in Controls)
+                if (control != sidebar && control != pageHost) control.Visible = false;
+            pageHost.Controls.Clear();
+            pageHost.Controls.Add(pageError);
+            AppLog.Write(exception);
+            pageError.Message = "This page could not be loaded";
+            pageError.ActionText = "Retry";
+            pageError.Detail = exception is InvalidOperationException ? exception.Message : "Check store file access, then retry.";
+            pageError.Visible = true;
+            pageHost.Visible = true;
+            pageHost.BringToFront();
+            retryPage = () => OpenScreen(screenName, orderFilter, inventoryFilter);
+        }
+        finally { UseWaitCursor = false; }
+    }
+
+    public void ShowOverview()
+    {
+        pageHost.Visible = false;
+        hostedPage?.Dispose();
+        hostedPage = null;
+        foreach (Control control in Controls)
+            if (control != pageHost) control.Visible = true;
+        UpdateDashboard();
+        StyleMenu("Overview");
+    }
+
+    public void PauseForCheckoutLogin()
+    {
+        expiryTimer.Stop();
+        Hide();
+    }
+
+    public void ResumeAfterCheckoutLogin()
+    {
+        if (IsDisposed) return;
+        try { UpdateDashboard(); }
+        finally
+        {
+            if (!IsDisposed) { Show(); Activate(); expiryTimer.Start(); }
         }
     }
 
@@ -192,6 +287,10 @@ public partial class DashboardForm : StoreWindow
         try
         {
             AppStore.Current.Logout();
+            Draft.Clear();
+            hostedPage?.Dispose();
+            hostedPage = null;
+            pageHost.Visible = false;
 
             using (LoginForm loginForm = new LoginForm())
             {
@@ -225,6 +324,20 @@ public partial class DashboardForm : StoreWindow
     {
         AppStore store = AppStore.Current;
         store.Refresh();
+        string currentIdentity = (store.Session?.Id ?? "Guest") + ":" + store.Session?.Role;
+        if (dashboardIdentity != currentIdentity)
+        {
+            trendChart.ClearRuntimeData(); distributionChart.ClearRuntimeData(); stockChart.ClearRuntimeData();
+            bool guestContinuation = dashboardIdentity.StartsWith("Guest:") && store.IsCustomer;
+            if (dashboardIdentity.Length > 0 && !guestContinuation)
+            {
+                Draft.Clear();
+                hostedPage?.Dispose(); hostedPage = null; pageHost.Visible = false;
+                foreach (Control control in Controls) if (control != pageHost) control.Visible = true;
+            }
+            dashboardIdentity = currentIdentity;
+            period.SelectedIndex = store.IsAdmin ? 1 : 0;
+        }
 
         heading.Text = store.CanViewAllOrders ? "Store overview" : store.Session == null ? "Welcome to CustomPC" : "My dashboard";
         Text = "CustomPC | " + heading.Text;
@@ -336,6 +449,112 @@ public partial class DashboardForm : StoreWindow
             else recentOrders.Rows.Add(order.Id, order.Number, order.Status);
         }
         Ui.Bind(recent, recentOrders);
+        bool operational = store.IsAdmin || store.IsStaff;
+        chartArea.Visible = operational;
+        period.Visible = operational;
+        summarySurface.Visible = !operational;
+        workflowSurface.Visible = !operational;
+        recent.Visible = !operational && store.IsCustomer;
+        recentTitle.Visible = !operational && store.IsCustomer;
+        emptyRecent.Visible = store.IsCustomer && recentOrders.Rows.Count == 0;
+        if (emptyRecent.Visible) { recent.Visible = false; emptyRecent.BringToFront(); }
+        statOrders.Visible = store.Session != null;
+        statOrdersCaption.Visible = store.Session != null;
+        if (operational) RefreshCharts();
+        chartActions.Visible = operational;
+        chartSummary.Visible = operational;
+        viewQueueOrders.Text = store.IsAdmin ? "View paid parts orders" : "View current work queue";
+        if (pageHost.Visible)
+        {
+            foreach (Control control in Controls)
+                if (control != sidebar && control != pageHost) control.Visible = false;
+        }
+        else StyleMenu("Overview");
+    }
+
+    private void OpenChartOrders(bool distribution)
+    {
+        AppStore store = AppStore.Current;
+        store.Refresh();
+        if (!store.CanViewAllOrders) return;
+        int days = period.SelectedIndex == 0 ? 7 : period.SelectedIndex == 2 ? 90 : 30;
+        DateTime last = DateTime.Today;
+        OrderViewFilter filter = store.IsStaff && distribution
+            ? new(WorkQueue: true)
+            : new(last.AddDays(1 - days), last, PaidDate: store.IsAdmin);
+        OpenScreen("Orders", filter);
+    }
+
+    private void OpenChartSelection(ChartSelection selection)
+    {
+        AppStore store = AppStore.Current;
+        store.Refresh();
+        if (!store.CanViewAllOrders) return;
+        if (selection.StockState != null || selection.Category != null)
+        {
+            OpenScreen("Inventory", inventoryFilter: new(selection.Category, selection.StockState));
+            return;
+        }
+        int days = period.SelectedIndex == 0 ? 7 : period.SelectedIndex == 2 ? 90 : 30;
+        if (store.IsStaff && selection.Status != null)
+        {
+            OpenScreen("Orders", new(Status: selection.Status, WorkQueue: true));
+            return;
+        }
+        DateTime last = selection.Date ?? DateTime.Today;
+        DateTime first = selection.Date ?? last.AddDays(1 - days);
+        OpenScreen("Orders", new(first, last, PaidDate: store.IsAdmin, Status: selection.Status,
+            PartId: selection.PartId, WorkQueue: store.IsStaff && selection.Status != null));
+    }
+
+    private void RefreshCharts()
+    {
+        try { DrawCharts(); }
+        catch (Exception error) { ShowDashboardFailure(error); }
+    }
+
+    private void DrawCharts()
+    {
+        AppStore store = AppStore.Current;
+        int days = period.SelectedIndex == 0 ? 7 : period.SelectedIndex == 2 ? 90 : 30;
+        if (store.IsAdmin)
+        {
+            var data = store.ReadAdminDashboard(days);
+            chartSummary.Text = $"{data.FirstDate:MMM d}–{data.LastDate:MMM d}: PHP {data.Sales.Sum(value => value.Value):N2} confirmed payments. Inventory is a current snapshot.";
+            trendChart.EmptyActionText = "Change period";
+            distributionChart.EmptyActionText = "View orders";
+            stockChart.EmptyActionText = "Add products";
+            trendChart.Line("Recorded sales", data.Sales, "PHP", "No confirmed payments in this period");
+            distributionChart.Bars("Top five selling parts", data.TopParts, true, "No confirmed payments in this period");
+            stockChart.Donut(data.Inventory);
+        }
+        else if (store.IsStaff)
+        {
+            var data = store.ReadStaffDashboard(days);
+            chartSummary.Text = $"{data.Incoming.Sum(value => value.Value):N0} incoming orders in {days} days. {data.Queue.Sum(value => value.Value):N0} orders in the current work queue.";
+            trendChart.EmptyActionText = "Change period";
+            distributionChart.EmptyActionText = "View all orders";
+            stockChart.EmptyActionText = "View inventory";
+            trendChart.Line("Incoming orders", data.Incoming, "Orders", "No incoming orders in this period");
+            distributionChart.Bars("Work queue · current", data.Queue, false, "No orders need this action right now");
+            stockChart.StackedStock(data.Stock);
+        }
+    }
+
+    private void StyleMenu(string screen)
+    {
+        var menu = new Dictionary<Button, string> { [home] = "Overview", [catalog] = "Catalog", [builder] = "Builder",
+            [orders] = "Orders", [inventory] = "Inventory", [suppliers] = "Suppliers", [users] = "Users",
+            [rules] = "Compatibility", [reports] = "Reports", [tools] = "Store tools" };
+        foreach (var item in menu)
+        {
+            bool selected = item.Value == screen;
+            item.Key.BackColor = selected ? StoreTheme.Green : StoreTheme.Ink;
+            item.Key.ForeColor = selected ? StoreTheme.Ink : Color.White;
+            item.Key.FlatAppearance.BorderSize = 0;
+            item.Key.FlatAppearance.MouseOverBackColor = selected ? Color.FromArgb(123, 195, 92) : Color.FromArgb(54, 68, 58);
+            item.Key.AccessibleDescription = selected ? "Current page" : "Open " + item.Key.Text;
+        }
     }
 
     private void ArrangeRoleMenu()

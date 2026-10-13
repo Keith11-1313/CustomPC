@@ -9,10 +9,10 @@ public partial class StoreToolsForm : StoreWindow
         if (Ui.IsDesign) return;
         AppStore.Current.Refresh();
         if (!AppStore.Current.IsAdmin) throw new InvalidOperationException("Administrator access is required.");
-        storeName.Text = AppStore.Current.StoreName;
-        contact.Text = AppStore.Current.StoreContact;
-        databaseLocation.Text = AppStore.Current.DatabasePath;
-        save.Click += SaveButton_Click;
+
+
+
+
         backup.Click += BackupButton_Click;
         restore.Click += RestoreButton_Click;
         refresh.Click += RefreshButton_Click;
@@ -33,21 +33,10 @@ public partial class StoreToolsForm : StoreWindow
         catch
         {
             grid.DataSource = null;
-            save.Enabled = backup.Enabled = restore.Enabled = false;
+            backup.Enabled = restore.Enabled = false;
             health.Text = "Administrator access is required. Close this screen and sign in again.";
             throw;
         }
-    }
-
-    private void SaveButton_Click(object? sender, EventArgs e)
-    {
-        try
-        {
-            AppStore.Current.SaveStoreDetails(storeName.Text, contact.Text);
-            LoadHistory();
-            MessageBox.Show(this, "Store details saved. New receipt views use this header.", "CustomPC");
-        }
-        catch (Exception exception) { Ui.ShowError(this, exception); }
     }
 
     private void BackupButton_Click(object? sender, EventArgs e)
@@ -58,7 +47,7 @@ public partial class StoreToolsForm : StoreWindow
             if (!AppStore.Current.IsAdmin) throw new InvalidOperationException("Administrator access is required.");
             using SaveFileDialog dialog = new SaveFileDialog
             {
-                Filter = "CustomPC backup (*.db)|*.db", FileName = "CustomPC-" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".db",
+                Filter = "Complete CustomPC backup (*.zip)|*.zip", FileName = "CustomPC-" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".zip",
                 InitialDirectory = AppStore.Current.BackupFolder
             };
             if (dialog.ShowDialog(this) != DialogResult.OK) return;
@@ -74,7 +63,7 @@ public partial class StoreToolsForm : StoreWindow
         {
             AppStore.Current.Refresh();
             if (!AppStore.Current.IsAdmin) throw new InvalidOperationException("Administrator access is required.");
-            using OpenFileDialog dialog = new OpenFileDialog { Filter = "CustomPC backup (*.db)|*.db", InitialDirectory = AppStore.Current.BackupFolder };
+            using OpenFileDialog dialog = new OpenFileDialog { Filter = "CustomPC backup (*.zip;*.db)|*.zip;*.db", InitialDirectory = AppStore.Current.BackupFolder };
             if (dialog.ShowDialog(this) != DialogResult.OK) return;
             if (!Ui.Confirm(this, "Restore " + dialog.FileName + "?\n\nThis replaces current records with the backup. A safety backup of current records is saved first. The app will close; reopen it and use an account from the restored backup.")) return;
             AppStore.Current.RestoreBackup(dialog.FileName, adminPassword.Text);

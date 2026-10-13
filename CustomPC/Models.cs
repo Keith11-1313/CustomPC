@@ -21,12 +21,15 @@ public class Part : DatabaseRecord
     public string Category { get; set; } = "CPU";
     public string Brand { get; set; } = "";
     public string Specifications { get; set; } = "";
+    public string PhotoFileName { get; set; } = "";
+    public string CatalogCode { get; set; } = "";
     public string Socket { get; set; } = "";
     public string MemoryType { get; set; } = "";
     // Only verified catalog specifications enable a build without a dedicated GPU.
     public bool HasIntegratedGraphics { get; set; }
     public bool HasVideoOutput { get; set; }
     public int Watts { get; set; }
+    public int RecommendedPsuWatts { get; set; }
     public decimal Price { get; set; }
     public int Stock { get; set; }
     public int LowStock { get; set; } = 3;

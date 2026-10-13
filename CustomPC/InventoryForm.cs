@@ -4,6 +4,13 @@ namespace CustomPC;
 
 public partial class InventoryForm : StoreWindow
 {
+    private string? filteredCategory;
+    public InventoryForm(InventoryViewFilter filter) : this()
+    {
+        filteredCategory = filter.Category;
+        if (filter.StockState != null) stockFilter.SelectedItem = filter.StockState;
+        LoadRows();
+    }
     public InventoryForm()
     {
         InitializeComponent();
@@ -32,6 +39,11 @@ public partial class InventoryForm : StoreWindow
         adjust.Click += AdjustStockClicked;
         history.Click += HistoryClicked;
         refresh.Click += RefreshClicked;
+        emptyInventory.ActionClicked += (_, _) =>
+        {
+            if (AppStore.Current.IsAdmin && !AppStore.Current.Parts.Any(p => !p.Archived)) AddClicked(this, EventArgs.Empty);
+            else { filteredCategory = null; search.Clear(); stockFilter.SelectedIndex = 0; LoadRows(); }
+        };
 
         LoadRows();
     }
@@ -148,6 +160,7 @@ public partial class InventoryForm : StoreWindow
         store.Refresh();
         ValidateAccess(store);
         string searchText = search.Text.Trim();
+        heading.Text = filteredCategory == null ? "Parts & inventory" : filteredCategory + " inventory";
 
         DataTable table = new DataTable();
         table.Columns.Add("Id");
@@ -163,6 +176,7 @@ public partial class InventoryForm : StoreWindow
 
         foreach (Part part in store.Parts)
         {
+            if (filteredCategory != null && part.Category != filteredCategory) continue;
             if (part.Archived && !archived.Checked)
             {
                 continue;
@@ -177,10 +191,6 @@ public partial class InventoryForm : StoreWindow
             int availableStock = store.Available(part);
             string stockStatus = store.StockState(part);
             bool matchesStockFilter = stockFilter.SelectedIndex == 0 || stockFilter.Text == stockStatus;
-            if (stockFilter.Text == "Available" && availableStock > 0)
-            {
-                matchesStockFilter = true;
-            }
             if (!matchesStockFilter)
             {
                 continue;
@@ -201,6 +211,15 @@ public partial class InventoryForm : StoreWindow
         }
 
         Ui.Bind(grid, table);
+        emptyInventory.Visible = table.Rows.Count == 0;
+        if (emptyInventory.Visible)
+        {
+            bool emptyStore = !store.Parts.Any(p => !p.Archived);
+            emptyInventory.Message = emptyStore && store.IsAdmin ? "Add products to your catalog" : "No products match these filters";
+            emptyInventory.Detail = emptyStore ? "Staff can receive stock after Admin adds products." : "Try another search or stock filter.";
+            emptyInventory.ActionText = emptyStore && store.IsAdmin ? "Add product" : "Clear filters";
+            emptyInventory.BringToFront();
+        }
     }
 
     private void ValidateAccess(AppStore store)
@@ -216,7 +235,7 @@ public partial class InventoryForm : StoreWindow
             button.Visible = button.Enabled;
             if (button.Enabled)
             {
-                button.Left = nextLeft;
+                if (button.Parent is not FlowLayoutPanel) button.Left = nextLeft;
                 nextLeft += button.Width + 12;
             }
         }
@@ -227,4 +246,5 @@ public partial class InventoryForm : StoreWindow
             throw new InvalidOperationException("Your account no longer has inventory access. Close this screen and sign in with an authorized account.");
         }
     }
+
 }

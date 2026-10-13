@@ -196,8 +196,8 @@ internal static class Ui
         string paymentDeadline = order.DeadlineUtc.ToLocalTime().ToString("MMM dd, yyyy hh:mm tt");
 
         StringBuilder receipt = new StringBuilder();
-        receipt.AppendLine(store.StoreName);
-        if (store.StoreContact.Length > 0) receipt.AppendLine(store.StoreContact);
+        receipt.AppendLine("CustomPC");
+
         receipt.AppendLine("PC BUILD ORDER RECEIPT");
         receipt.AppendLine(headingSeparator);
         receipt.AppendLine("Order: " + order.Number);

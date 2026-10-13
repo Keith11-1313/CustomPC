@@ -8,6 +8,8 @@ Before testing different jobs, read [who can do what](ROLES.md). Admin manages a
 
 The longer [code reference](CODE_REFERENCE.md) contains the complete file map, C# lookup table, role rules, and detailed database explanation. Use it when you have a specific question. [Validation results](VALIDATION.md) describe what was tested.
 
+For the new hosted pages, photos, dashboards and starter catalog, follow [the modern UI walkthrough](MODERN_UI_GUIDE.md) after the basic lessons.
+
 ## 1. Find your way around Visual Studio
 
 **Goal:** open the application and find one form's code.

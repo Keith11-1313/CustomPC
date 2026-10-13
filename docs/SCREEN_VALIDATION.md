@@ -1,88 +1,40 @@
-# Role screen validation — 13 October 2026
+# Current database revision
 
-The screen audit operated real Windows Forms controls and their Click/selection events, then checked the saved results. It opened each permitted screen through its dashboard button and returned through Back. Test windows were kept invisible; screen images were rendered from their actual controls with `DrawToBitmap`. These are runtime tests, not a claim of human mouse testing or Visual Studio Designer validation.
+The product data now lives in Database/custompc.db and Database/ProductImages, with one Admin and no transactions. The current 55-check report is in [VALIDATION.md](VALIDATION.md). [Current catalog render](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/data-folder-build/bin/DataValidation/debug/results-20261014-020102/Catalog.png). The five-screen previews and metrics below document the previous UI revision with isolated practice records; the starter importer has since been removed.
 
-**627 screen/workflow checks passed; 0 failed** in the earlier order-screen audit. Its 667-check regression rerun also passed. The corrected Guest checkout passed the latest **750-check full suite**, including 83 Guest sign-in/checkout checks. These runs overlap in coverage and should not be added together.
+# Modern screen review — 14 October 2026
 
-## Guest revision from the next annotated screenshot
+Runtime controls were operated by the external WinForms harness and rendered with DrawToBitmap. These are actual form controls and saved isolated test data. They are not browser mockups or proof of human mouse/Visual Studio Designer testing.
 
-The Guest homepage shows **Sign in**. Guests choose a valid build and click **Confirm build & order**, which opens login with the builder/homepage hidden. Customer login continues that same checkout, retains the selected parts, refreshes prices/availability and saves the build and linked order to that account after the normal order confirmation. No second checkout-button click is needed. Tests reload the database to verify the saved build's owner, selected part IDs and linked order. Cancelling or continuing as Guest preserves the preview without an order; Admin/Staff login returns to their dashboard. Cancelling homepage Sign in preserves the Guest workspace.
+The full regression passed **750 checks, 0 failures**. The final modern suite passed **234 checks, 0 failures**. Coverage overlaps; do not add these totals. See [VALIDATION.md](VALIDATION.md) for run evidence and manual checks.
 
-The 83 Guest checkout checks exercised those real buttons, invalid/valid builds, cancellation, wrong credentials, each role, a price changed during login, automatic checkout continuation and persistent build ownership. [Latest 750-check report](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/custompc-runtime-validation/run-20261013-225203-855-21456/report.json), [Guest homepage](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/custompc-runtime-validation/run-20261013-225203-855-21456/Role-guest-Dashboard.png), [saved checkout receipt](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/custompc-runtime-validation/run-20261013-225203-855-21456/Guest-checkout-saved-receipt.png). Earlier screenshots below predate this Guest flow correction.
+## Review the five requested screens
 
-## What each role actually has
-
-All 16 permitted dashboard routes were exercised across the four roles. Prohibited routes were checked as hidden and disabled.
-
-| Role | Visible dashboard routes | Actions exercised from those screens |
+| Screen | Preview | What to inspect |
 | --- | --- | --- |
-| Admin | Parts catalog, View orders, Parts & inventory, Suppliers, User accounts, Compatibility rules, Reports, Store tools & backups | Browse/search/refresh; read a selected order receipt; add/edit/archive parts; open movement history; add/edit/archive suppliers; add accounts with Admin/Staff/Customer roles, change a role, archive and search accounts; edit a compatibility rule; generate all four report types; save store details and refresh activity. |
-| Staff | Parts catalog, Orders & payments, Parts & inventory | Browse/search/refresh; open receipts; confirm payment; advance through Processing, Assembly, Ready for Pickup and Completed; adjust stock with a reason and refresh inventory. |
-| Customer | Parts catalog, PC builder, My orders | Browse/search/refresh; choose a valid build, confirm it and open its receipt; view personal orders; cancel an owned unpaid order; refresh. The Customer column is absent from their order table. |
-| Guest | Parts catalog, PC builder preview | Browse/search/refresh and select components for a preview. Confirm now opens login without placing an order. Login's Create account opens registration and saves a Customer account. |
+| Catalog | [Open](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/modern-ui-build/bin/ModernValidation/debug/previews-20261014-014901/Catalog.png) | Photos, prices, search/category/stock filters, Add to build, card scrolling |
+| Builder | [Open](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/modern-ui-build/bin/ModernValidation/debug/previews-20261014-014901/Builder.png) | Required selections, optional GPU, total and validation, checkout panel |
+| Login | [Open](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/modern-ui-build/bin/ModernValidation/debug/previews-20261014-014901/Login.png) | Logo, brand panel, white auth surface and focused account actions |
+| Admin | [Open populated](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/modern-ui-build/bin/ModernValidation/debug/previews-20261014-014901/Admin-populated.png) | Confirmed-payment sales, paid-part quantities, current stock health and selectors |
+| Staff | [Open populated](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/modern-ui-build/bin/ModernValidation/debug/previews-20261014-014901/Staff-populated.png) | Incoming counts, current work queue and category stock counts; no sales amounts |
 
-Every role's account button was exercised. It hid the dashboard during login and removed private routes after continuing as Guest. The current Guest caption is Sign in; authenticated users see Sign out. Buttons were checked for tab navigation and reachability in a simulated 1366×768 screen with a 1366×728 working area; scrolling was used for the taller part editor.
+[Customer first-order state](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/modern-ui-build/bin/ModernValidation/debug/previews-20261014-014901/Customer.png) · [No matching products](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/modern-ui-build/bin/ModernValidation/debug/previews-20261014-014901/Catalog-empty-search.png) · [Admin zero-payment period](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/modern-ui-build/bin/ModernValidation/debug/previews-20261014-014901/Admin.png)
 
-## A normal store workflow was also exercised
+Populated screenshots use saved practice receipts/payments in an isolated database. Managed-scale screenshots in the same directory simulate 100%, 125%, 150%; at larger sizes, scrolling is required. The rollback fixture deliberately revises one reference price in those scale previews; it is not a retailer quote or a live-store change.
 
-This test used normal mode, with demo mode disabled, on a separate empty database:
+## Role routes and actions
 
-1. Save store setup and sign in as the new Admin using a personal password.
-2. From Dashboard → User accounts → Add account, create Staff and Customer accounts.
-3. From Dashboard → Parts & inventory → Add part, add seven compatible components. Each starts at zero stock.
-4. Sign out and sign in as Staff. Record five units of each component through Adjust stock.
-5. Sign out and sign in as Customer. Confirm a valid build. Check ownership, pending status, reservation and the configured receipt header.
-6. Sign out and sign in as Staff. Confirm payment and advance the order through pickup.
-7. Check that completion leaves four units per component, releases reservations and retains exactly one payment.
-
-This proves the tested workflow does not depend on public demo credentials. Sample component descriptions were entered only into that isolated test store.
-
-## The availability problem found and fixed
-
-Payment and progress originally stayed enabled for Staff even when an order was completed. The business layer rejected invalid changes, but the screen suggested the actions were available.
-
-`OrdersForm.UpdateOrderActions` now checks both the role and the selected order. `OrdersForm_Shown` clears WinForms' automatic first-row selection. `LoadRows` keeps an explicitly selected order after payment/progress when it still matches the filters. Disabled transaction buttons use a muted background.
-
-| Selected row | Staff | Customer | Admin |
-| --- | --- | --- | --- |
-| No selected row | Record actions disabled | Record actions disabled | Receipt disabled |
-| Unexpired Pending Payment | Receipt and Confirm store payment | Receipt and Cancel unpaid order | Receipt only |
-| Paid / Processing / Assembly / Ready for Pickup | Receipt and Next order stage | Receipt only | Receipt only |
-| Completed / Cancelled | Receipt only | Receipt only | Receipt only |
-
-The added checks exercised Pending Payment, Paid, Completed and Cancelled rows for all three account roles, clearing selection, filtering out a selected row, retained selection after payment, and progression to completion without reselecting. Disabled completed actions produced no duplicate payment or stock deduction. The normal store workflow separately exercised each intermediate stage.
-
-The code reference also had two stale permissions: Admin payment and Staff/Admin cancellation. Both were corrected to match [ROLES.md](ROLES.md), along with its explanation of Admin catalog saves preserving stock.
-
-## Why a function may appear unavailable
-
-- **The menu/button is hidden:** the signed-in role cannot perform it. Admin cannot build/order, adjust stock, confirm payment, advance orders or cancel them manually. Staff cannot manage accounts, catalog details, suppliers, rules or reports. This follows the strict split you approved.
-- **An order button is visible but grey:** select an eligible row. Completed/cancelled orders offer receipt viewing; other transactions remain disabled.
-- **No component appears in the builder:** that category has no active part with available stock. Admin adds catalog details, then Staff receives stock.
-- **No Staff or Customer workspace on this computer yet:** the saved database was inspected read-only. Its only active account is `jerald@gmail.com`, with Admin role. The three old sample accounts are archived. Add your own accounts in User accounts; this audit did not add people or orders to your real store database.
-
-## Remaining manual checks
-
-No missing permitted route was found in the exercised screens. The following have a narrower validation boundary:
-
-| Function | Verified | Still unverified in this screen audit |
+| Role | Pages | Permitted actions |
 | --- | --- | --- |
-| Export CSV | Admin report screen, all report types, visible/enabled export control; CSV formatting in regression tests | Successfully choosing a destination through the native Windows Save dialog |
-| Receipt Save / Print | Selected receipt route, contents, visible/enabled controls, access restrictions | Successful native Save dialog and physical printer output |
-| Backup / Restore | Admin controls available; database backup, validation, password checks and recovery logic in regression tests | Successful native file-picker workflow and restoring a backup from an external drive |
-| Designer / Windows scaling | Matching Designer files; runtime fonts, controls and compact working-area checks | Loading in Visual Studio Designer and changing the actual Windows DPI setting |
+| Admin | Overview, Catalog, View orders, Inventory, Suppliers, Accounts, Rules, Reports, Store tools | Product metadata/photos/starter import; account roles; supplier/rules/settings; financial reports and ZIP recovery. Orders and inventory transactions are read-only. |
+| Staff | Overview, Catalog, Orders & payments, Inventory | Actual stock receipts/adjustments with reason, payment confirmation, Processing/Assembly/Ready/Completed. Operational charts only. |
+| Customer | Overview, Catalog, Builder, My orders | Select parts, own build checkout, own unpaid cancellation, own receipt. |
+| Guest | Overview, Catalog, Builder preview | Browse/select; valid checkout asks for login, then continues only for Customer. Sign in replaces Sign out. No personal order panel. |
 
-These pending checks are not counted as successful UI operations. The project remains under active revision. See [STORE_GUIDE.md](STORE_GUIDE.md) for manual store/recovery checks and [VALIDATION.md](VALIDATION.md) for the wider regression coverage.
+Page forms live inside one main window. Back returns to Overview. Editor/receipt/login dialogs remain focused. BuildDraft retains selected category IDs between Catalog and Builder. Sign out clears the draft. Guest-to-Customer checkout preserves it until the owned build and order are saved.
 
-## Open the recorded evidence
+Payments/progress buttons require a selected eligible row. Completed/cancelled orders have no transaction action. Zero-stock Add to build and invalid checkout are disabled with availability/validation text. Forbidden role actions are hidden and business methods independently reject them.
 
-These files are kept outside the source project so no QA or verification folder is added to the app:
+## Manual review
 
-- [627-check screen audit report](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/custompc-runtime-validation/run-20261013-103328-752-25796/report.json).
-- [667-check regression report after the fix](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/custompc-runtime-validation/run-20261013-103328-736-27332/report.json).
-- [Recorded screen/button inventory](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/custompc-runtime-validation/run-20261013-103328-752-25796/screen-inventory.json).
-- [Admin dashboard](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/custompc-runtime-validation/run-20261013-103328-752-25796/Audit-admin-DashboardForm.png), [Staff dashboard](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/custompc-runtime-validation/run-20261013-103328-752-25796/Audit-staff-DashboardForm.png), [Customer dashboard](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/custompc-runtime-validation/run-20261013-103328-752-25796/Audit-customer-DashboardForm.png), [Guest dashboard](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/custompc-runtime-validation/run-20261013-103328-752-25796/Audit-guest-DashboardForm.png).
-- [Completed order with Staff transactions disabled](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/custompc-runtime-validation/run-20261013-103328-752-25796/Audit-staff-Completed-order-actions.png).
-- [Normal-mode Customer build ready to confirm](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/custompc-runtime-validation/run-20261013-103328-752-25796/Audit-normal-customer-Builder-ready.png).
-
-Demo names in some images belong only to isolated fixtures. The normal-mode images use accounts created through setup/User accounts in a separate empty test database. Neither set represents new accounts in your real store.
+Run the practice database described in STORE_GUIDE. Tab through filters/cards/checkout/period selectors, scroll to the last product and Save/Back buttons, verify images after deleting originals, and complete an actual native-dialog/printer/external-drive test. Designer construction and managed scaling evidence do not replace those checks.
