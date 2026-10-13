@@ -1,6 +1,6 @@
 # Product source manifest
 
-42 exact products, six in each category. Sources retrieved 14 October 2026. These are ordinary records in Database/custompc.db with copied images in Database/ProductImages; all stock is zero. No product images are embedded in the app. Prices are editable PHP reference values, never automatically refreshed. Manufacturer specifications take precedence over retailer titles. Local PNGs are sourced product images, not generated illustrations. Source attribution does not transfer image ownership.
+42 exact products, six in each category. Sources retrieved 14 October 2026. These are ordinary records in Database/custompc.db with copied images in Database/ProductImages; stock was zero when prepared and is subsequently maintained in the live database. No product images are embedded in the app. Prices are editable PHP reference values, never automatically refreshed. Manufacturer specifications take precedence over retailer titles. Local PNGs are sourced product images, not generated illustrations. Source attribution does not transfer image ownership.
 
 The approved Tecware Nexus Air M2 replaces Nexus Air M. Its PHP 1,945 reference comes from an indexed Philippine retailer listing whose live endpoint returned 404; confirm a current supplier quote before selling. CPU engraving may not be readable; identity is tied to the exact listing. The Kingston CP-014 kit uses a single-DIMM thumbnail from the exact manufacturer page, rather than a photo proving both sticks. Read each review note below.
 

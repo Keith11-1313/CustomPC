@@ -1,59 +1,52 @@
-# Database and photo validation — 14 October 2026
+# Validation evidence
 
-The requested cleanup replaces the previous AppData database and embedded starter pack. The live data is now **C:\Users\Jerald\Desktop\CustomPC\Database\custompc.db**, with **ProductImages** beside it. The old data was preserved in an external safety snapshot before removal.
+This page separates executed checks from manual checks. Test counts overlap between runs and must not be added into a unique-test total. The application remains under revision.
 
-The prepared database has exactly one account: name admin, email admin@gmail.com, password admin@gmail.com, role Admin. It contains 42 ordinary products with zero stock and 42 local photographs. Orders, builds, payments, movements, suppliers and login attempts are empty. Three compatibility rules remain. Credentials use the existing salted PBKDF2 hash format.
+## Latest relevant run
 
-## Executed current checks
+**14 October 2026, 03:16 — 94 checks passed, 0 failed. Build: 0 warnings, 0 errors.** The external harness operated real WinForms controls against an isolated copy of the saved database. No test accounts, stock or orders were written into the live database.
 
-**55 passed, 0 failed** in the isolated data-folder harness. Build: **0 warnings, 0 errors** after a successful NuGet restore. The first restricted restore could not fetch vulnerability metadata; the subsequent forced restore succeeded.
+[Machine-readable report](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/data-folder-build/bin/DataValidation/debug/results-20261014-031656/report.json)
 
-- Default path resolves the solution-root Database folder; explicit test overrides still isolate data.
-- Exactly the requested Admin account exists and its requested password authenticates as Admin only.
-- All 42 product images decode from ProductImages beside the copied database; filenames contain no external paths.
-- No starter product resources are embedded in the compiled application, and the source Assets/StarterCatalog folder is gone.
-- No orders, payments, builds, movements or practice stock remain.
-- The catalog renders 42 ordinary saved product cards. Admin sees Add product but no Staff stock adjustment or starter-import button.
-- Account and product counts survive database reload.
-- Complete database/photo ZIP backup remains available.
+Coverage: saved Admin login, local photo decoding, catalog rendering, hosted management navigation, table/button separation at normal and 950×650 page sizes, period/greeting separation, mandatory socket/RAM/PSU checks, incompatible Customer checkout rejection, removal of supplier/rules UI/model fields/tables, database reload, and complete ZIP backup/restore. A sandbox-only temporary-folder permission failure was rerun with the required access; the completed run passed.
 
-The harness operates actual WinForms controls against a copy of the prepared database. It does not write test stock/accounts into the live database.
+Database removals were preceded by consistent SQLite backups. Settings/Rules/Suppliers removals preserved other table counts. Supplier-reference cleanup preserved all other product values. Photographs remained beside custompc.db.
 
-[Current JSON report](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/data-folder-build/bin/DataValidation/debug/results-20261014-020102/report.json) · [Current catalog render](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/data-folder-build/bin/DataValidation/debug/results-20261014-020102/Catalog.png)
+## Current rendered examples
 
-The previous modern UI revision passed 750 regression and 234 modern checks before this cleanup. Those historical runs include the now-removed embedded catalog importer and refer to the older data arrangement; they are not a claim that the old harness was rerun unchanged on this revision.
+These images are runtime control renders from the latest isolated run, not browser mockups or proof of actual Designer interaction. Stock and accounts in the images are snapshot data, not fixed application defaults.
 
-[Historical regression](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/custompc-runtime-validation/run-20261014-014617-355-26148/report.json) · [Historical modern checks](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/modern-ui-build/bin/ModernValidation/debug/previews-20261014-014901/report.json)
+| Screen | Preview |
+| --- | --- |
+| Admin overview | [Open](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/data-folder-build/bin/DataValidation/debug/results-20261014-031656/Overview.png) |
+| Catalog | [Open](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/data-folder-build/bin/DataValidation/debug/results-20261014-031656/Catalog.png) |
+| Inventory | [Open](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/data-folder-build/bin/DataValidation/debug/results-20261014-031656/Inventory.png) |
+| Reports | [Open](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/data-folder-build/bin/DataValidation/debug/results-20261014-031656/Reports.png) |
+| Activity & Backups | [Open](<C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/data-folder-build/bin/DataValidation/debug/results-20261014-031656/Store tools.png>) |
 
-## Safety backup
+## Historical broader tests
 
-The previous database, its images if present, and the removed embedded catalog are at:
+The earlier modern UI revision passed 750 regression checks and 234 modern checks. Those tested Guest checkout ownership after reload, role bypasses, reservations/payment/completion, photo import, chart date boundaries, empty/error states and managed scaling. They also included features/data arrangements that have since changed, so they are historical evidence rather than current full-suite certification.
 
-`C:\Users\Jerald\.codex\visualizations\2026\10\07\01a11539-e782-7ae3-bb38-3eafc37ec703\before-data-cleanup-20261014-015809`
+[Earlier regression JSON](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/custompc-runtime-validation/run-20261014-014617-355-26148/report.json) · [Earlier modern JSON](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/modern-ui-build/bin/ModernValidation/debug/previews-20261014-014901/report.json)
 
-SQLite online backup preserved the old records before replacing them. The old AppData custompc.db and ProductImages were removed only after the snapshots and new database integrity check. Earlier incomplete preparation attempts left temporary new files; the completed preparation replaced those and verified exactly 42 image references.
+## Manual checks still open
 
-## Still separate manual checks
+| Check | Action |
+| --- | --- |
+| Visual Studio Designer | Open the 15 forms with View Designer. Runtime/design-mode construction and a successful Designer MSBuild output target do not prove the Designer UI loads. Base-form design guards were added after the reported errors. |
+| Native file dialogs | Import a valid photo, test Cancel, delete the original and reopen. Select ZIP backup/restore paths through real Windows dialogs. Programmatic operations were checked separately. |
+| Windows DPI | Run at actual 100%, 125%, 150%; check focus, dropdowns, wrapping, scrolling and Save/Back. Earlier managed Scale simulations are separate. |
+| Printer | Print a practice receipt and inspect paper size/page breaks. |
+| External-drive recovery | Save ZIP to a removable drive, restore a practice database and verify records/photos after reopening. |
+| Whole store workflow | Repeat Customer order → Staff payment/assembly/pickup using a separate practice database on the target workstation. |
 
-Actual Visual Studio Designer loading, successful native file-picker selection/cancellation, physical printing, external-drive recovery and real Windows 100%/125%/150% DPI switching remain manual checks. Earlier managed scaling and runtime constructor tests do not replace them. The app remains under revision.
-
-## Run the focused validation
+## Reproduce the focused run on this computer
 
 ```powershell
-$qaRoot = 'C:\Users\Jerald\.codex\visualizations\2026\10\07\01a11539-e782-7ae3-bb38-3eafc37ec703'
-dotnet build "$qaRoot\data-folder-validation\DataValidation.csproj" --artifacts-path "$qaRoot\data-folder-build" -p:UseAppHost=false
-dotnet "$qaRoot\data-folder-build\bin\DataValidation\debug\DataValidation.dll"
+$qaRoot = 'C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703'
+dotnet build "$qaRoot/data-folder-validation/DataValidation.csproj" --artifacts-path "$qaRoot/data-folder-build" -p:UseAppHost=false
+dotnet "$qaRoot/data-folder-build/bin/DataValidation/debug/DataValidation.dll"
 ```
 
-QA builds, reports and snapshots remain outside source. Database is ignored by Git; copy the whole folder when transferring the prepared data. Deleting it creates an empty store and shows Setup; the app does not regenerate the 42 products or your prepared Admin.
-## Form sizing revision — 14 October 2026, 02:38
-
-The main window now opens wider to accommodate the sidebar and 1,100-pixel management pages. Inventory, Orders, Users, Suppliers, Reports and Compatibility use Designer-editable bottom FlowLayoutPanels; action buttons wrap and tables leave room above those panels. The dashboard chart host was widened with the window. Store tools retains the simplified backup layout.
-
-The isolated harness copied the current saved catalog rather than asserting the old zero-stock fixture. No live records or stock were changed. It passed **92 checks, 0 failed**, including table/action separation and visible button containment at normal size and 950×650 page size. Build passed with zero warnings/errors. Inventory, Reports, Compatibility and Store tools runtime renders were visually reviewed. This focused check does not claim every dialog or actual Windows DPI setting has been manually tested.
-
-[Layout report](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/data-folder-build/bin/DataValidation/debug/results-20261014-023758/report.json)
-
-Mandatory compatibility revision: 96 isolated checks passed, including valid build, mismatched socket/RAM, insufficient PSU, missing Rules table, removed Admin control and Customer checkout rejection. Build: zero warnings/errors. Rules was dropped after a consistent safety backup; other table counts and integrity remained unchanged. Report: C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/data-folder-build/bin/DataValidation/debug/results-20261014-031115/report.json
-
-Supplier removal: 94 isolated checks passed, including removed menu/editor selector/inventory column/model field, no recreated Suppliers table, mandatory compatibility and complete ZIP backup/restore without supplier records. Build: zero warnings/errors. Current database supplier references were removed after a safety backup; other table counts and product values were preserved. Report: C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/data-folder-build/bin/DataValidation/debug/results-20261014-031656/report.json
+The harness expects the prepared Admin credentials and catalog; if saved credentials/catalog change, fixtures must be adapted without resetting live data. Harnesses, reports and safety snapshots are local tooling outside the source project. Keep normal bin/obj build files for Visual Studio.

@@ -8,7 +8,7 @@ Before testing different jobs, read [who can do what](ROLES.md). Admin manages a
 
 The longer [code reference](CODE_REFERENCE.md) contains the complete file map, C# lookup table, role rules, and detailed database explanation. Use it when you have a specific question. [Validation results](VALIDATION.md) describe what was tested.
 
-For the new hosted pages, photos, dashboards and starter catalog, follow [the modern UI walkthrough](MODERN_UI_GUIDE.md) after the basic lessons.
+For hosted pages, photos and dashboards, use [the code reference](CODE_REFERENCE.md) after the basic lessons.
 
 ## 1. Find your way around Visual Studio
 
@@ -264,7 +264,7 @@ total.Text = "Build total: " + Ui.Money(buildTotal);
 
 The total starts at zero. `foreach` visits each chosen part. Here `+=` adds its price to the running total. The same symbol connected an event in lesson 3; what it does depends on the values being used. `Ui.Money` formats a number like `PHP 1,000.00`; assigning the finished text to `total.Text` displays it.
 
-**Try it:** run, Browse as guest, and open PC builder. Choose a CPU and note the total. Add a motherboard and check that the total is their two prices added together. Add RAM; the messages should still list the other missing categories. CPU Ryzen 5 5600, B550M motherboard, and DDR4 RAM are matching sample choices when available. Switching to an Intel CPU while keeping the B550M board should show a socket mismatch and disable checkout. Complete a compatible build: Confirm becomes enabled and opens login. Close login: the same preview returns with no order. Try again and sign in as Customer: the same checkout continues, saves that build and order to the account, and opens the receipt after the normal confirmation.
+**Try it:** run, Browse as guest, and open PC builder. Choose a CPU and note the total. Add a motherboard and check that the total is their two prices added together. Add RAM; the messages should still list the other missing categories. An AM4 CPU, AM4 motherboard and matching DDR4 RAM form matching choices when available. Switching to an Intel CPU while keeping the B550M board should show a socket mismatch and disable checkout. Complete a compatible build: Confirm becomes enabled and opens login. Close login: the same preview returns with no order. Try again and sign in as Customer: the same checkout continues, saves that build and order to the account, and opens the receipt after the normal confirmation.
 
 **Follow Guest checkout:** in `SubmitButton_Click`, `store.Session == null` calls `SignInFromBuilder`. That helper retains the chosen part IDs and refreshes the catalog. After Customer login, execution continues in the same handler to `CreateOrder`, using `store.Session.Id` as the owner. Both `PcBuild.CustomerId` and `CustomerOrder.CustomerId` receive that account ID. Cancelling, continuing as Guest or signing in as Staff/Admin returns without an order. If stock changed and the build is no longer valid, the Customer must fix the refreshed selection first.
 
@@ -291,7 +291,7 @@ The first line chooses a database for apps started from **this PowerShell proces
 1. Sign in as `staff@custompc.local`, password `CustomPC123!` in the fresh practice database.
 2. Open Parts & inventory. Select one component row and note its **OnHand** number.
 3. Click **Adjust stock**. Set **Quantity change** to `2`, enter `Learning exercise` in **Reason / supply reference**, and click **Record adjustment**.
-4. Expect OnHand to increase by 2. Movement history is an Admin report, so that button is disabled for Staff. Stay signed in as Staff for the next step.
+4. Expect OnHand to increase by 2. Movement history is an Admin report, so Staff does not see that button. Stay signed in as Staff for the next step.
 5. Select the component again and click Adjust stock. Set Quantity change to `0` with the same reason, then click Record adjustment. Expect an error and no extra stock change. Click Back to leave the unsaved editor. Its earlier successful adjustment stays saved.
 6. Close the app. The PowerShell command should finish. Run the same `dotnet run` line again; the saved stock should remain.
 7. Close the app. Remove the override from this PowerShell process:
@@ -386,8 +386,6 @@ For any feature, answer these four questions before moving on:
 3. Where is invalid input rejected?
 4. Does this action only change the screen, or does it save records?
 
-If you cannot answer one, return to that part of the flow. You do not need to memorize all 19 forms. The [reference](CODE_REFERENCE.md) provides their map, less common C# expressions, password hashing, database details, and the advanced manual validation checklist. The [store guide](STORE_GUIDE.md) explains setup, backups and daily operation.
+If you cannot answer one, return to that part of the flow. You do not need to memorize all 15 forms. The [reference](CODE_REFERENCE.md) provides their map, less common C# expressions, password hashing, database details, and the advanced manual validation checklist. The [store guide](STORE_GUIDE.md) explains setup, backups and daily operation.
 
-Compatibility checks are mandatory application logic in AppStore.Compatibility.cs. There is no Admin rules page, rule editor, Rules table or toggle. Socket, memory, graphics output and PSU checks run during preview and checkout.
-
-Supplier management is removed: no supplier pages, part selector, inventory column, model association or Suppliers table. Existing product sources in the research manifest are documentation, not supplier records.
+Compatibility validation is mandatory during preview and checkout. The current database has no Settings, Rules or Suppliers features. Use the code reference for the current file/table map.
