@@ -53,7 +53,6 @@ internal class Database
             using SqliteCommand support = connection.CreateCommand();
             support.Transaction = transaction;
             support.CommandText = """
-                CREATE TABLE IF NOT EXISTS Settings (Key TEXT PRIMARY KEY, Value TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS AuditLog (Id INTEGER PRIMARY KEY AUTOINCREMENT, CreatedUtc TEXT NOT NULL,
                     ActorId TEXT NOT NULL, Action TEXT NOT NULL, Details TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS LoginAttempts (Key TEXT PRIMARY KEY, Failures INTEGER NOT NULL, LockedUntilUtc TEXT NOT NULL);
