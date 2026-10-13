@@ -23,6 +23,8 @@ This is the strict split you approved. It replaces the proposal's broader permis
 
 Guests can register their own Customer account from login. Registration always assigns Customer; it cannot assign Admin or Staff. An existing order receipt can be viewed, saved or printed by its Customer owner or by Staff/Admin with read access. Reading a receipt does not confirm payment or change the order.
 
+Guests see **Sign in** on the homepage. Once their build is valid, **Confirm build & order** opens login. Customer login continues that same checkout, retains the chosen parts, refreshes prices/availability and saves the build/order to the signed-in Customer after the normal confirmation. There is no second checkout-button click. Cancelling or continuing as Guest preserves the preview without saving an order. Staff/Admin login returns to their own dashboard.
+
 A permitted action can still be disabled because of the selected record. On Orders, select a row first. Payment applies to an unexpired pending order; progress applies to a paid/in-progress order; cancellation applies to the Customer's own pending order. Completed/cancelled rows enable receipt viewing only. This differs from a prohibited action, which is hidden for that role.
 
 Automatic unpaid-order expiry is a system action. It runs on startup/refresh even when the current user cannot cancel orders manually.

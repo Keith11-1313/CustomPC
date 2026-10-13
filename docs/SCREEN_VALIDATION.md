@@ -2,7 +2,13 @@
 
 The screen audit operated real Windows Forms controls and their Click/selection events, then checked the saved results. It opened each permitted screen through its dashboard button and returned through Back. Test windows were kept invisible; screen images were rendered from their actual controls with `DrawToBitmap`. These are runtime tests, not a claim of human mouse testing or Visual Studio Designer validation.
 
-**627 screen/workflow checks passed; 0 failed.** The existing **667-check regression suite** was also rerun after the order-screen correction. The totals overlap in coverage and should not be added together.
+**627 screen/workflow checks passed; 0 failed** in the earlier order-screen audit. Its 667-check regression rerun also passed. The corrected Guest checkout passed the latest **750-check full suite**, including 83 Guest sign-in/checkout checks. These runs overlap in coverage and should not be added together.
+
+## Guest revision from the next annotated screenshot
+
+The Guest homepage shows **Sign in**. Guests choose a valid build and click **Confirm build & order**, which opens login with the builder/homepage hidden. Customer login continues that same checkout, retains the selected parts, refreshes prices/availability and saves the build and linked order to that account after the normal order confirmation. No second checkout-button click is needed. Tests reload the database to verify the saved build's owner, selected part IDs and linked order. Cancelling or continuing as Guest preserves the preview without an order; Admin/Staff login returns to their dashboard. Cancelling homepage Sign in preserves the Guest workspace.
+
+The 83 Guest checkout checks exercised those real buttons, invalid/valid builds, cancellation, wrong credentials, each role, a price changed during login, automatic checkout continuation and persistent build ownership. [Latest 750-check report](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/custompc-runtime-validation/run-20261013-225203-855-21456/report.json), [Guest homepage](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/custompc-runtime-validation/run-20261013-225203-855-21456/Role-guest-Dashboard.png), [saved checkout receipt](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/custompc-runtime-validation/run-20261013-225203-855-21456/Guest-checkout-saved-receipt.png). Earlier screenshots below predate this Guest flow correction.
 
 ## What each role actually has
 
@@ -13,9 +19,9 @@ All 16 permitted dashboard routes were exercised across the four roles. Prohibit
 | Admin | Parts catalog, View orders, Parts & inventory, Suppliers, User accounts, Compatibility rules, Reports, Store tools & backups | Browse/search/refresh; read a selected order receipt; add/edit/archive parts; open movement history; add/edit/archive suppliers; add accounts with Admin/Staff/Customer roles, change a role, archive and search accounts; edit a compatibility rule; generate all four report types; save store details and refresh activity. |
 | Staff | Parts catalog, Orders & payments, Parts & inventory | Browse/search/refresh; open receipts; confirm payment; advance through Processing, Assembly, Ready for Pickup and Completed; adjust stock with a reason and refresh inventory. |
 | Customer | Parts catalog, PC builder, My orders | Browse/search/refresh; choose a valid build, confirm it and open its receipt; view personal orders; cancel an owned unpaid order; refresh. The Customer column is absent from their order table. |
-| Guest | Parts catalog, PC builder preview | Browse/search/refresh and select components for a preview. Confirm cannot place an order. Login's Create account opens registration and saves a Customer account. |
+| Guest | Parts catalog, PC builder preview | Browse/search/refresh and select components for a preview. Confirm now opens login without placing an order. Login's Create account opens registration and saves a Customer account. |
 
-Every role's Sign out button was exercised. It hid the dashboard during login and removed private routes after continuing as Guest. Buttons were checked for tab navigation and reachability in a simulated 1366×768 screen with a 1366×728 working area; scrolling was used for the taller part editor.
+Every role's account button was exercised. It hid the dashboard during login and removed private routes after continuing as Guest. The current Guest caption is Sign in; authenticated users see Sign out. Buttons were checked for tab navigation and reachability in a simulated 1366×768 screen with a 1366×728 working area; scrolling was used for the taller part editor.
 
 ## A normal store workflow was also exercised
 

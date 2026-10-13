@@ -185,6 +185,7 @@ public partial class DashboardForm : StoreWindow
 
     private void SignIn()
     {
+        bool wasGuest = AppStore.Current.Session == null;
         expiryTimer.Stop();
         // Switching accounts should show only login, just like a fresh app launch.
         Hide();
@@ -196,7 +197,14 @@ public partial class DashboardForm : StoreWindow
             {
                 if (loginForm.ShowDialog() != DialogResult.OK)
                 {
-                    Close();
+                    if (wasGuest)
+                    {
+                        UpdateDashboard();
+                        Show();
+                        Activate();
+                        expiryTimer.Start();
+                    }
+                    else Close();
                     return;
                 }
             }
@@ -239,6 +247,7 @@ public partial class DashboardForm : StoreWindow
         orders.Enabled = store.CanViewAllOrders || store.IsCustomer;
         builder.Enabled = store.IsCustomer || store.Session == null;
         builder.Text = store.Session == null ? "PC builder preview" : "PC builder";
+        signout.Text = store.Session == null ? "Sign in" : "Sign out";
         orders.Text = store.IsAdmin ? "View orders" : store.IsStaff ? "Orders & payments" : "My orders";
         ArrangeRoleMenu();
 

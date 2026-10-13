@@ -8,6 +8,8 @@ For testing the store workflows, read [the store guide](docs/STORE_GUIDE.md). A 
 
 After setup, login appears first. Sign in or choose **Browse as guest** to open the homepage. Closing login exits the app. **Back** or **Esc** returns without saving unfinished editor inputs. Admins have **Store tools & backups** for receipt details, verified backups, recovery and activity history.
 
+The Guest homepage offers **Sign in**. Guests first choose a valid build, then click **Confirm build & order** to open login. Customer login continues that same checkout using the selected parts; after the normal order confirmation, the build and linked order are saved to that Customer account and its receipt opens. No second click on the checkout button is required. Cancelling login keeps the preview; Admin/Staff login returns to their dashboard. Cancelling Sign in from the Guest homepage returns there.
+
 Read [who can do what](docs/ROLES.md) for the strict permission matrix and steps to assign roles. Admin manages the system and monitors orders; Staff changes stock and records payments/progress; Customers place and cancel only their own unpaid orders. Admin does not inherit Staff or Customer actions.
 
 On this computer, `jerald@gmail.com` is Admin and keeps its existing password. The old public-password demo accounts were archived; add your own Staff and Customer accounts through User accounts. This is saved account data, not an Admin email hardcoded into the application.
@@ -22,7 +24,7 @@ Use [the code reference](docs/CODE_REFERENCE.md) afterward for all 19 forms, the
 
 The guide explains expected behavior. A successful build alone does not verify login against your saved database, runtime workflows, Visual Studio Designer loading, or printer output.
 
-Read [the validation results](docs/VALIDATION.md) for executed checks and remaining manual checks. The latest source run passed 667 checks with 0 failures, including 153 strict-role checks and real font-family checks on all 19 forms. Testing does not mark the product finished. Actual printer, Designer, Windows scaling and external-drive recovery checks remain open.
+Read [the validation results](docs/VALIDATION.md) for executed checks and remaining manual checks. The latest source run passed 750 checks with 0 failures, including 83 Guest sign-in/checkout checks, 153 strict-role checks and real font-family checks on all 19 forms. Testing does not mark the product finished. Actual printer, Designer, Windows scaling and external-drive recovery checks remain open.
 
 Read [the role screen audit](docs/SCREEN_VALIDATION.md) for the actual dashboard routes, buttons tested per role, normal store workflow and disabled-action explanation. Its separate 627 checks include a correction for payment/progress buttons on completed orders.
 

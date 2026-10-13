@@ -2,13 +2,15 @@
 
 Validated on **13 October 2026**, Windows, .NET SDK 10.0.401. This source project is under active revision. The latest run covers the strict Admin/Staff/Customer permission split, role-specific menus, EasyPC-inspired green palette, supplied logo and bundled Righteous/Roboto fonts. No published release package is retained.
 
-**Result: 667 automated checks passed, 0 failed.** This includes 153 strict-role checks and 38 customer-revision/GPU/inventory-button checks alongside the business, navigation, store-hardening and font/render checks. The earlier branding-only total of 476 is historical; one former Staff-report UI check was removed because Staff no longer has report access. The build completed with **0 warnings and 0 errors** after a successful network-enabled restore. These results verify tested code paths; they do not mean the product is finished.
+**Result: 750 automated checks passed, 0 failed.** This includes 83 Guest sign-in/checkout checks, 153 strict-role checks and 38 customer-revision/GPU/inventory-button checks alongside the business, navigation, store-hardening and font/render checks. The earlier branding-only total of 476 is historical; one former Staff-report UI check was removed because Staff no longer has report access. The latest build completed with **0 warnings and 0 errors**, using previously restored packages. These results verify tested code paths; they do not mean the product is finished.
 
 Separately, **6 current-database copy-upgrade checks passed** on 13 October. A read-only SQLite snapshot of your saved database was upgraded on a separate path. Account hashes and record counts were preserved, and the original file's SHA-256 remained unchanged. The earlier **9 October** run passed **3 login-button checks** against its then-current saved-database copy; those historical credentials were not retested against the newer original file.
 
 These results apply to the source saved during this validation. Start with [CODE_GUIDE.md](CODE_GUIDE.md) to learn the code. The [code reference](CODE_REFERENCE.md) contains the advanced manual validation checklist.
 
 ## Fresh role screen audit
+
+The newer Guest revision adds a Sign in footer and clickable builder confirmation that opens login. Its 83 checks cover invalid/valid builds, cancelled login, continuing as Guest, wrong passwords, Customer login continuing the same checkout without a second button click, persistent ownership of the selected build and linked order, Admin/Staff return, retained selections and updated prices. Builder and dashboard stay hidden during redirected login. Cancelling Sign in from the Guest homepage returns there. These checks are included in the latest 750-check full run; no live store records were changed.
 
 The follow-up [screen-by-screen audit](SCREEN_VALIDATION.md) passed **627 checks, 0 failures**: 420 for actual dashboard routes and nested actions, 146 for an empty normal-mode store's Admin → Staff → Customer → Staff workflow, and 61 for selected-order action availability. The existing 667-check regression suite was rerun after the correction and passed again. These totals overlap; they are separate runs.
 
@@ -90,7 +92,7 @@ For the current saved database, sign in with `jerald@gmail.com` and its existing
 
 ## What was exercised
 
-The 667 checks include 142 business/data checks, 118 existing form checks, 99 startup/navigation checks, 51 store-hardening checks, 7 setup/maintenance button checks, 59 render/font/sizing checks, 153 strict-role checks and 38 customer-revision checks. Fixtures now sign in with Customer to create test orders and Staff to receive stock or confirm payments; they no longer rely on Admin inheriting those actions. Form checks used real controls and events, changed selectors/search inputs and inspected saved records. Test windows stayed invisible; native confirmation/error dialogs were answered within the test process.
+The 750 checks include 142 business/data checks, 118 existing form checks, 99 startup/navigation checks, 83 Guest sign-in/checkout checks, 51 store-hardening checks, 7 setup/maintenance button checks, 59 render/font/sizing checks, 153 strict-role checks and 38 customer-revision checks. Fixtures sign in with Customer to create test orders and Staff to receive stock or confirm payments; they do not rely on Admin inheriting those actions. Form checks used real controls and events, changed selectors/search inputs and inspected saved records. Test windows stayed invisible; native confirmation/error dialogs were answered within the test process.
 
 | Area | Checks | Evidence covered |
 | --- | ---: | --- |
@@ -114,7 +116,8 @@ The 667 checks include 142 business/data checks, 118 existing form checks, 99 st
 | Form renders, fonts and sizing | 59 | Isolated fixture, 19 real form renders, 38 bundled font-family assertions, simulated 125% scaling with a smaller work area |
 | Strict roles and bypass attempts | 153 | Four roles, ownership, denial without saved changes, hidden-handler attempts, role-specific menus, live role changes, stock-editor race and revoked receipts |
 | Customer revisions and inventory buttons | 38 | Conditional six-part builds, ownership without an account selector, private customer columns, actual parent buttons, normal credentials and safe recovery |
-| **Current full run, 13 October** | **667** | **All passed** |
+| Guest sign-in and checkout continuation | 83 | Guest footer wording, login redirection, cancelled/Guest/incorrect/Customer/Admin/Staff outcomes, retained selections, fresh prices, same-checkout order creation and build ownership after database reload |
+| **Current full run, 13 October** | **750** | **All passed** |
 | Current-database copy upgrade, separate 13 October run | 6 | Integrity, preserved business counts and hashes, isolated migration, unchanged original SHA-256 |
 | Existing-database login buttons, separate 9 October run | 3 | Admin, Staff, Customer login using the saved database copy; all passed |
 
@@ -157,7 +160,7 @@ The full run creates fresh test databases and uses the current project source. I
 
 Machine-readable evidence on this computer:
 
-- [Full run results, 13 October](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/custompc-runtime-validation/run-20261013-094722-899/report.json)
+- [Full run results, 13 October](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/custompc-runtime-validation/run-20261013-225203-855-21456/report.json)
 - [Current saved database copy upgrade](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/custompc-runtime-validation/run-20261013-013839-218/report.json)
 - [Existing-database login results](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/custompc-runtime-validation/run-20261009-224736-007/report.json)
 - [Read-only database inspection](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/custompc-runtime-validation/actual-database-evidence.json)

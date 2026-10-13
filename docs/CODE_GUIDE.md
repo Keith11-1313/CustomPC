@@ -19,7 +19,7 @@ The longer [code reference](CODE_REFERENCE.md) contains the complete file map, C
 5. Press **F5** to run. If your database is empty, **Set up your store** appears first: create your own administrator with a password of at least 12 characters. After setup, or with existing accounts, expect login alone. The homepage opens after successful sign-in or guest access.
 6. Click **Browse as guest**, then **Parts catalog**. You can look at parts without placing an order. Click **Back** to return to the homepage, then close the homepage when done.
 
-**Try navigating:** run again, choose Browse as guest, open Parts catalog, then press **Esc**. It should return to the homepage just like Back. On an editor such as customer registration, Back returns without saving unfinished inputs. Back from a receipt only closes the receipt; an order you already confirmed stays saved. The login window has no Back button because it is the starting screen. Closing it exits the app.
+**Try navigating:** run again, choose Browse as guest, open Parts catalog, then press **Esc**. It should return to the homepage just like Back. On an editor such as customer registration, Back returns without saving unfinished inputs. Back from a receipt only closes the receipt; an order you already confirmed stays saved. Closing the initial login exits the app. Closing login opened from the Guest homepage or builder returns to that Guest screen.
 
 An application must be **built** before it runs: the compiler checks your C# and creates the executable. If F5 reports an error, open **View → Error List** and read the first error before trying later lessons. This project requires .NET 10 and Visual Studio's .NET desktop development tools.
 
@@ -262,7 +262,9 @@ total.Text = "Build total: " + Ui.Money(buildTotal);
 
 The total starts at zero. `foreach` visits each chosen part. Here `+=` adds its price to the running total. The same symbol connected an event in lesson 3; what it does depends on the values being used. `Ui.Money` formats a number like `PHP 1,000.00`; assigning the finished text to `total.Text` displays it.
 
-**Try it:** run, Browse as guest, and open PC builder. Choose a CPU and note the total. Add a motherboard and check that the total is their two prices added together. Add RAM; the messages should still list the other missing categories. CPU Ryzen 5 5600, B550M motherboard, and DDR4 RAM are matching sample choices when those parts remain available. Switching to an Intel CPU while keeping the B550M board should show a socket mismatch. As guest, confirmation remains disabled.
+**Try it:** run, Browse as guest, and open PC builder. Choose a CPU and note the total. Add a motherboard and check that the total is their two prices added together. Add RAM; the messages should still list the other missing categories. CPU Ryzen 5 5600, B550M motherboard, and DDR4 RAM are matching sample choices when available. Switching to an Intel CPU while keeping the B550M board should show a socket mismatch and disable checkout. Complete a compatible build: Confirm becomes enabled and opens login. Close login: the same preview returns with no order. Try again and sign in as Customer: the same checkout continues, saves that build and order to the account, and opens the receipt after the normal confirmation.
+
+**Follow Guest checkout:** in `SubmitButton_Click`, `store.Session == null` calls `SignInFromBuilder`. That helper retains the chosen part IDs and refreshes the catalog. After Customer login, execution continues in the same handler to `CreateOrder`, using `store.Session.Id` as the owner. Both `PcBuild.CustomerId` and `CustomerOrder.CustomerId` receive that account ID. Cancelling, continuing as Guest or signing in as Staff/Admin returns without an order. If stock changed and the build is no longer valid, the Customer must fix the refreshed selection first.
 
 Find `PartSelectionChanged`: it calls `UpdateBuildSummary`. This explains why changing a dropdown updates the screen immediately.
 
@@ -363,7 +365,7 @@ Application.Run(new DashboardForm());
 
 `new LoginForm()` creates the login window. `ShowDialog()` displays it and waits for its result. `!=` means “is not equal to.” If login closes without an OK result, `return` ends `Main`, so the homepage is never created. Sign in and Browse as guest both return OK. Only then does `Application.Run(new DashboardForm())` create the homepage and keep the app running. The `using` block releases the login window's resources after it closes.
 
-When you click **Sign out**, `DashboardForm.SignIn` hides the homepage and shows login. A successful sign-in or guest choice brings the homepage back with the new menu. Closing that login window ends the app.
+The homepage uses **Sign in** for Guest and **Sign out** for a signed-in account. Both call `DashboardForm.SignIn`, which hides the homepage while login is open. A successful sign-in or Guest choice restores it with the new menu. Cancelling Guest Sign in returns to the Guest homepage. Cancelling after signing out of an account closes the app.
 
 The `AppStore.*.cs` files use `partial` just like the form files: they are sections of **one class**, grouped by subject. `AppStore.Accounts.cs` is not a second store or a second database.
 

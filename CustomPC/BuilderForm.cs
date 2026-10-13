@@ -105,7 +105,8 @@ public partial class BuilderForm : StoreWindow
             validation.ForeColor = Color.FromArgb(153, 27, 27);
         }
 
-        submit.Enabled = store.IsCustomer && errors.Count == 0;
+        // A valid Guest build continues to Customer login; ordering still requires that account.
+        submit.Enabled = (store.Session == null || store.IsCustomer) && errors.Count == 0;
         submit.BackColor = submit.Enabled ? Color.FromArgb(84, 177, 55) : Color.FromArgb(226, 232, 224);
 
         if (store.Session == null)
@@ -118,6 +119,18 @@ public partial class BuilderForm : StoreWindow
     {
         try
         {
+            AppStore store = AppStore.Current;
+            store.Refresh();
+            if (store.Session == null)
+            {
+                SignInFromBuilder();
+                if (!store.IsCustomer) return;
+                if (store.CheckBuild(GetSelectedParts()).Count > 0) return;
+                // Continue this checkout with the retained parts and the newly signed-in owner.
+            }
+            if (!store.IsCustomer)
+                throw new InvalidOperationException("Sign in with a Customer account to place an order.");
+
             decimal confirmedTotal = 0;
             foreach (Part selectedPart in GetSelectedParts())
             {
@@ -129,7 +142,6 @@ public partial class BuilderForm : StoreWindow
                 return;
             }
 
-            AppStore store = AppStore.Current;
             store.Refresh();
             if (!store.IsCustomer)
             {
@@ -163,6 +175,34 @@ public partial class BuilderForm : StoreWindow
             }
             Ui.ShowError(this, exception);
         }
+    }
+
+    private void SignInFromBuilder()
+    {
+        Form? dashboard = Owner;
+        bool dashboardWasVisible = dashboard != null && dashboard.Visible;
+        Hide();
+        if (dashboardWasVisible) dashboard!.Hide();
+        try
+        {
+            using LoginForm loginForm = new LoginForm();
+            loginForm.ShowDialog();
+        }
+        finally
+        {
+            if (dashboardWasVisible && !dashboard!.IsDisposed) dashboard.Show();
+            Show();
+        }
+
+        AppStore.Current.Refresh();
+        if (AppStore.Current.Session != null && !AppStore.Current.IsCustomer)
+        {
+            // Staff/Admin continue to their own dashboard instead of a Customer-only builder.
+            DialogResult = DialogResult.Cancel;
+            Close();
+            return;
+        }
+        RefreshSelectedParts();
     }
 
     private void RefreshSelectedParts()
