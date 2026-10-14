@@ -22,7 +22,7 @@ namespace CustomPC
             using Mutex instance = new Mutex(true, @"Local\CustomPC-" + key, out bool firstInstance);
             if (!firstInstance)
             {
-                MessageBox.Show("CustomPC is already running for this database. Switch to its existing window.", "CustomPC");
+                Ui.Message(null, "CustomPC is already running for this database. Switch to its existing window.", "CustomPC");
                 return;
             }
 

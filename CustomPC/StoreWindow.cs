@@ -28,8 +28,37 @@ public class StoreWindow : Form
         {
             StoreTheme.Apply(this);
             FitToWorkingArea(Screen.FromControl(this).WorkingArea);
+            FitHeader();
         }
         base.OnLoad(e);
+    }
+
+    protected override void OnSizeChanged(EventArgs e)
+    {
+        base.OnSizeChanged(e);
+        if (!Ui.IsDesign) FitHeader();
+    }
+
+    private void FitHeader()
+    {
+        foreach (DataGridView grid in Controls.OfType<DataGridView>().Where(table => table.Name == "grid"))
+        {
+            // AutoScroll's virtual width must not stretch a table beyond the visible page.
+            grid.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+            grid.Width = Math.Max(280, ClientSize.Width - grid.Left - 32);
+            FlowLayoutPanel? actions = Controls.OfType<FlowLayoutPanel>().FirstOrDefault(row => row.Name == "actionRow");
+            grid.Height = Math.Max(100, ClientSize.Height - grid.Top - (actions?.Height ?? 16) - 16);
+        }
+        // Some dialogs grew after their header was designed. Keep Back inside the surface.
+        foreach (Panel header in Controls.OfType<Panel>().Where(panel => panel.Name == "headerSurface"))
+        {
+            header.Width = ClientSize.Width;
+            Button? back = header.Controls.OfType<Button>().FirstOrDefault(button => button.Name == "back");
+            if (back == null) continue;
+            back.Left = Math.Max(0, header.ClientSize.Width - back.Width - 24);
+            Label? heading = header.Controls.OfType<Label>().FirstOrDefault(label => label.Name == "heading");
+            if (heading != null) heading.Width = Math.Max(1, back.Left - heading.Left - 16);
+        }
     }
 
     public void FitToWorkingArea(Rectangle workingArea)

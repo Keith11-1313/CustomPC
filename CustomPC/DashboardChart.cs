@@ -84,6 +84,8 @@ public sealed partial class DashboardChart : Panel
         empty.Visible = false;
         chart.Visible = true;
         chart.Plot.Clear();
+        chart.Plot.FigureBackground.Color = ScottPlot.Color.FromHex("FFFFFF");
+        chart.Plot.DataBackground.Color = ScottPlot.Color.FromHex("FFFFFF");
         draw(chart.Plot);
         chart.Plot.Title(title);
         chart.Plot.Axes.AutoScale();
@@ -99,9 +101,11 @@ public sealed partial class DashboardChart : Panel
             line.Color = ScottPlot.Color.FromHex("54B137");
             line.LineWidth = 2;
             line.LegendText = unit;
-            plot.Axes.DateTimeTicksBottom();
+            int stride = Math.Max(1, (int)Math.Ceiling(values.Count / 7.0));
+            plot.Axes.Bottom.TickGenerator = new ScottPlot.TickGenerators.NumericManual(
+                values.Where((value, index) => index % stride == 0 || index == values.Count - 1)
+                    .Select(value => new ScottPlot.Tick(value.Date.ToOADate(), value.Date.ToString("MMM d"))).ToArray());
             plot.YLabel(unit);
-            plot.ShowLegend();
         }, values.Any(v => v.Value > 0), noData);
         if (values.Any(v => v.Value > 0))
             SetTargets(values.Select(value => new ChartSelection($"{value.Date:MMM d}: {value.Value.ToString(unit == "PHP" ? "N2" : "N0")} {unit}", Date: value.Date)).ToList(),

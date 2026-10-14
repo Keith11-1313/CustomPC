@@ -8,7 +8,7 @@ partial class DashboardChart
     private void InitializeComponent()
     {
         selectionFooter = new Panel();
-        selection = new ComboBox();
+        selection = new StoreComboBox();
         openSelection = new Button();
         selectionFooter.Dock = DockStyle.Bottom;
         selectionFooter.Height = 38;

@@ -67,7 +67,7 @@ public partial class StoreToolsForm : StoreWindow
             if (dialog.ShowDialog(this) != DialogResult.OK) return;
             if (!Ui.Confirm(this, "Restore " + dialog.FileName + "?\n\nThis replaces current records with the backup. A safety backup of current records is saved first. The app will close; reopen it and use an account from the restored backup.")) return;
             AppStore.Current.RestoreBackup(dialog.FileName, adminPassword.Text);
-            MessageBox.Show(this, "Backup restored. CustomPC will close. Reopen it to sign in.", "CustomPC");
+            Ui.Message(this, "Backup restored. CustomPC will close. Reopen it to sign in.", "CustomPC");
             Application.Exit();
         }
         catch (Exception exception) { Ui.ShowError(this, exception); }

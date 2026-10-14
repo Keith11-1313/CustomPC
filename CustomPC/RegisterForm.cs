@@ -40,7 +40,7 @@ public partial class RegisterForm : StoreWindow
 
             // Registration always creates a customer account.
             AppStore.Current.SaveUser(newCustomer, password.Text, true);
-            MessageBox.Show(this, "Account created. You can now sign in.", "CustomPC");
+            Ui.Message(this, "Account created. You can now sign in.", "CustomPC");
             DialogResult = DialogResult.OK;
         }
         catch (Exception exception)

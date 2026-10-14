@@ -39,7 +39,7 @@ partial class ReceiptForm
         back.Cursor = Cursors.Hand;
         back.UseMnemonic = false;
         Controls.Add(back);
-        receiptText = new TextBox();
+        receiptText = new StoreTextField();
         receiptText.Name = "receiptText";
         receiptText.Location = new Point(32, 98);
         receiptText.Size = new Size(836, 450);
@@ -110,7 +110,7 @@ partial class ReceiptForm
     private Panel headerSurface = null!;
     private Label heading = null!;
     private Button back = null!;
-    private TextBox receiptText = null!;
+    private StoreTextField receiptText = null!;
     private Button print = null!;
     private Button save = null!;
 }

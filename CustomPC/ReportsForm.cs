@@ -7,6 +7,11 @@ public partial class ReportsForm : StoreWindow
     public ReportsForm()
     {
         InitializeComponent();
+        SizeChanged += (_, _) =>
+        {
+            filters.Width = Math.Max(1, ClientSize.Width - 64);
+            summary.Width = Math.Max(1, ClientSize.Width - summary.Left - 32);
+        };
         back.Click += BackButton_Click;
         if (Ui.IsDesign)
         {

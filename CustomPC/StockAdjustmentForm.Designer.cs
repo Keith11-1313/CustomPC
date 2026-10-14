@@ -55,7 +55,7 @@ partial class StockAdjustmentForm
         quantityLabel.Text = "Quantity change";
         quantityLabel.UseMnemonic = false;
         Controls.Add(quantityLabel);
-        quantity = new NumericUpDown();
+        quantity = new StoreNumberField();
         quantity.Name = "quantity";
         quantity.Location = new Point(32, 214);
         quantity.Size = new Size(480, 32);
@@ -72,7 +72,7 @@ partial class StockAdjustmentForm
         reasonLabel.Text = "Reason / supply reference";
         reasonLabel.UseMnemonic = false;
         Controls.Add(reasonLabel);
-        reason = new TextBox();
+        reason = new StoreTextField();
         reason.Name = "reason";
         reason.Location = new Point(32, 298);
         reason.Size = new Size(480, 32);
@@ -127,8 +127,8 @@ partial class StockAdjustmentForm
     private Button back = null!;
     private Label partLabel = null!;
     private Label quantityLabel = null!;
-    private NumericUpDown quantity = null!;
+    private StoreNumberField quantity = null!;
     private Label reasonLabel = null!;
-    private TextBox reason = null!;
+    private StoreTextField reason = null!;
     private Button save = null!;
 }

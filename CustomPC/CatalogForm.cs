@@ -31,6 +31,8 @@ public partial class CatalogForm : StoreWindow
         availability.SelectedIndexChanged += FilterChanged;
         refresh.Click += RefreshButton_Click;
         emptyProducts.ActionClicked += EmptyProducts_Click;
+        products.SizeChanged += (_, _) => FitProductCards();
+        products.ControlAdded += (_, _) => FitProductCards();
         grid.CellDoubleClick += PartsGrid_CellDoubleClick;
 
         LoadRows();
@@ -41,6 +43,15 @@ public partial class CatalogForm : StoreWindow
         // Closing this screen returns to the window that opened it.
         DialogResult = DialogResult.Cancel;
         Close();
+    }
+
+    private void FitProductCards()
+    {
+        // Fill each row evenly instead of leaving a large unused strip on the right.
+        int available = products.ClientSize.Width - products.Padding.Horizontal - SystemInformation.VerticalScrollBarWidth;
+        int columns = Math.Max(1, available / 278);
+        int width = Math.Max(220, available / columns - 20);
+        foreach (ProductCard card in products.Controls.OfType<ProductCard>()) card.Width = width;
     }
 
     private void FilterChanged(object? sender, EventArgs e)
@@ -101,7 +112,7 @@ public partial class CatalogForm : StoreWindow
                 $"Wattage: {selectedPart.Watts}\n" +
                 $"Available: {AppStore.Current.Available(selectedPart)}";
 
-            MessageBox.Show(this, details, "Component details");
+            Ui.Message(this, details, "Component details");
         }
         catch (Exception exception)
         {

@@ -13,7 +13,8 @@ partial class EmptyStateControl
         detail = new Label();
         action = new Button();
         SuspendLayout();
-        icon.Text = "◇";
+        icon.Text = "";
+        icon.Paint += PaintEmptyIcon;
         icon.Font = new Font("Segoe UI", 28F);
         icon.Dock = DockStyle.Top;
         icon.Height = 64;

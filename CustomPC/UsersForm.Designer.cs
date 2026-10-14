@@ -31,13 +31,13 @@ partial class UsersForm
         searchLabel.Text = "Search name or email";
         searchLabel.UseMnemonic = false;
         Controls.Add(searchLabel);
-        search = new TextBox();
+        search = new StoreTextField();
         search.Name = "search";
         search.Location = new Point(32, 118);
         search.Size = new Size(440, 32);
         search.TabIndex = 3;
         Controls.Add(search);
-        archived = new CheckBox();
+        archived = new StoreCheckBox();
         archived.Name = "archived";
         archived.Location = new Point(500, 118);
         archived.Size = new Size(320, 32);
@@ -170,7 +170,7 @@ partial class UsersForm
     private Panel headerSurface = null!;
     private Label heading = null!;
     private Label searchLabel = null!;
-    private TextBox search = null!;
+    private StoreTextField search = null!;
     private CheckBox archived = null!;
     private DataGridView grid = null!;
     private Button add = null!;

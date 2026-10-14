@@ -5,7 +5,12 @@ namespace CustomPC;
 // The layout is editable in ProductCard.Designer.cs. Only this constructor binds saved data.
 public partial class ProductCard : UserControl
 {
-    public ProductCard() { InitializeComponent(); }
+    public ProductCard()
+    {
+        InitializeComponent();
+        foreach (Control child in Controls)
+            child.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+    }
 
     public ProductCard(Part part, AppStore store, Action<Part>? select) : this()
     {
@@ -23,9 +28,10 @@ public partial class ProductCard : UserControl
         details.Click += (_, _) => ShowSpecifications(part);
         AccessibleName = part.Name;
         AppFonts.Apply(this);
+        StoreTheme.Apply(this);
     }
 
-    private void ShowSpecifications(Part part) => MessageBox.Show(FindForm(), part.Specifications, part.Name);
+    private void ShowSpecifications(Part part) => Ui.Message(FindForm(), part.Specifications, part.Name);
 
     protected override void OnPaint(PaintEventArgs e)
     {

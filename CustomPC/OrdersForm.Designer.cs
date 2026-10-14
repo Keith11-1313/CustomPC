@@ -31,7 +31,7 @@ partial class OrdersForm
         searchLabel.Text = "Order number or customer";
         searchLabel.UseMnemonic = false;
         Controls.Add(searchLabel);
-        search = new TextBox();
+        search = new StoreTextField();
         search.Name = "search";
         search.Location = new Point(32, 118);
         search.Size = new Size(440, 32);
@@ -45,7 +45,7 @@ partial class OrdersForm
         statusLabel.Text = "Order status";
         statusLabel.UseMnemonic = false;
         Controls.Add(statusLabel);
-        status = new ComboBox();
+        status = new StoreComboBox();
         status.Name = "status";
         status.Location = new Point(496, 118);
         status.Size = new Size(260, 32);
@@ -253,7 +253,7 @@ partial class OrdersForm
     private Panel headerSurface = null!;
     private Label heading = null!;
     private Label searchLabel = null!;
-    private TextBox search = null!;
+    private StoreTextField search = null!;
     private Label statusLabel = null!;
     private ComboBox status = null!;
     private DataGridView grid = null!;

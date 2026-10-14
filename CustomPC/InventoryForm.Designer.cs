@@ -31,7 +31,7 @@ partial class InventoryForm
         searchLabel.Text = "Search parts";
         searchLabel.UseMnemonic = false;
         Controls.Add(searchLabel);
-        search = new TextBox();
+        search = new StoreTextField();
         search.Name = "search";
         search.Location = new Point(32, 118);
         search.Size = new Size(420, 32);
@@ -45,14 +45,14 @@ partial class InventoryForm
         stockLabel.Text = "Stock status";
         stockLabel.UseMnemonic = false;
         Controls.Add(stockLabel);
-        stockFilter = new ComboBox();
+        stockFilter = new StoreComboBox();
         stockFilter.Name = "stockFilter";
         stockFilter.Location = new Point(476, 118);
         stockFilter.Size = new Size(250, 32);
         stockFilter.TabIndex = 5;
         stockFilter.DropDownStyle = ComboBoxStyle.DropDownList;
         Controls.Add(stockFilter);
-        archived = new CheckBox();
+        archived = new StoreCheckBox();
         archived.Name = "archived";
         archived.Location = new Point(750, 118);
         archived.Size = new Size(280, 32);
@@ -248,7 +248,7 @@ partial class InventoryForm
     private Panel headerSurface = null!;
     private Label heading = null!;
     private Label searchLabel = null!;
-    private TextBox search = null!;
+    private StoreTextField search = null!;
     private Label stockLabel = null!;
     private ComboBox stockFilter = null!;
     private CheckBox archived = null!;

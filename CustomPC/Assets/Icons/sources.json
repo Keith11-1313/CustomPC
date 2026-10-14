@@ -1,0 +1,110 @@
+[
+  {
+    "name": "arrow-left",
+    "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/arrow-left.svg",
+    "retrieved": "2026-10-14",
+    "sha256": "C5F4B88076108EB1A0D95336E1AA7E7BB1419A3A92AF96F6247D88CD3456F933"
+  },
+  {
+    "name": "calendar-days",
+    "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/calendar-days.svg",
+    "retrieved": "2026-10-14",
+    "sha256": "9330EB8D7C4989E97B6361314ABBF02953243C602874725C9E58CECA00DA3BD7"
+  },
+  {
+    "name": "chart-no-axes-column",
+    "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/chart-no-axes-column.svg",
+    "retrieved": "2026-10-14",
+    "sha256": "5DFD8FC5B5417DAD858991DE4969C3FE1C4A466104D0880A15B691FF7C5B1F12"
+  },
+  {
+    "name": "check",
+    "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/check.svg",
+    "retrieved": "2026-10-14",
+    "sha256": "7F33ACC9A77A61659531044525FC008EDEBE215BF4DCF1C789C8674AD3277DB0"
+  },
+  {
+    "name": "chevron-down",
+    "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/chevron-down.svg",
+    "retrieved": "2026-10-14",
+    "sha256": "66EA878E72ED3488BB3B464C39DFDCCEE8D1F78E560DCCEA40E5E12DA0E87E87"
+  },
+  {
+    "name": "clipboard-list",
+    "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/clipboard-list.svg",
+    "retrieved": "2026-10-14",
+    "sha256": "2B91ABC2E8EE8BA4C2E0F77D506A47A7A9774B0D4DE3FA4B27E822A6376AB892"
+  },
+  {
+    "name": "cpu",
+    "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/cpu.svg",
+    "retrieved": "2026-10-14",
+    "sha256": "EC83BB69EC029D367D749AFC445B39C8E95891EBF99B0400652677C2B149B99C"
+  },
+  {
+    "name": "eye-off",
+    "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/eye-off.svg",
+    "retrieved": "2026-10-14",
+    "sha256": "774BCD975C5DE781A4EE778C76E5591BCDEB409955F7054847E7E6003DA0A520"
+  },
+  {
+    "name": "eye",
+    "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/eye.svg",
+    "retrieved": "2026-10-14",
+    "sha256": "5BF90197DD7629CAD64A2E48D1186A71559DEB6121207D10E3DC5B19EBAFFDCF"
+  },
+  {
+    "name": "inbox",
+    "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/inbox.svg",
+    "retrieved": "2026-10-14",
+    "sha256": "1838482C53D0846BADEF9BE96FDCF7A167064241BD4891EFA995C77EBEC5F187"
+  },
+  {
+    "name": "layout-grid",
+    "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/layout-grid.svg",
+    "retrieved": "2026-10-14",
+    "sha256": "B8903F61D09B1D75E55C71158277D26570962F69C2099446A251871E0A2D6678"
+  },
+  {
+    "name": "lock-keyhole",
+    "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/lock-keyhole.svg",
+    "retrieved": "2026-10-14",
+    "sha256": "FC0B8B7590D1D9E9BB0112C5C2E15A78ADE0BFECA6D6F8C79FBBE149236D74BE"
+  },
+  {
+    "name": "log-out",
+    "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/log-out.svg",
+    "retrieved": "2026-10-14",
+    "sha256": "F24B5B45C05A3ACC346AF8095408F6BA197FF58EA1641A4F2CB25A9702D2C0AC"
+  },
+  {
+    "name": "mail",
+    "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/mail.svg",
+    "retrieved": "2026-10-14",
+    "sha256": "3236A51D5B8CE9B0528CF2E6AD07E527BD636DDED6F5A9D656072052B99CAEA8"
+  },
+  {
+    "name": "plus",
+    "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/plus.svg",
+    "retrieved": "2026-10-14",
+    "sha256": "7F6AF73BF1FF6C4BCA3F18351C8D1BDEC6749C0C2530C4DE5DA85D520C21DF17"
+  },
+  {
+    "name": "refresh-cw",
+    "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/refresh-cw.svg",
+    "retrieved": "2026-10-14",
+    "sha256": "2E10DD403C85A24F163D59FC6151AA21147FE9402E1305DFC8979208CAEE8944"
+  },
+  {
+    "name": "search",
+    "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/search.svg",
+    "retrieved": "2026-10-14",
+    "sha256": "283D371C2E433817BB9C0C8310CAA6C77FA4177C0F4F1168D9C83B97AF7389DC"
+  },
+  {
+    "name": "user-round",
+    "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/user-round.svg",
+    "retrieved": "2026-10-14",
+    "sha256": "84870F26F3FAF8DA45DA84174517519E81B9E8F00319C78954FCBB74F50038A1"
+  }
+]

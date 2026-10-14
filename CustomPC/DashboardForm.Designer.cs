@@ -519,7 +519,7 @@ partial class DashboardForm
         Controls.Add(emptyRecent);
         chartArea.Visible = false;
         Controls.Add(chartArea);
-        period = new ComboBox();
+        period = new StoreComboBox();
         period.Name = "period";
         period.DropDownStyle = ComboBoxStyle.DropDownList;
         period.Items.AddRange(new object[] { "Last 7 days", "Last 30 days", "Last 90 days" });

@@ -47,7 +47,7 @@ partial class RegisterForm
         fullNameLabel.Text = "Full name";
         fullNameLabel.UseMnemonic = false;
         Controls.Add(fullNameLabel);
-        fullName = new TextBox();
+        fullName = new StoreTextField();
         fullName.Name = "fullName";
         fullName.Location = new Point(32, 134);
         fullName.Size = new Size(480, 32);
@@ -61,7 +61,7 @@ partial class RegisterForm
         emailLabel.Text = "Email address";
         emailLabel.UseMnemonic = false;
         Controls.Add(emailLabel);
-        email = new TextBox();
+        email = new StoreTextField();
         email.Name = "email";
         email.Location = new Point(32, 214);
         email.Size = new Size(480, 32);
@@ -75,12 +75,13 @@ partial class RegisterForm
         passwordLabel.Text = "Password (at least 12 characters)";
         passwordLabel.UseMnemonic = false;
         Controls.Add(passwordLabel);
-        password = new TextBox();
+        password = new StoreTextField();
         password.Name = "password";
         password.Location = new Point(32, 294);
         password.Size = new Size(480, 32);
         password.TabIndex = 7;
         password.UseSystemPasswordChar = true;
+        password.ShowPasswordToggle = true;
         Controls.Add(password);
         confirmLabel = new Label();
         confirmLabel.Name = "confirmLabel";
@@ -90,12 +91,13 @@ partial class RegisterForm
         confirmLabel.Text = "Confirm password";
         confirmLabel.UseMnemonic = false;
         Controls.Add(confirmLabel);
-        confirm = new TextBox();
+        confirm = new StoreTextField();
         confirm.Name = "confirm";
         confirm.Location = new Point(32, 374);
         confirm.Size = new Size(480, 32);
         confirm.TabIndex = 9;
         confirm.UseSystemPasswordChar = true;
+        confirm.ShowPasswordToggle = true;
         Controls.Add(confirm);
         save = new Button();
         save.Name = "save";
@@ -145,12 +147,12 @@ partial class RegisterForm
     private Label heading = null!;
     private Button back = null!;
     private Label fullNameLabel = null!;
-    private TextBox fullName = null!;
+    private StoreTextField fullName = null!;
     private Label emailLabel = null!;
-    private TextBox email = null!;
+    private StoreTextField email = null!;
     private Label passwordLabel = null!;
-    private TextBox password = null!;
+    private StoreTextField password = null!;
     private Label confirmLabel = null!;
-    private TextBox confirm = null!;
+    private StoreTextField confirm = null!;
     private Button save = null!;
 }

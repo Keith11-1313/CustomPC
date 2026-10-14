@@ -43,7 +43,7 @@ partial class SetupForm
         fullNameLabel.ForeColor = Color.FromArgb(32, 41, 35);
         fullNameLabel.UseMnemonic = false;
         Controls.Add(fullNameLabel);
-        fullName = new TextBox();
+        fullName = new StoreTextField();
         fullName.Name = "fullName";
         fullName.Location = new Point(34, 135);
         fullName.Size = new Size(592, 30);
@@ -60,7 +60,7 @@ partial class SetupForm
         emailLabel.ForeColor = Color.FromArgb(32, 41, 35);
         emailLabel.UseMnemonic = false;
         Controls.Add(emailLabel);
-        email = new TextBox();
+        email = new StoreTextField();
         email.Name = "email";
         email.Location = new Point(34, 215);
         email.Size = new Size(592, 30);
@@ -77,13 +77,14 @@ partial class SetupForm
         passwordLabel.ForeColor = Color.FromArgb(32, 41, 35);
         passwordLabel.UseMnemonic = false;
         Controls.Add(passwordLabel);
-        password = new TextBox();
+        password = new StoreTextField();
         password.Name = "password";
         password.Location = new Point(34, 295);
         password.Size = new Size(592, 30);
         password.TabIndex = 10;
         password.MaxLength = 128;
         password.UseSystemPasswordChar = true;
+        password.ShowPasswordToggle = true;
         Controls.Add(password);
         confirmLabel = new Label();
         confirmLabel.Name = "confirmLabel";
@@ -95,13 +96,14 @@ partial class SetupForm
         confirmLabel.ForeColor = Color.FromArgb(32, 41, 35);
         confirmLabel.UseMnemonic = false;
         Controls.Add(confirmLabel);
-        confirm = new TextBox();
+        confirm = new StoreTextField();
         confirm.Name = "confirm";
         confirm.Location = new Point(34, 375);
         confirm.Size = new Size(592, 30);
         confirm.TabIndex = 12;
         confirm.MaxLength = 128;
         confirm.UseSystemPasswordChar = true;
+        confirm.ShowPasswordToggle = true;
         Controls.Add(confirm);
         help = new Label();
         help.Name = "help";
@@ -171,13 +173,13 @@ partial class SetupForm
 
 
     private Label fullNameLabel = null!;
-    private TextBox fullName = null!;
+    private StoreTextField fullName = null!;
     private Label emailLabel = null!;
-    private TextBox email = null!;
+    private StoreTextField email = null!;
     private Label passwordLabel = null!;
-    private TextBox password = null!;
+    private StoreTextField password = null!;
     private Label confirmLabel = null!;
-    private TextBox confirm = null!;
+    private StoreTextField confirm = null!;
     private Label help = null!;
     private Button save = null!;
     private Button back = null!;

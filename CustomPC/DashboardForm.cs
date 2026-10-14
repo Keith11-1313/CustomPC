@@ -533,7 +533,7 @@ public partial class DashboardForm : StoreWindow
         foreach (var item in menu)
         {
             bool selected = item.Value == screen;
-            item.Key.BackColor = selected ? StoreTheme.Green : StoreTheme.Ink;
+            item.Key.BackColor = selected ? Color.FromArgb(222, 241, 212) : StoreTheme.Ink;
             item.Key.ForeColor = selected ? StoreTheme.Ink : Color.White;
             item.Key.FlatAppearance.BorderSize = 0;
             item.Key.FlatAppearance.MouseOverBackColor = selected ? Color.FromArgb(123, 195, 92) : Color.FromArgb(54, 68, 58);

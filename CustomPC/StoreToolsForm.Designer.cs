@@ -77,13 +77,14 @@ partial class StoreToolsForm
         adminPasswordLabel.ForeColor = Color.FromArgb(32, 41, 35);
         adminPasswordLabel.UseMnemonic = false;
         Controls.Add(adminPasswordLabel);
-        adminPassword = new TextBox();
+        adminPassword = new StoreTextField();
         adminPassword.Name = "adminPassword";
         adminPassword.Location = new Point(300, 128);
         adminPassword.Size = new Size(302, 30);
         adminPassword.TabIndex = 11;
         adminPassword.MaxLength = 128;
         adminPassword.UseSystemPasswordChar = true;
+        adminPassword.ShowPasswordToggle = true;
         Controls.Add(adminPassword);
         restore = new Button();
         restore.Name = "restore";
@@ -199,7 +200,7 @@ partial class StoreToolsForm
 
     private Button backup = null!;
     private Label adminPasswordLabel = null!;
-    private TextBox adminPassword = null!;
+    private StoreTextField adminPassword = null!;
     private Button restore = null!;
     private Label health = null!;
     private Label historyTitle = null!;

@@ -31,7 +31,7 @@ partial class CatalogForm
         searchLabel.Text = "Search";
         searchLabel.UseMnemonic = false;
         Controls.Add(searchLabel);
-        search = new TextBox();
+        search = new StoreTextField();
         search.Name = "search";
         search.Location = new Point(32, 118);
         search.Size = new Size(380, 32);
@@ -45,7 +45,7 @@ partial class CatalogForm
         categoryLabel.Text = "Category";
         categoryLabel.UseMnemonic = false;
         Controls.Add(categoryLabel);
-        category = new ComboBox();
+        category = new StoreComboBox();
         category.Name = "category";
         category.Location = new Point(436, 118);
         category.Size = new Size(220, 32);
@@ -60,7 +60,7 @@ partial class CatalogForm
         availabilityLabel.Text = "Availability";
         availabilityLabel.UseMnemonic = false;
         Controls.Add(availabilityLabel);
-        availability = new ComboBox();
+        availability = new StoreComboBox();
         availability.Name = "availability";
         availability.Location = new Point(680, 118);
         availability.Size = new Size(220, 32);
@@ -226,7 +226,7 @@ partial class CatalogForm
     private Panel headerSurface = null!;
     private Label heading = null!;
     private Label searchLabel = null!;
-    private TextBox search = null!;
+    private StoreTextField search = null!;
     private Label categoryLabel = null!;
     private ComboBox category = null!;
     private Label availabilityLabel = null!;

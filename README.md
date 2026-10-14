@@ -6,7 +6,7 @@ CustomPC is a Windows Forms application for PC builds, inventory, orders and sto
 
 Open `CustomPC.slnx` in Visual Studio with the .NET desktop development workload and .NET 10 installed. Restore packages, build, then press **F5**. The project targets `net10.0-windows10.0.19041`.
 
-Right-click a form's `.cs` file and choose **View Designer** (Shift+F7). Layout lives in `.Designer.cs`; event handlers live in `.cs`; form resources live in `.resx`. There are **15 forms**. Catalog and management pages are hosted inside DashboardForm; login, editors and receipts are dialogs.
+Right-click a form's `.cs` file and choose **View Designer** (Shift+F7). Layout lives in `.Designer.cs`; event handlers live in `.cs`; form resources live in `.resx`. There are **16 forms**. Catalog and management pages are hosted inside DashboardForm; login, editors and receipts are dialogs.
 
 Keep `bin` and `obj`: Visual Studio and the Designer need their generated files. A debug EXE is a build output, not a release package. QA tooling and reports are outside the source project.
 

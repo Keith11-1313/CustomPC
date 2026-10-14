@@ -76,40 +76,35 @@ Open `LoginForm.cs`. Near the top, find:
 
 ```csharp
 login.Click += LoginButton_Click;
-showPassword.CheckedChanged += ShowPassword_CheckedChanged;
 ```
 
-An **event** is a notification that something happened. `Click` happens when a button is clicked. `CheckedChanged` happens when the checkbox's checked state changes. In these lines, `+=` connects the event to the method that should respond. A method connected this way is called an **event handler**.
+An **event** is a notification that something happened. `Click` happens when a button is clicked. `+=` connects the event to the method that should respond. A method connected this way is called an **event handler**.
 
 Read the first line as: **when login is clicked, run LoginButton_Click**.
 
 These connections are inside `public LoginForm()`. That is a **constructor**: setup instructions that run when code creates a new login window. `InitializeComponent()` creates the controls before the constructor connects their events. `AcceptButton = login;` also lets Enter activate Sign in.
 
-Now find this complete method:
+Now open `StoreTextField.cs`. Find `passwordEye.Click +=` in its constructor. That button is the eye inside the password field. Inside its handler, find:
 
 ```csharp
-private void ShowPassword_CheckedChanged(object? sender, EventArgs e)
-{
-    password.UseSystemPasswordChar = !showPassword.Checked;
-}
+UseSystemPasswordChar = !UseSystemPasswordChar;
 ```
 
-For this lesson, concentrate on the line inside the braces:
+Read this one instruction:
 
-- `showPassword.Checked` is `true` when the checkbox is ticked and `false` when unticked. `true` and `false` are the two possible values of a `bool`.
+- `UseSystemPasswordChar` is a `bool`: `true` means masked; `false` means visible.
 - `!` reverses a true/false value.
-- `password.UseSystemPasswordChar` decides whether the text box masks its characters. `true` means masked; `false` means visible.
 - `=` assigns a value. The semicolon ends the instruction.
 
-Ticked checkbox → `!true` → `false` → password characters become visible.
+First click: masked (`true`) → `!true` → visible (`false`). Second click: visible (`false`) → `!false` → masked (`true`). `UpdateEye()` changes the downloaded eye/eye-off image and accessible action label. The handler also preserves the caret and selected text.
 
-In the method's first line, `private` means other classes cannot directly call it; `void` means it does not return a value. Windows supplies `sender` and `e` when raising the event. This handler uses the form's controls directly, so it does not need those two arguments. You can leave their declaration unchanged.
+In `LoginButton_Click`'s first line, `private` means other classes cannot directly call it; `void` means it does not return a value. Windows supplies `sender` and `e` when raising the event. Leave those arguments unchanged while learning the handler.
 
-**Try it:** run the app, type the dummy text `practice` in Password, and toggle Show password. You should see the same text become visible and masked. This action does not sign you in or change a saved password.
+**Try it:** run the app, type the dummy text `practice` in Password, and click its eye twice. You should see the same text become visible and masked. Tab from the text to the eye; Space can activate the button. This action does not sign you in or change a saved password.
 
-**Checkpoint:** Why does ticking the checkbox set masking to false?
+**Checkpoint:** Why does the same eye button reveal and then hide the password?
 
-**Answer:** The `!` reverses its `Checked` value from true to false.
+**Answer:** The `!` reverses the current masking value each time.
 
 **Follow another button:** open `CatalogForm.cs` and find `BackButton_Click`. The constructor connects `back.Click += BackButton_Click;`, using the same event pattern. In `CatalogForm.Designer.cs`, `InitializeComponent` sets `CancelButton = back;`, which makes Esc activate Back. The handler sets `DialogResult.Cancel` and closes the catalog, so control returns to the homepage. Cancel here is a window result; it does not cancel an order or call a save method.
 
@@ -386,6 +381,6 @@ For any feature, answer these four questions before moving on:
 3. Where is invalid input rejected?
 4. Does this action only change the screen, or does it save records?
 
-If you cannot answer one, return to that part of the flow. You do not need to memorize all 15 forms. The [reference](CODE_REFERENCE.md) provides their map, less common C# expressions, password hashing, database details, and the advanced manual validation checklist. The [store guide](STORE_GUIDE.md) explains setup, backups and daily operation.
+If you cannot answer one, return to that part of the flow. You do not need to memorize all 16 forms. The [reference](CODE_REFERENCE.md) provides their map, less common C# expressions, password hashing, database details, and the advanced manual validation checklist. The [store guide](STORE_GUIDE.md) explains setup, backups and daily operation.
 
 Compatibility validation is mandatory during preview and checkout. The current database has no Settings, Rules or Suppliers features. Use the code reference for the current file/table map.

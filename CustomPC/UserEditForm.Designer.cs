@@ -47,7 +47,7 @@ partial class UserEditForm
         fullNameLabel.Text = "Full name";
         fullNameLabel.UseMnemonic = false;
         Controls.Add(fullNameLabel);
-        fullName = new TextBox();
+        fullName = new StoreTextField();
         fullName.Name = "fullName";
         fullName.Location = new Point(32, 134);
         fullName.Size = new Size(480, 32);
@@ -61,7 +61,7 @@ partial class UserEditForm
         emailLabel.Text = "Email address";
         emailLabel.UseMnemonic = false;
         Controls.Add(emailLabel);
-        email = new TextBox();
+        email = new StoreTextField();
         email.Name = "email";
         email.Location = new Point(32, 214);
         email.Size = new Size(480, 32);
@@ -75,7 +75,7 @@ partial class UserEditForm
         roleLabel.Text = "Access role";
         roleLabel.UseMnemonic = false;
         Controls.Add(roleLabel);
-        role = new ComboBox();
+        role = new StoreComboBox();
         role.Name = "role";
         role.Location = new Point(32, 294);
         role.Size = new Size(480, 32);
@@ -90,14 +90,15 @@ partial class UserEditForm
         passwordLabel.Text = "New password (12+ characters; blank keeps existing)";
         passwordLabel.UseMnemonic = false;
         Controls.Add(passwordLabel);
-        password = new TextBox();
+        password = new StoreTextField();
         password.Name = "password";
         password.Location = new Point(32, 374);
         password.Size = new Size(480, 32);
         password.TabIndex = 9;
         password.UseSystemPasswordChar = true;
+        password.ShowPasswordToggle = true;
         Controls.Add(password);
-        archived = new CheckBox();
+        archived = new StoreCheckBox();
         archived.Name = "archived";
         archived.Location = new Point(32, 434);
         archived.Size = new Size(480, 32);
@@ -152,13 +153,13 @@ partial class UserEditForm
     private Label heading = null!;
     private Button back = null!;
     private Label fullNameLabel = null!;
-    private TextBox fullName = null!;
+    private StoreTextField fullName = null!;
     private Label emailLabel = null!;
-    private TextBox email = null!;
+    private StoreTextField email = null!;
     private Label roleLabel = null!;
     private ComboBox role = null!;
     private Label passwordLabel = null!;
-    private TextBox password = null!;
+    private StoreTextField password = null!;
     private CheckBox archived = null!;
     private Button save = null!;
 }

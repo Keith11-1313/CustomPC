@@ -28,8 +28,7 @@ internal static class Ui
             message = "The operation could not be completed. Check available disk space and file access, then try again.\n\n" +
                 "If the problem continues, contact support with reference " + reference + ". Your diagnostic log is in " + AppLog.Folder;
         }
-        MessageBox.Show(owner, message, "Please check",
-            MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        Message(owner, message, "Please check");
     }
 
     public static void Bind(DataGridView grid, object data)
@@ -42,12 +41,35 @@ internal static class Ui
         {
             idColumn.Visible = false;
         }
+        StoreTheme.ApplyGrid(grid);
 
         grid.ClearSelection();
         grid.Paint -= EmptyGrid_Paint;
         grid.Paint += EmptyGrid_Paint;
         grid.CellFormatting -= StatusCell_Formatting;
         grid.CellFormatting += StatusCell_Formatting;
+        grid.CellPainting -= CheckboxCell_Paint;
+        grid.CellPainting += CheckboxCell_Paint;
+    }
+
+    private static void CheckboxCell_Paint(object? sender, DataGridViewCellPaintingEventArgs e)
+    {
+        if (sender is not DataGridView grid || e.RowIndex < 0 || e.ColumnIndex < 0 || e.Graphics == null ||
+            grid.Columns[e.ColumnIndex] is not DataGridViewCheckBoxColumn) return;
+        e.PaintBackground(e.ClipBounds, true);
+        bool selected = e.Value is bool value && value;
+        Rectangle box = new(e.CellBounds.Left + (e.CellBounds.Width - 18) / 2,
+            e.CellBounds.Top + (e.CellBounds.Height - 18) / 2, 18, 18);
+        e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+        using var outline = StoreTheme.RoundedRectangle(box, 4);
+        using SolidBrush fill = new(selected ? Color.FromArgb(61, 137, 39) : Color.White);
+        using Pen border = new(Color.FromArgb(155, 171, 161), 1.4F);
+        e.Graphics.FillPath(fill, outline); e.Graphics.DrawPath(border, outline);
+        if (selected)
+        {
+            IconAssets.Paint(e.Graphics, "check", Rectangle.Inflate(box, -2, -2), Color.White);
+        }
+        e.Handled = true;
     }
 
     private static void EmptyGrid_Paint(object? sender, PaintEventArgs e)
@@ -106,10 +128,14 @@ internal static class Ui
 
     public static bool Confirm(IWin32Window owner, string message)
     {
-        DialogResult answer = MessageBox.Show(owner, message, "Confirm",
-            MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+        using StoreDialog dialog = new("Confirm action", message, true);
+        return dialog.ShowDialog(owner) == DialogResult.Yes;
+    }
 
-        return answer == DialogResult.Yes;
+    public static void Message(IWin32Window? owner, string message, string title)
+    {
+        using StoreDialog dialog = new(title, message);
+        dialog.ShowDialog(owner);
     }
 
     public static void Export(IWin32Window owner, DataGridView grid)
@@ -157,7 +183,7 @@ internal static class Ui
             }
 
             File.WriteAllLines(saveDialog.FileName, lines, new UTF8Encoding(true));
-            MessageBox.Show(owner, "Report exported.", "CustomPC");
+            Message(owner, "Report exported.", "CustomPC");
         }
     }
 

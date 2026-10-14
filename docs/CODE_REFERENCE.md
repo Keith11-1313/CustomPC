@@ -22,12 +22,16 @@ Use [CODE_GUIDE.md](CODE_GUIDE.md) for lessons. This reference answers where beh
 | Models.cs | Saved record classes |
 | StoreWindow.cs | Shared scrolling, styling and design-time guards |
 | StoreTheme.cs / AppFonts.cs / BrandLogo.cs | Palette, process-local fonts and supplied logo |
+| StoreTextField.cs / StoreNumberField.cs / StoreDateField.cs | Padded fields around native text, numeric and date controls |
+| StoreComboBox.cs / StoreCheckBox.cs / IconAssets.cs | Dropdown rows, checkbox surfaces and downloaded Lucide SVG icons |
+| PasswordEyeButton.cs | Clickable eye/eye-off button inside password fields |
+| StoreDialog.cs | App message and confirmation modal |
 | Ui.cs | Prices, grids, receipts, CSV/text export and validation messages |
 | AppLog.cs | Unexpected-error diagnostic references |
 
 `AppStore.*.cs` are parts of one `partial` class. `AppStore.Current` creates it lazily. Forms call business methods; they do not write SQL directly.
 
-## The 15 forms
+## The 16 forms
 
 | Form | Purpose |
 | --- | --- |
@@ -41,6 +45,7 @@ Use [CODE_GUIDE.md](CODE_GUIDE.md) for lessons. This reference answers where beh
 | UsersForm / UserEditForm | Admin account management |
 | ReportsForm | Admin reports/CSV export |
 | StoreToolsForm | Activity & Backups (internal class name retained) |
+| StoreDialog | Shared messages, confirmations and product specifications |
 
 Each form retains `.cs`, `.Designer.cs` and `.resx`. ProductCard, ProductThumbnail and EmptyStateControl are reusable Designer-editable controls. DashboardChart has a database-free placeholder and constructs ScottPlot only for runtime data.
 
@@ -108,6 +113,20 @@ Part.PhotoFileName is a filename, not an external path. Admin imports JPG/PNG up
 ZIP backup contains custompc.db and ProductImages. Restore validates paths, records and image bytes, saves a before-restore backup, then replaces database/photos. Failed photo replacement rolls the database back. If rollback itself fails, recovery files and paths are retained. Legacy .db restore is supported but has no images. New and automatic backup UI uses ZIP.
 
 ## Charts, accounts and fixed identity
+
+### Shared appearance
+
+StoreTextField wraps a normal TextBox in a padded, rounded surface. Text, masking, maximum length and multiline receipt behavior are forwarded to that inner control; the TextChanged event is forwarded to the form. StoreNumberField and StoreDateField do the same for numeric entry and the Windows calendar. Their values still go through the existing business validation.
+
+StoreComboBox keeps the Windows popup and keyboard selection, but draws rows with padding and a visible selected state. StoreCheckBox keeps CheckBox behavior and uses a downloaded check icon. IconAssets loads original Lucide SVGs from embedded Assets/Icons resources. SVG.NET renders them directly as vectors at the control's size and colour. Parsed documents are reused; there are no icon PNGs, bitmap caches or conversion tools. Source URLs/hashes and the full license remain in that folder. No icon download happens at runtime. StoreDialog replaces app confirmations/messages; Ui.Confirm returns true only for Confirm. Closing or cancelling it does not approve an action. Windows file and print dialogs remain native.
+
+StoreTextField.ShowPasswordToggle enables PasswordEyeButton. It toggles UseSystemPasswordChar without changing Text, preserves selection, and updates its accessible name between Show password and Hide password. The old login checkbox and its handler were removed. Login, registration, setup, account editing and backup-restore password fields use this control.
+
+StoreWindow calls StoreTheme.Apply after a runtime form loads and keeps direct form headers and their Back buttons within the current width. StoreTheme draws rounded buttons and their hover, pressed, disabled and focus states; it also styles tables. Ui.Bind reapplies table styling after new records are bound. Button styling changes drawing only: the original Click handlers, TabIndex, Enabled state and role checks still control behavior.
+
+ProductCard.Designer.cs owns photo, name, price, stock and action placement. CatalogForm.FitProductCards distributes card widths across the available row. BuilderForm.Designer.cs keeps component selection and checkout in separate white panels. LoginForm.Designer.cs owns the sign-in layout. EmptyStateControl uses the downloaded inbox icon. DashboardChart uses white plot surfaces and readable day labels; chart selection continues to use the original saved dates.
+
+These helpers do not open the database in Designer. Layout controls remain in separate Designer files; actual Visual Studio Designer loading and Windows DPI checks must still be verified independently.
 
 Admin sales use local payment date and confirmed amounts; top parts count quantities from orders paid in the period. Staff incoming counts use local creation date. Queue/inventory are current snapshots. Defaults are Admin 30 days and Staff seven days, with 7/30/90 options. ChartSelection maps a day, part, status, category or stock state to filters on already-authorized lists. Account changes dispose cached plots/selections.
 
