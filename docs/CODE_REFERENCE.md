@@ -63,6 +63,8 @@ Button.Click
 
 For an example, read StockAdjustmentForm.SaveClicked → AppStore.AdjustStock → SaveData → Database.WriteRecords. Failed changes roll back and reload the lists. Merely assigning Part.Stock changes memory, not the database.
 
+PartEditForm.UpdateCategoryFields controls category-specific visibility and positions. Common fields stay visible; socket/memory/graphics/recommended-PSU inputs depend on category. SaveClicked separately excludes hidden values, and stock still comes from saved Staff records. The default Designer retains the controls for visual editing; runtime selects the relevant layout.
+
 ## Draft and checkout
 
 DashboardForm owns BuildDraft, a dictionary of category → part ID. ProductCard's Add to build selects that category; selecting another CPU replaces the previous CPU. BuilderForm restores the shared draft after navigation. Draft is not a saved order and clears on sign-out.

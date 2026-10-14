@@ -23,7 +23,7 @@ public partial class PartEditForm : StoreWindow
         category.Items.AddRange(AppStore.Categories);
         category.SelectedIndex = 0;
         category.SelectedIndexChanged += CategoryChanged;
-        UpdateGraphicsFields();
+        UpdateCategoryFields();
 
         low.Value = 3;
         save.Click += SaveClicked;
@@ -90,19 +90,68 @@ public partial class PartEditForm : StoreWindow
 
     private void CategoryChanged(object? sender, EventArgs e)
     {
-        UpdateGraphicsFields();
+        UpdateCategoryFields();
     }
 
-    private void UpdateGraphicsFields()
+    // Hidden fields keep their draft values, but unrelated values are not saved.
+    private void UpdateCategoryFields()
     {
-        integratedGraphics.Enabled = category.Text == "CPU";
-        videoOutput.Enabled = category.Text == "Motherboard";
-        if (!integratedGraphics.Enabled) integratedGraphics.Checked = false;
-        if (!videoOutput.Enabled) videoOutput.Checked = false;
+        string selected = category.Text;
+        bool hasSocket = selected is "CPU" or "Motherboard";
+        bool hasMemory = selected is "Motherboard" or "RAM";
+        bool hasPower = selected != "Case";
+        bool isGpu = selected == "GPU";
+
+        SuspendLayout();
+        AutoScrollPosition = Point.Empty;
+        // Use the existing scaled width to respect Windows DPI and font scaling.
+        float scale = partName.Width / 480f;
+        int Px(int value) => (int)Math.Round(value * scale);
+        int left = partName.Left, second = left + Px(244);
+        void FieldRow(Label label, Control input, bool show, int x, int y)
+        {
+            label.Visible = input.Visible = show;
+            input.TabStop = show;
+            if (!show) return;
+            label.Location = new Point(x, y);
+            input.Location = new Point(x, y + Px(30));
+        }
+
+        stockLabel.Visible = stock.Visible = false;
+        stock.TabStop = false; // Stock changes belong to Staff, not this editor.
+        FieldRow(lowLabel, low, true, second, priceLabel.Top);
+        int row = specifications.Bottom + Px(18);
+        FieldRow(socketLabel, socket, hasSocket, left, row);
+        FieldRow(memoryLabel, memory, hasMemory, hasSocket ? second : left, row);
+        if (hasSocket || hasMemory) row += Px(80);
+
+        wattsLabel.Text = selected == "Power Supply" ? "PSU capacity (W)" : "Power use (W)";
+        FieldRow(wattsLabel, watts, hasPower, left, row);
+        recommendedPsuLabel.Text = "Recommended PSU (W)";
+        recommendedPsuLabel.Height = Px(28);
+        FieldRow(recommendedPsuLabel, recommendedPsu, isGpu, second, row);
+        if (hasPower) row += Px(80);
+
+        integratedGraphics.Visible = selected == "CPU";
+        videoOutput.Visible = selected == "Motherboard";
+        integratedGraphics.Enabled = videoOutput.Enabled = true;
+        integratedGraphics.TabStop = selected == "CPU";
+        videoOutput.TabStop = selected == "Motherboard";
+        integratedGraphics.Location = videoOutput.Location = new Point(left, row);
+        if (selected is "CPU" or "Motherboard") row += Px(48);
+
+        archived.Location = new Point(left, row);
+        save.Location = new Point(second + Px(16), row - Px(4));
+        int height = Math.Max(save.Bottom, photoStatus.Bottom) + Px(24);
+        AutoScrollMinSize = new Size(Px(830), height);
+        int availableHeight = Screen.FromControl(this).WorkingArea.Height - (Height - ClientSize.Height);
+        ClientSize = new Size(ClientSize.Width, Math.Min(height, availableHeight));
+        ResumeLayout(true);
     }
 
     private void PartEditForm_Shown(object? sender, EventArgs e)
     {
+        UpdateCategoryFields();
         // Small laptop displays can be shorter than this editor. Fit the window, then scroll.
         Rectangle workingArea = Screen.FromControl(this).WorkingArea;
         MinimumSize = new Size(Math.Min(MinimumSize.Width, workingArea.Width),
@@ -134,12 +183,12 @@ public partial class PartEditForm : StoreWindow
             part.Price = price.Value;
             part.Stock = partId == null ? 0 : store.Parts.First(p => p.Id == partId).Stock;
             part.Specifications = specifications.Text.Trim();
-            part.Socket = socket.Text.Trim();
-            part.MemoryType = memory.Text.Trim();
+            part.Socket = category.Text is "CPU" or "Motherboard" ? socket.Text.Trim() : "";
+            part.MemoryType = category.Text is "Motherboard" or "RAM" ? memory.Text.Trim() : "";
             part.HasIntegratedGraphics = category.Text == "CPU" && integratedGraphics.Checked;
             part.HasVideoOutput = category.Text == "Motherboard" && videoOutput.Checked;
-            part.Watts = (int)watts.Value;
-            part.RecommendedPsuWatts = (int)recommendedPsu.Value;
+            part.Watts = category.Text == "Case" ? 0 : (int)watts.Value;
+            part.RecommendedPsuWatts = category.Text == "GPU" ? (int)recommendedPsu.Value : 0;
             part.LowStock = (int)low.Value;
             part.Archived = archived.Checked;
 

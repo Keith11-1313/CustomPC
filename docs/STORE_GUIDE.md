@@ -18,6 +18,21 @@ Admin's part editor accepts JPG/PNG files up to 15 MB. It copies a normalized PN
 
 The 42-product [manifest](CATALOG_MANIFEST.md) records researched reference prices/specifications and image limitations. Admin reviews actual prices and specifications; Staff records actual inventory. The document is not a live stock report.
 
+
+The editor changes its visible specification fields when Category changes:
+
+| Category | Category-specific inputs |
+| --- | --- |
+| CPU | Socket, power use, integrated graphics |
+| Motherboard | Socket, memory type, power use, video output |
+| RAM | Memory type, power use |
+| GPU | Power use, recommended PSU capacity |
+| Storage | Power use |
+| Power Supply | PSU capacity |
+| Case | General specifications; no compatibility inputs |
+
+Name, brand, price, low-stock threshold, specifications and photo controls remain common. The Admin stock box is hidden. Switching categories preserves unsaved draft inputs, but saving excludes fields unrelated to the selected category. The form closes gaps and adjusts its height.
+
 ## Build, payment and pickup
 
 1. Customer or Guest chooses CPU, motherboard, RAM, storage, PSU and case. GPU is optional only with verified CPU integrated graphics and motherboard video output.

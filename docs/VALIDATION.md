@@ -4,9 +4,11 @@ This page separates executed checks from manual checks. Test counts overlap betw
 
 ## Latest relevant run
 
-**14 October 2026, 03:16 — 94 checks passed, 0 failed. Build: 0 warnings, 0 errors.** The external harness operated real WinForms controls against an isolated copy of the saved database. No test accounts, stock or orders were written into the live database.
+**14 October 2026, 11:15 — 370 checks passed, 0 failed. Build: 0 warnings, 0 errors.** The external harness operated real WinForms controls against an isolated copy of the saved database. No test accounts, stock or orders were written into the live database.
 
-[Machine-readable report](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/data-folder-build/bin/DataValidation/debug/results-20261014-031656/report.json)
+[Machine-readable report](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/data-folder-build/bin/DataValidation/debug/results-20261014-111509/report.json)
+
+Coverage also includes seven category layouts: relevant field visibility/enabled state, hidden-field keyboard exclusion, no overlapping inputs, draft preservation across category changes, saved Case normalization and existing-part stock preservation. CPU, GPU and Case renders were inspected. Actual OS DPI checks remain separate.
 
 Coverage: saved Admin login, local photo decoding, catalog rendering, hosted management navigation, table/button separation at normal and 950×650 page sizes, period/greeting separation, mandatory socket/RAM/PSU checks, incompatible Customer checkout rejection, removal of supplier/rules UI/model fields/tables, database reload, and complete ZIP backup/restore. A sandbox-only temporary-folder permission failure was rerun with the required access; the completed run passed.
 
@@ -18,11 +20,11 @@ These images are runtime control renders from the latest isolated run, not brows
 
 | Screen | Preview |
 | --- | --- |
-| Admin overview | [Open](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/data-folder-build/bin/DataValidation/debug/results-20261014-031656/Overview.png) |
-| Catalog | [Open](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/data-folder-build/bin/DataValidation/debug/results-20261014-031656/Catalog.png) |
-| Inventory | [Open](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/data-folder-build/bin/DataValidation/debug/results-20261014-031656/Inventory.png) |
-| Reports | [Open](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/data-folder-build/bin/DataValidation/debug/results-20261014-031656/Reports.png) |
-| Activity & Backups | [Open](<C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/data-folder-build/bin/DataValidation/debug/results-20261014-031656/Store tools.png>) |
+| Admin overview | [Open](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/data-folder-build/bin/DataValidation/debug/results-20261014-111509/Overview.png) |
+| Catalog | [Open](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/data-folder-build/bin/DataValidation/debug/results-20261014-111509/Catalog.png) |
+| Inventory | [Open](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/data-folder-build/bin/DataValidation/debug/results-20261014-111509/Inventory.png) |
+| Reports | [Open](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/data-folder-build/bin/DataValidation/debug/results-20261014-111509/Reports.png) |
+| Activity & Backups | [Open](<C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/data-folder-build/bin/DataValidation/debug/results-20261014-111509/Store tools.png>) |
 
 ## Historical broader tests
 
