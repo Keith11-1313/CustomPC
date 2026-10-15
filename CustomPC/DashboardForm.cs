@@ -16,6 +16,8 @@ public partial class DashboardForm : StoreWindow
     public DashboardForm()
     {
         InitializeComponent();
+        SizeChanged += (_, _) => FitWorkspace();
+        Shown += (_, _) => FitWorkspace();
 
         if (Ui.IsDesign)
         {
@@ -204,8 +206,8 @@ public partial class DashboardForm : StoreWindow
             form.FormBorderStyle = FormBorderStyle.None;
             form.MinimumSize = Size.Empty;
             form.Dock = DockStyle.Fill;
-            form.AutoScroll = true;
-            form.AutoScrollMinSize = new Size(screenName is "Catalog" or "Builder" ? 820 : 1100, 650);
+            form.AutoScroll = screenName is not "Catalog" and not "Builder";
+            form.AutoScrollMinSize = Size.Empty;
             pageHost.Controls.Clear();
             pageError.Visible = false;
             pageHost.Controls.Add(form);
@@ -543,19 +545,74 @@ public partial class DashboardForm : StoreWindow
 
     private void ArrangeRoleMenu()
     {
-        // Show only this role's screens, without leaving gaps in the sidebar.
-        int nextTop = catalog.Top;
-        int left = catalog.Left;
-        int spacing = catalog.Height + 6;
         Button[] menu = { catalog, builder, orders, inventory, users, reports, tools };
+        int gap = Math.Max(4, (int)(6 * DeviceDpi / 96F));
+        int firstTop = brandCaption.Bottom + gap;
+        int count = menu.Count(button => button.Enabled) + 1;
+        int height = Math.Clamp((signout.Top - firstTop - gap * (count + 1)) / count, 30, (int)(44 * DeviceDpi / 96F));
+        home.SetBounds(16, firstTop, sidebar.Width - 32, height);
+        int nextTop = home.Bottom + gap;
         foreach (Button button in menu)
         {
             button.Visible = button.Enabled;
             if (button.Enabled)
             {
-                button.Location = new Point(left, nextTop);
-                nextTop += spacing;
+                button.SetBounds(16, nextTop, sidebar.Width - 32, height);
+                nextTop += height + gap;
             }
         }
+    }
+
+    private void FitWorkspace()
+    {
+        if (Ui.IsDesign || sidebar == null || pageHost == null) return;
+        AutoScroll = false;
+        AutoScrollMinSize = Size.Empty;
+        AutoScrollPosition = Point.Empty;
+        float scale = DeviceDpi / 96F;
+        int gap = (int)(24 * scale);
+        int sideWidth = Math.Min((int)(248 * scale), Math.Max(200, ClientSize.Width / 4));
+        sidebar.SetBounds(0, 0, sideWidth, ClientSize.Height);
+        pageHost.SetBounds(sideWidth, 0, Math.Max(1, ClientSize.Width - sideWidth), ClientSize.Height);
+        pageHost.AutoScroll = false;
+        brand.Width = Math.Max(1, sideWidth - brand.Left - 10);
+        float brandSize = Math.Min(20F, 20F * brand.Width / (156 * scale));
+        if (Math.Abs(brand.Font.Size - brandSize) > .1F)
+        {
+            Font previous = brand.Font;
+            brand.Font = new Font(previous.FontFamily, brandSize, previous.Style);
+            previous.Dispose();
+        }
+        brandCaption.Width = Math.Max(1, sideWidth - brandCaption.Left - 12);
+        signout.SetBounds(16, Math.Max(0, ClientSize.Height - signout.Height - 24), sideWidth - 32, signout.Height);
+        ArrangeRoleMenu();
+
+        int x = sideWidth + gap, width = Math.Max(1, ClientSize.Width - x - gap);
+        heading.Left = x; heading.Width = width;
+        identity.Left = x;
+        period.Left = ClientSize.Width - period.Width - gap;
+        identity.Width = Math.Max(1, period.Left - x - gap);
+        summarySurface.SetBounds(x, (int)(128 * scale), width, summarySurface.Height);
+        Label[] values = { statParts, statOrders, statStock, statSales };
+        Label[] captions = { statPartsCaption, statOrdersCaption, statStockCaption, statSalesCaption };
+        int column = width / 4;
+        for (int i = 0; i < values.Length; i++)
+        {
+            values[i].Left = 16 + i * column; values[i].Width = Math.Max(1, column - 24);
+            captions[i].Left = values[i].Left; captions[i].Width = values[i].Width;
+        }
+        int y = summarySurface.Bottom + gap;
+        workflowSurface.SetBounds(x, y, width / 3, Math.Max(120, ClientSize.Height - y - gap));
+        guide.Width = Math.Max(1, workflowSurface.Width - guide.Left - 16);
+        workflowTitle.Width = Math.Max(1, workflowSurface.Width - workflowTitle.Left - 16);
+        recentTitle.SetBounds(workflowSurface.Right + gap, y, Math.Max(1, width - workflowSurface.Width - gap), recentTitle.Height);
+        recent.SetBounds(recentTitle.Left, recentTitle.Bottom + 8, recentTitle.Width, Math.Max(80, ClientSize.Height - recentTitle.Bottom - gap - 8));
+        emptyRecent.Bounds = recent.Bounds;
+
+        chartSummary.Left = x; chartSummary.Width = width;
+        chartActions.Width = width;
+        int actionsHeight = width < 760 * scale ? (int)(100 * scale) : (int)(54 * scale);
+        chartActions.SetBounds(x, ClientSize.Height - actionsHeight - gap, width, actionsHeight);
+        chartArea.SetBounds(x, chartSummary.Bottom + 8, width, Math.Max(160, chartActions.Top - chartSummary.Bottom - 20));
     }
 }

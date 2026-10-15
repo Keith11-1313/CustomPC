@@ -412,7 +412,8 @@ partial class DashboardForm
         ForeColor = Color.FromArgb(32, 41, 35);
         BackColor = Color.FromArgb(244, 248, 240);
         ClientSize = new Size(1360, 720);
-        MinimumSize = new Size(1116, 759);
+        MinimumSize = new Size(976, 639);
+        WindowState = FormWindowState.Maximized;
         StartPosition = FormStartPosition.CenterScreen;
         Text = "CustomPC | Store overview";
         Name = "DashboardForm";
@@ -466,7 +467,7 @@ partial class DashboardForm
         pageHost.Location = new Point(248, 0);
         pageHost.Size = new Size(ClientSize.Width - 248, ClientSize.Height);
         pageHost.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-        pageHost.AutoScroll = true;
+        pageHost.AutoScroll = false;
         pageHost.BackColor = Color.FromArgb(243, 245, 247);
         pageHost.Visible = false;
         Controls.Add(pageHost);

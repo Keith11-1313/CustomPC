@@ -10,6 +10,8 @@ The prepared Admin was `admin@gmail.com`, password `admin@gmail.com`, name `admi
 
 The sidebar switches hosted pages. Overview/Back returns to the dashboard. Editors close without saving when Back is used. Sign out clears the unfinished build. Cancelling Guest Sign in returns to the Guest workspace; cancelling after signing out ends the app.
 
+The main window opens maximized to use the monitor's working area. Restore it with the title-bar button to resize it. The sidebar stays fixed. In a narrower builder, checkout moves below the parts; scroll the component list to reach the remaining categories. The total and order action stay visible.
+
 ## Products and stock
 
 Admin adds/edits/archives products in Parts & inventory, including price, specifications and photographs. New products start at zero stock. Staff uses Adjust stock with a quantity change and reason to record actual receipts or corrections. Admin metadata edits preserve Staff stock. Available stock equals on-hand stock minus reservations.
@@ -36,6 +38,7 @@ Name, brand, price, low-stock threshold, specifications and photo controls remai
 ## Build, payment and pickup
 
 1. Customer or Guest chooses CPU, motherboard, RAM, storage, PSU and case. GPU is optional only with verified CPU integrated graphics and motherboard video output.
+   Motherboard choices follow the selected CPU socket; RAM follows the motherboard's memory type; PSU choices meet the selected components' stored power requirements. Changing an earlier component clears later selections that no longer fit. The integrated-graphics option appears only for a verified CPU/board pair. Guest checkout is labelled **Log in and order** and becomes available for a complete valid build.
 2. Socket, memory and PSU checks always run. PSU must cover estimated component power plus 100 W and recorded recommended PSU requirements. BIOS support, case dimensions and cooler clearance still need physical review.
 3. Valid Guest checkout opens login. Customer login continues the same checkout and saves the selected build/order to that account after confirmation. Cancelled login retains the preview; Admin/Staff login returns to their own dashboard.
 4. The order reserves stock and has a 24-hour payment deadline. Staff records full payment received at the store.

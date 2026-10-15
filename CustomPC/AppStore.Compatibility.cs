@@ -34,7 +34,6 @@ public sealed partial class AppStore
         Part? ram = null;
         Part? powerSupply = null;
         bool hasDedicatedGpu = false;
-        long componentWatts = 0;
 
         foreach (Part part in selectedParts)
         {
@@ -62,10 +61,6 @@ public sealed partial class AppStore
                     break;
             }
 
-            if (part.Category != "Power Supply")
-            {
-                componentWatts += part.Watts;
-            }
         }
 
         // Graphics output is required even when the dedicated GPU is optional.
@@ -97,7 +92,7 @@ public sealed partial class AppStore
 
         if (powerSupply != null)
         {
-            long requiredWatts = Math.Max(componentWatts + 100, selectedParts.Select(part => part.RecommendedPsuWatts).DefaultIfEmpty(0).Max());
+            long requiredWatts = RequiredPowerSupplyWatts(selectedParts);
             if (powerSupply.Watts <= 0 || powerSupply.Watts < requiredWatts)
             {
                 errors.Add("Power supply needs at least estimated component wattage plus 100 W headroom and the component's recommended PSU capacity.");
@@ -105,6 +100,13 @@ public sealed partial class AppStore
         }
 
         return errors;
+    }
+
+    public static long RequiredPowerSupplyWatts(IEnumerable<Part> parts)
+    {
+        List<Part> selected = parts.ToList();
+        long watts = selected.Where(part => part.Category != "Power Supply").Sum(part => (long)part.Watts);
+        return Math.Max(watts + 100, selected.Select(part => part.RecommendedPsuWatts).DefaultIfEmpty(0).Max());
     }
 
 }

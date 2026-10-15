@@ -55,6 +55,10 @@ DashboardForm.OpenScreen creates an authorized page, disposes the previous page,
 
 Management pages use a bottom actionRow FlowLayoutPanel. Buttons wrap; the table reserves room above it. StoreWindow fits large windows to the working area and supplies scrolling. Runtime checks are separate from actual Designer and Windows DPI checks.
 
+DashboardForm.FitWorkspace keeps the sidebar fixed and positions the hosted page within the visible client area. The main window starts maximized; StoreWindow leaves maximized borders to Windows and clamps restored windows to usable monitor bounds. Hosted pages no longer inherit a fixed 650-pixel scrolling minimum.
+
+BuilderForm.FitBuilder switches to a stacked checkout layout when the page narrows. selectionScroll owns vertical scrolling; checkout stays outside that scroll area. LoadPartChoices rebuilds lists in component order, preserves IDs still offered, and clears incompatible downstream IDs. CPU socket filters motherboards; board memory type filters RAM; AppStore.RequiredPowerSupplyWatts supplies the same wattage rule used at checkout. These filters do not replace CheckBuild or physical fit/BIOS review. They do not rank performance or automatically choose a "best" product.
+
 ## From a click to saved data
 
 ```text

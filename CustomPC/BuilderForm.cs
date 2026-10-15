@@ -5,6 +5,7 @@ public partial class BuilderForm : StoreWindow
     private ComboBox[] partSelectors = Array.Empty<ComboBox>();
     private BuildDraft draft = new();
     private bool restoringDraft;
+    private bool fittingBuilder;
 
     public BuilderForm(BuildDraft sharedDraft) : this()
     {
@@ -14,13 +15,7 @@ public partial class BuilderForm : StoreWindow
 
     private void RestoreDraft()
     {
-        restoringDraft = true;
-        for (int i = 0; i < partSelectors.Length; i++)
-            foreach (object item in partSelectors[i].Items)
-                if (item is Part part && part.Id == draft.SelectedId(AppStore.Categories[i]))
-                    partSelectors[i].SelectedItem = part;
-        restoringDraft = false;
-        UpdateBuildSummary();
+        LoadPartChoices(AppStore.Categories.Select(category => draft.SelectedId(category)).ToArray());
     }
 
     public BuilderForm()
@@ -38,6 +33,9 @@ public partial class BuilderForm : StoreWindow
             throw new InvalidOperationException("Customer access is required to build and order a PC. Guests may preview only.");
 
         partSelectors = new ComboBox[] { part0, part1, part2, part3, part4, part5, part6 };
+        SizeChanged += (_, _) => FitBuilder();
+        selectionScroll.SizeChanged += (_, _) => FitBuilder();
+        Shown += (_, _) => FitBuilder();
         submit.Click += SubmitButton_Click;
 
         LoadPartChoices();
@@ -51,21 +49,32 @@ public partial class BuilderForm : StoreWindow
         Close();
     }
 
-    private void LoadPartChoices()
+    private void LoadPartChoices(string[]? chosenIds = null)
     {
         AppStore store = AppStore.Current;
         store.Refresh();
-
+        chosenIds ??= partSelectors.Select(selector => (selector.SelectedItem as Part)?.Id ?? "").ToArray();
+        restoringDraft = true;
         // The selectors follow the same order as AppStore.Categories.
         for (int index = 0; index < partSelectors.Length; index++)
         {
             string partCategory = AppStore.Categories[index];
             List<object> availableParts = new List<object>();
-            if (partCategory == "GPU") availableParts.Add("No dedicated GPU (integrated graphics)");
+            Part? cpu = part0.SelectedItem as Part;
+            Part? motherboard = part1.SelectedItem as Part;
+            bool integrated = cpu?.HasIntegratedGraphics == true && motherboard?.HasVideoOutput == true;
+            if (partCategory == "GPU" && integrated) availableParts.Add("No dedicated GPU (integrated graphics)");
 
             foreach (Part part in store.Parts)
             {
-                if (!part.Archived && store.Available(part) > 0 && part.Category == partCategory)
+                bool compatible = partCategory switch
+                {
+                    "Motherboard" when cpu != null => cpu.Socket.Length > 0 && cpu.Socket.Equals(part.Socket, StringComparison.OrdinalIgnoreCase),
+                    "RAM" when motherboard != null => motherboard.MemoryType.Length > 0 && motherboard.MemoryType.Equals(part.MemoryType, StringComparison.OrdinalIgnoreCase),
+                    "Power Supply" => part.Watts >= AppStore.RequiredPowerSupplyWatts(GetSelectedParts()),
+                    _ => true
+                };
+                if (!part.Archived && store.Available(part) > 0 && part.Category == partCategory && compatible)
                 {
                     availableParts.Add(part);
                 }
@@ -74,9 +83,14 @@ public partial class BuilderForm : StoreWindow
             ComboBox selector = partSelectors[index];
             selector.SelectedIndexChanged -= PartSelectionChanged;
             selector.DataSource = availableParts;
-            selector.SelectedIndex = partCategory == "GPU" ? 0 : -1;
+            selector.SelectedIndex = partCategory == "GPU" && integrated ? 0 : -1;
+            foreach (object item in availableParts)
+                if (item is Part part && part.Id == chosenIds[index]) selector.SelectedItem = part;
             selector.SelectedIndexChanged += PartSelectionChanged;
         }
+        restoringDraft = false;
+        for (int i = 0; i < partSelectors.Length; i++) draft.Select(AppStore.Categories[i], (partSelectors[i].SelectedItem as Part)?.Id);
+        UpdateBuildSummary();
     }
 
     private List<Part> GetSelectedParts()
@@ -96,9 +110,7 @@ public partial class BuilderForm : StoreWindow
 
     private void PartSelectionChanged(object? sender, EventArgs e)
     {
-        if (!restoringDraft) for (int i = 0; i < partSelectors.Length; i++)
-            draft.Select(AppStore.Categories[i], (partSelectors[i].SelectedItem as Part)?.Id);
-        UpdateBuildSummary();
+        if (!restoringDraft) LoadPartChoices();
     }
 
     private void UpdateBuildSummary()
@@ -111,8 +123,8 @@ public partial class BuilderForm : StoreWindow
             photos[i].Display(partSelectors[i].SelectedItem as Part, store.DatabasePath);
         if (part3.SelectedItem is string) photo3.PlaceholderText = "Integrated graphics";
         for (int i = 0; i < partSelectors.Length; i++)
-            if (AppStore.Categories[i] != "GPU" && partSelectors[i].Items.Count == 0)
-                errors.Add("No available " + AppStore.Categories[i] + " products. The store must receive stock before checkout.");
+            if (AppStore.Categories[i] != "GPU" && !partSelectors[i].Items.OfType<Part>().Any())
+                errors.Add("No compatible, in-stock " + AppStore.Categories[i] + " choices. Change the earlier selection or check stock.");
         decimal buildTotal = 0;
 
         foreach (Part part in selectedParts)
@@ -120,7 +132,7 @@ public partial class BuilderForm : StoreWindow
             buildTotal += part.Price;
         }
 
-        total.Text = "Build total: " + Ui.Money(buildTotal);
+        total.Text = "Build total\n" + Ui.Money(buildTotal);
 
         if (errors.Count == 0)
         {
@@ -129,18 +141,17 @@ public partial class BuilderForm : StoreWindow
         }
         else
         {
-            validation.Text = string.Join("\n", errors);
-            validation.ForeColor = Color.FromArgb(153, 27, 27);
+            List<string> missing = AppStore.Categories.Where(category => category != "GPU" && !selectedParts.Any(part => part.Category == category)).ToList();
+            List<string> issues = errors.Where(error => !error.StartsWith("Select one ")).ToList();
+            validation.Text = (missing.Count > 0 ? "Still to choose: " + string.Join(", ", missing) + ".\n\n" : "") + string.Join("\n", issues);
+            validation.ForeColor = StoreTheme.Muted;
         }
 
         // A valid Guest build continues to Customer login; ordering still requires that account.
         submit.Enabled = (store.Session == null || store.IsCustomer) && errors.Count == 0;
         submit.BackColor = submit.Enabled ? Color.FromArgb(84, 177, 55) : Color.FromArgb(226, 232, 224);
 
-        if (store.Session == null)
-        {
-            validation.Text += "\n\nSign in with a Customer account to place your own order.";
-        }
+        submit.Text = store.Session == null ? "Log in and order" : "Confirm build & order";
     }
 
     private void SubmitButton_Click(object? sender, EventArgs e)
@@ -258,19 +269,34 @@ public partial class BuilderForm : StoreWindow
             chosenIds.Add(chosenId);
         }
 
-        LoadPartChoices();
-        for (int index = 0; index < partSelectors.Length; index++)
-        {
-            foreach (object item in partSelectors[index].Items)
-            {
-                if (item is Part part && part.Id == chosenIds[index])
-                {
-                    partSelectors[index].SelectedItem = part;
-                    break;
-                }
-            }
-        }
+        LoadPartChoices(chosenIds.ToArray());
+    }
 
-        UpdateBuildSummary();
+    private void FitBuilder()
+    {
+        if (builderLayout == null || fittingBuilder) return;
+        fittingBuilder = true;
+        try
+        {
+            bool stacked = ClientSize.Width < 900 * DeviceDpi / 96F;
+            builderLayout.SuspendLayout();
+            if (!stacked)
+            {
+                builderLayout.SetColumnSpan(checkoutLayout, 1);
+                builderLayout.SetCellPosition(checkoutLayout, new TableLayoutPanelCellPosition(1, 1));
+            }
+            builderLayout.RowCount = stacked ? 3 : 2;
+            builderLayout.RowStyles.Clear();
+            builderLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 84 * DeviceDpi / 96F));
+            builderLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+            if (stacked) builderLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 260 * DeviceDpi / 96F));
+            builderLayout.SetColumnSpan(selectionScroll, stacked ? 2 : 1);
+            builderLayout.SetCellPosition(checkoutLayout, new TableLayoutPanelCellPosition(stacked ? 0 : 1, stacked ? 2 : 1));
+            builderLayout.SetColumnSpan(checkoutLayout, stacked ? 2 : 1);
+            builderLayout.ResumeLayout(true);
+            selectionLayout.Width = Math.Max(1, selectionScroll.ClientSize.Width - SystemInformation.VerticalScrollBarWidth);
+            selectionLayout.Height = Math.Max((int)(560 * DeviceDpi / 96F), selectionScroll.ClientSize.Height);
+        }
+        finally { fittingBuilder = false; }
     }
 }
