@@ -73,7 +73,7 @@ partial class ReportsForm
         refresh.Location = new Point(804, 114);
         refresh.Size = new Size(264, 40);
         refresh.TabIndex = 8;
-        refresh.Text = "Generate report";
+        refresh.Text = "Refresh";
         refresh.BackColor = Color.White;
         refresh.ForeColor = Color.FromArgb(32, 41, 35);
         refresh.FlatStyle = FlatStyle.Flat;

@@ -19,6 +19,15 @@ public partial class StoreToolsForm : StoreWindow
         LoadHistory();
     }
 
+    // Render the PNG icons; keep the headings as normal editable labels.
+    private void BackupHeading_Paint(object? sender, PaintEventArgs e)
+    {
+        if (sender is not Label label) return;
+        int size = (int)(20 * label.DeviceDpi / 96F);
+        IconAssets.Paint(e.Graphics, label == saveTitle ? "download" : "rotate-ccw",
+            new Rectangle(0, Math.Max(0, (label.Height - size) / 2), size, size), label.ForeColor);
+    }
+
     private void LoadHistory()
     {
         // Recheck access, including an account changed while this screen was open.
@@ -28,7 +37,7 @@ public partial class StoreToolsForm : StoreWindow
             int defaults = AppStore.Current.DefaultPasswordAccounts();
             health.Text = defaults > 0
                 ? $"Action required: {defaults} legacy demo accounts still use the public password. Change their passwords or archive them in User accounts. Review demonstration stock before store use."
-                : "Account check passed. Keep a backup on an external drive, and verify prices, stock and specifications before taking orders.";
+                : "Account check passed. Keep a backup on an external drive.";
         }
         catch
         {

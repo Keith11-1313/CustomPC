@@ -1,18 +1,13 @@
 using System.Reflection;
-using Svg;
+using System.Drawing.Imaging;
+using System.Drawing.Drawing2D;
 
 namespace CustomPC;
 
-// Load the original SVG assets once; SVG.NET renders their paths at the requested size.
-// There are no PNG conversions, bitmap caches or hand-written icon shapes.
+// Load each transparent PNG once. Windows drawing supplies scaling and colour tinting.
 internal static class IconAssets
 {
-    private static readonly Dictionary<(string Name, int Color), SvgDocument> icons = new();
-    static IconAssets()
-    {
-        SvgDocument.ResolveExternalElements = ExternalType.None;
-        SvgDocument.ResolveExternalImages = ExternalType.None;
-    }
+    private static readonly Dictionary<string, Bitmap> icons = new();
 
     public static void Paint(Graphics graphics, string icon, Rectangle bounds, Color color)
     {
@@ -20,22 +15,29 @@ internal static class IconAssets
         string name = icon switch { "email" => "mail", "lock" => "lock-keyhole", "back" => "arrow-left",
             "add" => "plus", "refresh" => "refresh-cw", "grid" => "layout-grid", "list" => "clipboard-list",
             "chart" => "chart-no-axes-column", "user" => "user-round", "build" => "cpu", _ => icon };
-        var key = (name, color.ToArgb());
-        if (!icons.TryGetValue(key, out SvgDocument? document))
+        if (!icons.TryGetValue(name, out Bitmap? bitmap))
         {
-            using Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("CustomPC.Assets.Icons." + name + ".svg")
+            using Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("CustomPC.Assets.Icons." + name + ".png")
                 ?? throw new InvalidOperationException("Missing icon asset: " + name);
-            using StreamReader reader = new(stream);
-            string source = reader.ReadToEnd().Replace("currentColor", ColorTranslator.ToHtml(color));
-            document = SvgDocument.FromSvg<SvgDocument>(source);
-            icons.Add(key, document);
+            using Image source = Image.FromStream(stream);
+            bitmap = new Bitmap(source); // Detach from the resource stream before it closes.
+            icons.Add(name, bitmap);
         }
+        // The PNG alpha defines the shape; tint it for normal, disabled and dark surfaces.
+        using ImageAttributes attributes = new();
+        attributes.SetColorMatrix(new ColorMatrix(new float[][] {
+            new float[] { 0, 0, 0, 0, 0 },
+            new float[] { 0, 0, 0, 0, 0 },
+            new float[] { 0, 0, 0, 0, 0 },
+            new float[] { 0, 0, 0, color.A / 255F, 0 },
+            new float[] { color.R / 255F, color.G / 255F, color.B / 255F, 0, 1 }
+        }));
         var state = graphics.Save();
         try
         {
-            graphics.TranslateTransform(bounds.X, bounds.Y);
-            graphics.ScaleTransform(bounds.Width / document.ViewBox.Width, bounds.Height / document.ViewBox.Height);
-            document.Draw(graphics);
+            graphics.InterpolationMode = InterpolationMode.HighQualityBilinear;
+            graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+            graphics.DrawImage(bitmap, bounds, 0, 0, bitmap.Width, bitmap.Height, GraphicsUnit.Pixel, attributes);
         }
         finally { graphics.Restore(state); }
     }

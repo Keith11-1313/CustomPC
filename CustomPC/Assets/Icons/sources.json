@@ -3,108 +3,180 @@
     "name": "arrow-left",
     "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/arrow-left.svg",
     "retrieved": "2026-10-14",
-    "sha256": "C5F4B88076108EB1A0D95336E1AA7E7BB1419A3A92AF96F6247D88CD3456F933"
+    "sha256": "C5F4B88076108EB1A0D95336E1AA7E7BB1419A3A92AF96F6247D88CD3456F933",
+    "pngFile": "arrow-left.png",
+    "pngSize": "192x192",
+    "pngSha256": "317264B88A8715D31483F32D2D8F536AB842CD8D00114D978F9CBA4A08C71D28"
   },
   {
     "name": "calendar-days",
     "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/calendar-days.svg",
     "retrieved": "2026-10-14",
-    "sha256": "9330EB8D7C4989E97B6361314ABBF02953243C602874725C9E58CECA00DA3BD7"
+    "sha256": "9330EB8D7C4989E97B6361314ABBF02953243C602874725C9E58CECA00DA3BD7",
+    "pngFile": "calendar-days.png",
+    "pngSize": "192x192",
+    "pngSha256": "DD5794C207D470B82B1C89AA577EF69329D2E5E868DDEAE35E8F06ED630EA800"
   },
   {
     "name": "chart-no-axes-column",
     "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/chart-no-axes-column.svg",
     "retrieved": "2026-10-14",
-    "sha256": "5DFD8FC5B5417DAD858991DE4969C3FE1C4A466104D0880A15B691FF7C5B1F12"
+    "sha256": "5DFD8FC5B5417DAD858991DE4969C3FE1C4A466104D0880A15B691FF7C5B1F12",
+    "pngFile": "chart-no-axes-column.png",
+    "pngSize": "192x192",
+    "pngSha256": "0DA514A141AF5CC7B6180BC48450DA2C8357FD2B09A14F5F9B0A2DBB975A4DAA"
   },
   {
     "name": "check",
     "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/check.svg",
     "retrieved": "2026-10-14",
-    "sha256": "7F33ACC9A77A61659531044525FC008EDEBE215BF4DCF1C789C8674AD3277DB0"
+    "sha256": "7F33ACC9A77A61659531044525FC008EDEBE215BF4DCF1C789C8674AD3277DB0",
+    "pngFile": "check.png",
+    "pngSize": "192x192",
+    "pngSha256": "B8DA3A25B94F444CC1749F7DD34D6B362EEFCD7F2D1FE9B2B82B3150BD421231"
   },
   {
     "name": "chevron-down",
     "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/chevron-down.svg",
     "retrieved": "2026-10-14",
-    "sha256": "66EA878E72ED3488BB3B464C39DFDCCEE8D1F78E560DCCEA40E5E12DA0E87E87"
+    "sha256": "66EA878E72ED3488BB3B464C39DFDCCEE8D1F78E560DCCEA40E5E12DA0E87E87",
+    "pngFile": "chevron-down.png",
+    "pngSize": "192x192",
+    "pngSha256": "149515F19A94613EC3AE3244D56C5E80F0EFFE2A3440A85B0ACE167AEB5A4B53"
   },
   {
     "name": "clipboard-list",
     "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/clipboard-list.svg",
     "retrieved": "2026-10-14",
-    "sha256": "2B91ABC2E8EE8BA4C2E0F77D506A47A7A9774B0D4DE3FA4B27E822A6376AB892"
+    "sha256": "2B91ABC2E8EE8BA4C2E0F77D506A47A7A9774B0D4DE3FA4B27E822A6376AB892",
+    "pngFile": "clipboard-list.png",
+    "pngSize": "192x192",
+    "pngSha256": "27190B7D593C3E0CFA62F5935E8560F65CCC3DAFA129EED805F33A3B1E6FED6F"
   },
   {
     "name": "cpu",
     "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/cpu.svg",
     "retrieved": "2026-10-14",
-    "sha256": "EC83BB69EC029D367D749AFC445B39C8E95891EBF99B0400652677C2B149B99C"
+    "sha256": "EC83BB69EC029D367D749AFC445B39C8E95891EBF99B0400652677C2B149B99C",
+    "pngFile": "cpu.png",
+    "pngSize": "192x192",
+    "pngSha256": "0C01D72A58853C811A1D25161B4E313A3753C9EE25DF02D24E06BC33AF1F51F9"
   },
   {
     "name": "eye-off",
     "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/eye-off.svg",
     "retrieved": "2026-10-14",
-    "sha256": "774BCD975C5DE781A4EE778C76E5591BCDEB409955F7054847E7E6003DA0A520"
+    "sha256": "774BCD975C5DE781A4EE778C76E5591BCDEB409955F7054847E7E6003DA0A520",
+    "pngFile": "eye-off.png",
+    "pngSize": "192x192",
+    "pngSha256": "48C44B1F660B745A43F154B1D685830975A6DF45D9CF2EA165A4F11CA85C99DB"
   },
   {
     "name": "eye",
     "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/eye.svg",
     "retrieved": "2026-10-14",
-    "sha256": "5BF90197DD7629CAD64A2E48D1186A71559DEB6121207D10E3DC5B19EBAFFDCF"
+    "sha256": "5BF90197DD7629CAD64A2E48D1186A71559DEB6121207D10E3DC5B19EBAFFDCF",
+    "pngFile": "eye.png",
+    "pngSize": "192x192",
+    "pngSha256": "F2B0ACBA41D4E73480FEE65728619796863B128F48A76E5214952EF3822CD12F"
   },
   {
     "name": "inbox",
     "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/inbox.svg",
     "retrieved": "2026-10-14",
-    "sha256": "1838482C53D0846BADEF9BE96FDCF7A167064241BD4891EFA995C77EBEC5F187"
+    "sha256": "1838482C53D0846BADEF9BE96FDCF7A167064241BD4891EFA995C77EBEC5F187",
+    "pngFile": "inbox.png",
+    "pngSize": "192x192",
+    "pngSha256": "106F536C9E54E14D7DD40876862D0E0331334B6D67611734BB1AC259BD507B05"
   },
   {
     "name": "layout-grid",
     "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/layout-grid.svg",
     "retrieved": "2026-10-14",
-    "sha256": "B8903F61D09B1D75E55C71158277D26570962F69C2099446A251871E0A2D6678"
+    "sha256": "B8903F61D09B1D75E55C71158277D26570962F69C2099446A251871E0A2D6678",
+    "pngFile": "layout-grid.png",
+    "pngSize": "192x192",
+    "pngSha256": "D5F0EA6629C70843E9FBBB5EFF9FC2E10CE0FB0545D4F556A20D68B1EE88F2C0"
   },
   {
     "name": "lock-keyhole",
     "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/lock-keyhole.svg",
     "retrieved": "2026-10-14",
-    "sha256": "FC0B8B7590D1D9E9BB0112C5C2E15A78ADE0BFECA6D6F8C79FBBE149236D74BE"
+    "sha256": "FC0B8B7590D1D9E9BB0112C5C2E15A78ADE0BFECA6D6F8C79FBBE149236D74BE",
+    "pngFile": "lock-keyhole.png",
+    "pngSize": "192x192",
+    "pngSha256": "CAEE58F239C54A1702A42A196A9B9DCBB35B0F1626930A447F891EBBC42AC4A3"
   },
   {
     "name": "log-out",
     "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/log-out.svg",
     "retrieved": "2026-10-14",
-    "sha256": "F24B5B45C05A3ACC346AF8095408F6BA197FF58EA1641A4F2CB25A9702D2C0AC"
+    "sha256": "F24B5B45C05A3ACC346AF8095408F6BA197FF58EA1641A4F2CB25A9702D2C0AC",
+    "pngFile": "log-out.png",
+    "pngSize": "192x192",
+    "pngSha256": "359385E09D1AEE51C5D0DCF9E700EC475E2DBFCCFC62230A3943D5C2E6449A12"
   },
   {
     "name": "mail",
     "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/mail.svg",
     "retrieved": "2026-10-14",
-    "sha256": "3236A51D5B8CE9B0528CF2E6AD07E527BD636DDED6F5A9D656072052B99CAEA8"
+    "sha256": "3236A51D5B8CE9B0528CF2E6AD07E527BD636DDED6F5A9D656072052B99CAEA8",
+    "pngFile": "mail.png",
+    "pngSize": "192x192",
+    "pngSha256": "577EA6BDF3E9BCB1B4F9320E3339CC50D43069A9A58285283B664CC761C65069"
   },
   {
     "name": "plus",
     "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/plus.svg",
     "retrieved": "2026-10-14",
-    "sha256": "7F6AF73BF1FF6C4BCA3F18351C8D1BDEC6749C0C2530C4DE5DA85D520C21DF17"
+    "sha256": "7F6AF73BF1FF6C4BCA3F18351C8D1BDEC6749C0C2530C4DE5DA85D520C21DF17",
+    "pngFile": "plus.png",
+    "pngSize": "192x192",
+    "pngSha256": "FC1897AB259165324AA84032346246C28A18AF6A3BEB42796867CEC9E7C4458F"
   },
   {
     "name": "refresh-cw",
     "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/refresh-cw.svg",
     "retrieved": "2026-10-14",
-    "sha256": "2E10DD403C85A24F163D59FC6151AA21147FE9402E1305DFC8979208CAEE8944"
+    "sha256": "2E10DD403C85A24F163D59FC6151AA21147FE9402E1305DFC8979208CAEE8944",
+    "pngFile": "refresh-cw.png",
+    "pngSize": "192x192",
+    "pngSha256": "B6D22C8789B74AA4C50174AB0D52D6FC0C4DFE73260EDE99DADC8C6157A4BB4C"
   },
   {
     "name": "search",
     "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/search.svg",
     "retrieved": "2026-10-14",
-    "sha256": "283D371C2E433817BB9C0C8310CAA6C77FA4177C0F4F1168D9C83B97AF7389DC"
+    "sha256": "283D371C2E433817BB9C0C8310CAA6C77FA4177C0F4F1168D9C83B97AF7389DC",
+    "pngFile": "search.png",
+    "pngSize": "192x192",
+    "pngSha256": "5F7DEE20F2B4727522CACD3946FAAFACB15E368D2BEB27092AB79FAF25BEA6BE"
   },
   {
     "name": "user-round",
     "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/user-round.svg",
     "retrieved": "2026-10-14",
-    "sha256": "84870F26F3FAF8DA45DA84174517519E81B9E8F00319C78954FCBB74F50038A1"
+    "sha256": "84870F26F3FAF8DA45DA84174517519E81B9E8F00319C78954FCBB74F50038A1",
+    "pngFile": "user-round.png",
+    "pngSize": "192x192",
+    "pngSha256": "C60A9E10360395E3CE30EFCEA3156914CB63C50FBEB848343EDE3D7D0BADD5B2"
+  },
+  {
+    "name": "download",
+    "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/download.svg",
+    "retrieved": "2026-10-20",
+    "sha256": "3DAEEE13DED5A3AFA2198B1BB4E2262D163922F97D96AC6FF9953E8ED4FE039D",
+    "pngFile": "download.png",
+    "pngSize": "192x192",
+    "pngSha256": "1CB49ADC1ECDF5D7FCA7E9D529E028D1A26707501CA135B66F711D2D046B3BA2"
+  },
+  {
+    "name": "rotate-ccw",
+    "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/rotate-ccw.svg",
+    "retrieved": "2026-10-20",
+    "sha256": "622685386AB4017EABFDE01CD74550A20B1924DF233B353F73B6B155371F2AFD",
+    "pngFile": "rotate-ccw.png",
+    "pngSize": "192x192",
+    "pngSha256": "E7BB8C6263F3E48136FE58562EB3E1DB817CE4CCDA07E11349B5773DAD3F4B32"
   }
 ]

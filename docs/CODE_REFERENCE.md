@@ -23,7 +23,7 @@ Use [CODE_GUIDE.md](CODE_GUIDE.md) for lessons. This reference answers where beh
 | StoreWindow.cs | Shared scrolling, styling and design-time guards |
 | StoreTheme.cs / AppFonts.cs / BrandLogo.cs | Palette, process-local fonts and supplied logo |
 | StoreTextField.cs / StoreNumberField.cs / StoreDateField.cs | Padded fields around native text, numeric and date controls |
-| StoreComboBox.cs / StoreCheckBox.cs / IconAssets.cs | Dropdown rows, checkbox surfaces and downloaded Lucide SVG icons |
+| StoreComboBox.cs / StoreCheckBox.cs / IconAssets.cs | Dropdown rows, checkbox surfaces and Lucide PNG icons |
 | PasswordEyeButton.cs | Clickable eye/eye-off button inside password fields |
 | StoreDialog.cs | App message and confirmation modal |
 | Ui.cs | Prices, grids, receipts, CSV/text export and validation messages |
@@ -63,20 +63,20 @@ BuilderForm.FitBuilder switches to a stacked checkout layout when the page narro
 
 ```text
 Button.Click
-  → form reads inputs
-  → AppStore refreshes records and verifies role
-  → business validation
-  → Database.WriteRecords inside transaction
-  → commit, close dialog or refresh page
+  â†’ form reads inputs
+  â†’ AppStore refreshes records and verifies role
+  â†’ business validation
+  â†’ Database.WriteRecords inside transaction
+  â†’ commit, close dialog or refresh page
 ```
 
-For an example, read StockAdjustmentForm.SaveClicked → AppStore.AdjustStock → SaveData → Database.WriteRecords. Failed changes roll back and reload the lists. Merely assigning Part.Stock changes memory, not the database.
+For an example, read StockAdjustmentForm.SaveClicked â†’ AppStore.AdjustStock â†’ SaveData â†’ Database.WriteRecords. Failed changes roll back and reload the lists. Merely assigning Part.Stock changes memory, not the database.
 
 PartEditForm.UpdateCategoryFields controls category-specific visibility and positions. Common fields stay visible; socket/memory/graphics/recommended-PSU inputs depend on category. SaveClicked separately excludes hidden values, and stock still comes from saved Staff records. The default Designer retains the controls for visual editing; runtime selects the relevant layout.
 
 ## Draft and checkout
 
-DashboardForm owns BuildDraft, a dictionary of category → part ID. ProductCard's Add to build selects that category; selecting another CPU replaces the previous CPU. BuilderForm restores the shared draft after navigation. Draft is not a saved order and clears on sign-out.
+DashboardForm owns BuildDraft, a dictionary of category â†’ part ID. ProductCard's Add to build selects that category; selecting another CPU replaces the previous CPU. BuilderForm restores the shared draft after navigation. Draft is not a saved order and clears on sign-out.
 
 CheckBuild always validates required categories, active/available parts, graphics output, CPU/board socket, board/RAM memory type and PSU headroom/recommendations. GPU omission requires verified integrated graphics and board video output. Physical fit/BIOS checks remain limited to staff review.
 
@@ -85,8 +85,8 @@ Guest checkout temporarily hides the main window and opens login. Customer login
 ## Inventory and order lifecycle
 
 ```text
-Available = On hand − Reserved
-Pending Payment → Paid → Processing → Assembly → Ready for Pickup → Completed
+Available = On hand âˆ’ Reserved
+Pending Payment â†’ Paid â†’ Processing â†’ Assembly â†’ Ready for Pickup â†’ Completed
 ```
 
 A reservation begins on order creation. Payment does not deduct physical stock. Completion deducts on-hand stock, writes stock movements and ends reservations. Cancellation/expiry releases reservations without deducting on-hand stock. Customer cancellation is own unpaid pending only; Staff owns payment/progress. Expiry is processed while open and on reopening, never while closed.
@@ -122,7 +122,7 @@ ZIP backup contains custompc.db and ProductImages. Restore validates paths, reco
 
 StoreTextField wraps a normal TextBox in a padded, rounded surface. Text, masking, maximum length and multiline receipt behavior are forwarded to that inner control; the TextChanged event is forwarded to the form. StoreNumberField and StoreDateField do the same for numeric entry and the Windows calendar. Their values still go through the existing business validation.
 
-StoreComboBox keeps the Windows popup and keyboard selection, but draws rows with padding and a visible selected state. StoreCheckBox keeps CheckBox behavior and uses a downloaded check icon. IconAssets loads original Lucide SVGs from embedded Assets/Icons resources. SVG.NET renders them directly as vectors at the control's size and colour. Parsed documents are reused; there are no icon PNGs, bitmap caches or conversion tools. Source URLs/hashes and the full license remain in that folder. No icon download happens at runtime. StoreDialog replaces app confirmations/messages; Ui.Confirm returns true only for Confirm. Closing or cancelling it does not approve an action. Windows file and print dialogs remain native.
+StoreComboBox keeps the Windows popup and keyboard selection, but draws rows with padding and a visible selected state. StoreCheckBox keeps CheckBox behavior and uses a downloaded check icon. IconAssets loads transparent 192×192 Lucide PNGs from embedded Assets/Icons resources. System.Drawing reuses the loaded bitmaps, scales them to the control and tints them for its colour. No SVG package or runtime conversion is needed. Source URLs/hashes and the full license remain in that folder. No icon download happens at runtime. StoreDialog replaces app confirmations/messages; Ui.Confirm returns true only for Confirm. Closing or cancelling it does not approve an action. Windows file and print dialogs remain native.
 
 StoreTextField.ShowPasswordToggle enables PasswordEyeButton. It toggles UseSystemPasswordChar without changing Text, preserves selection, and updates its accessible name between Show password and Hide password. The old login checkbox and its handler were removed. Login, registration, setup, account editing and backup-restore password fields use this control.
 

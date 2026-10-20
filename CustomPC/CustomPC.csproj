@@ -12,14 +12,13 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Assets\logo.png" />
-    <EmbeddedResource Include="Assets\Icons\*.svg" />
+    <EmbeddedResource Include="Assets\Icons\*.png" />
     <None Update="Assets\Icons\*.txt" CopyToOutputDirectory="PreserveNewest" />
     <EmbeddedResource Include="Assets\Fonts\*.ttf" />
     <None Update="Assets\Fonts\*.txt" CopyToOutputDirectory="PreserveNewest" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.12" />
     <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.5" />
     <PackageReference Include="ScottPlot.WinForms" Version="5.1.59" />
-    <PackageReference Include="Svg" Version="3.4.8" />
     <Compile Update="*Form.cs">
       <SubType>Form</SubType>
     </Compile>
