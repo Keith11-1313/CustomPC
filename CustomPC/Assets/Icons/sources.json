@@ -178,5 +178,23 @@
     "pngFile": "rotate-ccw.png",
     "pngSize": "192x192",
     "pngSha256": "E7BB8C6263F3E48136FE58562EB3E1DB817CE4CCDA07E11349B5773DAD3F4B32"
+  },
+  {
+    "name": "pencil",
+    "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/pencil.svg",
+    "retrieved": "2026-10-21",
+    "sha256": "7E1CA7A6F5C1EB949671DF762F2BAADD32F5BD841D43153C3A15279AF7D78D0C",
+    "pngFile": "pencil.png",
+    "pngSize": "192x192",
+    "pngSha256": "E02EC1B1D89A74A6E742DE80315805AEC285A8E29D6195BB8E83DD4BF215A8E7"
+  },
+  {
+    "name": "arrow-right",
+    "source": "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/arrow-right.svg",
+    "retrieved": "2026-10-21",
+    "sha256": "288397FDB73BB4F783CF9EABB726FF47357DF1D4E3F1201DD748090579F108B9",
+    "pngFile": "arrow-right.png",
+    "pngSize": "192x192",
+    "pngSha256": "C04372B765F1E45FC413EBE713D1E1CCC86BC102DB54CC13EC2B38A29CFCE6B1"
   }
 ]
