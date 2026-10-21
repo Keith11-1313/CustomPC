@@ -141,3 +141,15 @@ Replaced the ScottPlot.WinForms reference with LiveChartsCore.SkiaSharpView.WinF
 The chart layer now uses a green line with light area fill, rounded bars, a donut with an external legend and horizontal stacked stock bars. Axis lines/grids are subtle; date labels are spaced and full product names remain available through tooltips and the labelled selection control. Clicking series points opens the corresponding target; the selection dropdown and Open selected button remain available for keyboard users. Clearing role/account data disposes the runtime chart and clears all targets.
 
 Separate build: zero warnings/errors. Focused runner: 317 checks passed, including all six runtime chart constructions, six labelled navigation actions, disposal/clearing, absence of ScottPlot references and previous Admin/Staff restrictions. Inspected synthetic six-chart render plus real copied-data Admin and Staff renders. Synthetic sales/queue values exist only in the external QA tool, never in the store database. Direct physical mouse-hit testing, Visual Studio Designer and OS scaling changes remain manual checks.
+
+### 21 October 2026 — Orders duplicate empty state
+
+Moved the reusable Orders empty state inside the grid's body and resize it with that body. The generic grid painter skips its fallback message when a dedicated empty-state child is visible. Empty-state content is now selected using the actual row count instead of inherited Visible (which is false before the form is shown), fixing the initial Customer message as well. No filters, button placements, permissions or database records were changed.
+
+Separate build: zero warnings/errors. Twelve focused checks passed for Admin and Customer at 1100×688, 1660×850 and 850×600, checking empty-state ownership/bounds and the initial Customer message. Visually reviewed wide Admin and narrow Customer renders: one centred empty state, no duplicate fallback text. QA used a database copy; Visual Studio Designer and physical OS scaling were not tested.
+
+### 21 October 2026 — Catalog empty-state sizing
+
+The Catalog empty state now docks in the same layout cell as the product list, with only the matching view visible, rather than retaining fixed coordinates. The initial sibling-overlay attempt failed rendered review and was replaced with this shared layout cell. Message setup uses the result row count so it also works before the form becomes visible. Retry uses the same fitted overlay. Clear filters was verified to hide the empty state and restore product cards.
+
+Separate build: zero warnings/errors. Nine focused checks passed across 1660×850, 1100×688 and 850×600 client sizes for overlay bounds/visibility, message and Clear filters. Inspected the wide rendered Catalog empty state. QA used a database copy; live data was unchanged.
