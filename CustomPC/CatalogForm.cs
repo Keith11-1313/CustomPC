@@ -103,16 +103,8 @@ public partial class CatalogForm : StoreWindow
                 throw new InvalidOperationException("This component could not be found. Refresh the catalog.");
             }
 
-            string details = $"{selectedPart.Name}\n" +
-                $"{selectedPart.Brand} / {selectedPart.Category}\n" +
-                $"{Ui.Money(selectedPart.Price)}\n\n" +
-                $"{selectedPart.Specifications}\n" +
-                $"Socket: {selectedPart.Socket}\n" +
-                $"Memory type: {selectedPart.MemoryType}\n" +
-                $"Wattage: {selectedPart.Watts}\n" +
-                $"Available: {AppStore.Current.Available(selectedPart)}";
-
-            Ui.Message(this, details, "Component details");
+            using ProductDetailsForm details = new(selectedPart);
+            details.ShowDialog(this);
         }
         catch (Exception exception)
         {

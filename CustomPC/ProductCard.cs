@@ -17,7 +17,7 @@ public partial class ProductCard : UserControl
         productName.Text = part.Name;
         categoryCaption.Text = part.Category;
         price.Text = Ui.Money(part.Price);
-        stock.Text = store.StockState(part) + $" · {store.Available(part)} units";
+        stock.Text = store.StockState(part) + $"  /  {store.Available(part)} units";
         stock.ForeColor = store.Available(part) <= 0 ? Color.FromArgb(155, 58, 58) : StoreTheme.Muted;
         photograph.Display(part, store.DatabasePath);
         choose.Text = select == null ? "Specifications" : "Add to build";
@@ -31,7 +31,11 @@ public partial class ProductCard : UserControl
         StoreTheme.Apply(this);
     }
 
-    private void ShowSpecifications(Part part) => Ui.Message(FindForm(), part.Specifications, part.Name);
+    private void ShowSpecifications(Part part)
+    {
+        using ProductDetailsForm details = new(part);
+        details.ShowDialog(FindForm());
+    }
 
     protected override void OnPaint(PaintEventArgs e)
     {
