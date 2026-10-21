@@ -150,16 +150,10 @@ public sealed partial class AppStore
             List<string> details = new List<string>();
             foreach (var record in database.ChangedRecords.Take(20))
             {
-                string description = record.Table switch
-                {
-                    "Orders" => "Order " + Orders.Find(x => x.Id == record.Id)?.Number,
-                    "Parts" => "Part " + Parts.Find(x => x.Id == record.Id)?.Name,
-                    "Users" => "Account " + Users.Find(x => x.Id == record.Id)?.Name,
-                    _ => record.Table + " " + record.Id[..Math.Min(8, record.Id.Length)]
-                };
+                string description = DescribeActivityRecord(record.Table, record.Id);
                 details.Add(description);
             }
-            WriteAudit(connection, transaction, action, changed + " records changed: " + string.Join("; ", details));
+            WriteAudit(connection, transaction, action, string.Join("; ", details) + (changed > 20 ? $"; and {changed - 20} more records" : ""));
         }
         transaction.Commit();
     }

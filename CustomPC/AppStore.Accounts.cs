@@ -31,6 +31,7 @@ public sealed partial class AppStore
         }
 
         if (matchingAccount == null || !Roles.Contains(matchingAccount.Role) || !VerifyPassword(password, matchingAccount.PasswordHash)
+            || password.Trim().Equals(email.Trim(), StringComparison.OrdinalIgnoreCase)
             || (!DemoMode && password == "CustomPC123!"))
         {
             RecordLoginResult(email, false);
@@ -99,16 +100,14 @@ public sealed partial class AppStore
 
                 if (existingAccount == null || password.Length > 0)
                 {
-                    int minimumLength = DemoMode ? 8 : 12;
-                    if (password.Length < minimumLength || password.Length > 128 || (!DemoMode && password == "CustomPC123!"))
-                    {
-                        throw new InvalidOperationException($"Use a password of at least {minimumLength} characters.");
-                    }
+                    ValidateNewPassword(password, user.Email);
 
                     user.PasswordHash = HashPassword(password);
                 }
                 else
                 {
+                    if (VerifyPassword(user.Email.Trim(), existingAccount.PasswordHash))
+                        throw new InvalidOperationException("Choose a new password that differs from the email address.");
                     user.PasswordHash = existingAccount.PasswordHash;
                 }
 
@@ -134,6 +133,18 @@ public sealed partial class AppStore
                 throw;
             }
         }
+    }
+
+    // Apply only when creating/changing a password. Existing accounts can still sign in.
+    public static void ValidateNewPassword(string password, string? email = null)
+    {
+        if (email != null && password.Trim().Equals(email.Trim(), StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException("Your password must differ from your email address.");
+        if (password.Length < 12 || password.Length > 128 || !password.Any(char.IsUpper)
+            || !password.Any(char.IsLower) || !password.Any(char.IsDigit)
+            || !password.Any(c => !char.IsLetterOrDigit(c) && !char.IsWhiteSpace(c)))
+            throw new InvalidOperationException("Use 12â€“128 characters with uppercase and lowercase letters, a number and a symbol.");
+        if (password == "CustomPC123!") throw new InvalidOperationException("Choose a personal password.");
     }
 
     public static string HashPassword(string password)

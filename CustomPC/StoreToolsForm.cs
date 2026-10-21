@@ -16,6 +16,12 @@ public partial class StoreToolsForm : StoreWindow
         backup.Click += BackupButton_Click;
         restore.Click += RestoreButton_Click;
         refresh.Click += RefreshButton_Click;
+        grid.CellDoubleClick += (_, e) =>
+        {
+            if (e.RowIndex < 0) return;
+            string details = grid.Rows[e.RowIndex].Cells["Details"].Value?.ToString() ?? "";
+            Ui.Message(this, details, "Activity details");
+        };
         LoadHistory();
     }
 
@@ -34,6 +40,12 @@ public partial class StoreToolsForm : StoreWindow
         try
         {
             Ui.Bind(grid, AppStore.Current.ActivityHistory());
+            if (grid.Columns["Details"] is DataGridViewColumn detailsColumn)
+            {
+                detailsColumn.DefaultCellStyle.WrapMode = DataGridViewTriState.True;
+                detailsColumn.FillWeight = 400;
+            }
+            grid.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
             int defaults = AppStore.Current.DefaultPasswordAccounts();
             health.Text = defaults > 0
                 ? $"Action required: {defaults} legacy demo accounts still use the public password. Change their passwords or archive them in User accounts. Review demonstration stock before store use."

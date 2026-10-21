@@ -72,7 +72,7 @@ partial class SetupForm
         passwordLabel.Location = new Point(34, 267);
         passwordLabel.Size = new Size(592, 24);
         passwordLabel.TabIndex = 9;
-        passwordLabel.Text = "Password (at least 12 characters)";
+        passwordLabel.Text = "Password (12+; Aa, number, symbol)";
         passwordLabel.Font = new Font("Roboto", 10F, FontStyle.Bold);
         passwordLabel.ForeColor = Color.FromArgb(32, 41, 35);
         passwordLabel.UseMnemonic = false;

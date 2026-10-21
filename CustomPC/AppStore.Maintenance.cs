@@ -25,8 +25,7 @@ public sealed partial class AppStore
             if (
                 string.IsNullOrWhiteSpace(adminName) || adminName.Length > 100 || !MailAddress.TryCreate(email, out _))
                 throw new InvalidOperationException("Enter an administrator name and valid email address.");
-            if (password.Length < 12 || password == "CustomPC123!")
-                throw new InvalidOperationException("Choose your own password with at least 12 characters.");
+            ValidateNewPassword(password, email);
             Users.Add(new UserAccount { Name = adminName.Trim(), Email = email.Trim(), Role = "Admin", PasswordHash = HashPassword(password) });
             SaveData(connection, transaction);
         }
@@ -71,6 +70,32 @@ public sealed partial class AppStore
             table.Rows.Add(DateTime.Parse(reader.GetString(0), CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind).ToLocalTime().ToString("yyyy-MM-dd HH:mm"), name, action, reader.GetString(3));
         }
         return table;
+    }
+
+    private string DescribeActivityRecord(string table, string id)
+    {
+        switch (table)
+        {
+            case "Orders":
+                CustomerOrder? order = Orders.Find(x => x.Id == id);
+                return order == null ? "Order unavailable" : $"Order {order.Number}: {order.Status}; customer {order.CustomerName}; total PHP {order.Total:N2}";
+            case "Parts":
+                Part? part = Parts.Find(x => x.Id == id);
+                return part == null ? "Product unavailable" : $"Product {part.Name}: PHP {part.Price:N2}; on hand {part.Stock}; {(part.Archived ? "archived" : "active")}";
+            case "Users":
+                UserAccount? user = Users.Find(x => x.Id == id);
+                return user == null ? "Account unavailable" : $"Account {user.Name}: role {user.Role}; {(user.Archived ? "archived" : "active")}";
+            case "Payments":
+                Payment? payment = Payments.Find(x => x.Id == id);
+                return payment == null ? "Payment unavailable" : $"Payment PHP {payment.Amount:N2} for order {Orders.Find(x => x.Id == payment.OrderId)?.Number}";
+            case "Movements":
+                InventoryMovement? movement = Movements.Find(x => x.Id == id);
+                return movement == null ? "Stock movement unavailable" : $"Stock {Parts.Find(x => x.Id == movement.PartId)?.Name}: {movement.Quantity:+0;-0;0} units; reason: {movement.Reason}";
+            case "Builds":
+                PcBuild? build = Builds.Find(x => x.Id == id);
+                return build == null ? "Build unavailable" : $"Build for {Users.Find(x => x.Id == build.CustomerId)?.Name}: {build.PartIds.Count} components";
+            default: return table + " updated";
+        }
     }
 
     public int DefaultPasswordAccounts()

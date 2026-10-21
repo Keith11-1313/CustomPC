@@ -87,7 +87,7 @@ partial class UserEditForm
         passwordLabel.Location = new Point(32, 344);
         passwordLabel.Size = new Size(480, 28);
         passwordLabel.TabIndex = 8;
-        passwordLabel.Text = "New password (12+ characters; blank keeps existing)";
+        passwordLabel.Text = "New password (12+; Aa, 1, symbol; blank keeps existing)";
         passwordLabel.UseMnemonic = false;
         Controls.Add(passwordLabel);
         password = new StoreTextField();
