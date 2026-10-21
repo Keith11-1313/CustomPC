@@ -176,6 +176,8 @@ public partial class DashboardForm : StoreWindow
             switch (screenName)
             {
                 case "Catalog":
+                    if (AppStore.Current.IsAdmin || AppStore.Current.IsStaff)
+                        throw new InvalidOperationException("Use Parts & inventory to manage products.");
                     form = new CatalogForm(Draft);
                     break;
                 case "Builder":
@@ -340,6 +342,7 @@ public partial class DashboardForm : StoreWindow
         }
 
         inventory.Enabled = store.CanViewInventory;
+        catalog.Enabled = !store.IsAdmin && !store.IsStaff;
         reports.Enabled = store.IsAdmin;
 
         users.Enabled = store.IsAdmin;
@@ -438,7 +441,7 @@ public partial class DashboardForm : StoreWindow
         }
         Ui.Bind(recent, recentOrders);
         bool operational = store.IsAdmin || store.IsStaff;
-        chartArea.Visible = operational;
+        chartArea.Visible = store.IsAdmin;
         period.Visible = operational;
         summarySurface.Visible = !operational;
         workflowSurface.Visible = !operational;
@@ -552,12 +555,10 @@ public partial class DashboardForm : StoreWindow
             lowStockAction.Text = $"Low stock ({low})";
             outOfStockAction.Text = $"Out of stock ({unavailable})";
             chartSummary.Text = $"{data.Incoming.Sum(value => value.Value):N0} incoming orders in {days} days. {data.Queue.Sum(value => value.Value):N0} orders in the current work queue.";
-            trendChart.EmptyActionText = "Change period";
-            distributionChart.EmptyActionText = "View all orders";
-            stockChart.EmptyActionText = "View inventory";
-            trendChart.Line("Incoming orders", data.Incoming, "Orders", "No incoming orders in this period");
-            distributionChart.Bars("Work queue · current", data.Queue, false, "No orders need this action right now");
-            stockChart.StackedStock(data.Stock);
+            // Staff use operational counts and stock links without loading chart controls.
+            trendChart.ClearRuntimeData();
+            distributionChart.ClearRuntimeData();
+            stockChart.ClearRuntimeData();
         }
     }
 
@@ -650,7 +651,10 @@ public partial class DashboardForm : StoreWindow
         if (adminSummary.Visible)
         {
             adminSummary.SetBounds(x, chartSummary.Bottom + 8, width, (int)(88 * scale));
-            stockAttention.SetBounds(x, ClientSize.Height - (int)(72 * scale) - gap, width, (int)(72 * scale));
+            int attentionTop = AppStore.Current.IsStaff
+                ? adminSummary.Bottom + (int)(20 * scale)
+                : ClientSize.Height - (int)(72 * scale) - gap;
+            stockAttention.SetBounds(x, attentionTop, width, (int)(72 * scale));
             stockAttentionText.AutoSize = false;
             stockAttentionText.Size = new Size(Math.Max(120, width - lowStockAction.Width - outOfStockAction.Width - (int)(72 * scale)), (int)(40 * scale));
             stockAttentionText.Margin = new Padding(0, 0, 12, 0);

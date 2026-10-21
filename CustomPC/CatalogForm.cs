@@ -16,6 +16,9 @@ public partial class CatalogForm : StoreWindow
             return;
         }
 
+        if (AppStore.Current.IsAdmin || AppStore.Current.IsStaff)
+            throw new InvalidOperationException("Use Parts & inventory to manage products.");
+
         category.Items.Add("All categories");
         category.Items.AddRange(AppStore.Categories);
         category.SelectedIndex = 0;
