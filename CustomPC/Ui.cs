@@ -75,6 +75,8 @@ internal static class Ui
     private static void EmptyGrid_Paint(object? sender, PaintEventArgs e)
     {
         if (sender is not DataGridView grid || grid.Rows.Count != 0) return;
+        // A dedicated child empty state owns the message for this table.
+        if (grid.Controls.OfType<EmptyStateControl>().Any(state => state.Visible)) return;
         Rectangle area = grid.ClientRectangle;
         area.Y += grid.ColumnHeadersHeight;
         area.Height -= grid.ColumnHeadersHeight;

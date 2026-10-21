@@ -172,6 +172,13 @@ public partial class OrdersForm : StoreWindow
         }
     }
 
+    private void OrdersGrid_SizeChanged(object? sender, EventArgs e)
+    {
+        if (emptyOrders == null) return;
+        int top = grid.ColumnHeadersVisible ? grid.ColumnHeadersHeight : 0;
+        emptyOrders.SetBounds(0, top, grid.ClientSize.Width, Math.Max(0, grid.ClientSize.Height - top));
+    }
+
     private void LoadRows()
     {
         string? selectedOrderId = Ui.Selected(grid);
@@ -236,7 +243,9 @@ public partial class OrdersForm : StoreWindow
 
         Ui.Bind(grid, table);
         emptyOrders.Visible = table.Rows.Count == 0;
-        if (emptyOrders.Visible)
+        OrdersGrid_SizeChanged(this, EventArgs.Empty);
+        grid.Invalidate();
+        if (table.Rows.Count == 0)
         {
             bool firstBuild = store.IsCustomer && store.VisibleOrders().Count == 0;
             emptyOrders.Message = firstBuild ? "Your first build starts here" : store.IsStaff ? "No orders need this action right now" : "No orders match this view";

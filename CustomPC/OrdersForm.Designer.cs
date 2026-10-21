@@ -209,7 +209,8 @@ partial class OrdersForm
         emptyOrders.Location = new Point(320, 245);
         emptyOrders.Size = new Size(420, 240);
         emptyOrders.Visible = false;
-        Controls.Add(emptyOrders);
+        grid.Controls.Add(emptyOrders);
+        grid.SizeChanged += OrdersGrid_SizeChanged;
         filterCaption = new Label();
         filterCaption.Location = new Point(32, 157);
         filterCaption.Size = new Size(800, 30);
