@@ -104,7 +104,7 @@ public static class StoreTheme
         Color text = !button.Enabled ? Muted : dark ? Color.White : Ink;
         string icon = button.Name switch { "back" => "back", "add" => "add", "refresh" => "refresh",
             "catalog" or "inventory" => "grid", "builder" => "build", "orders" or "tools" => "list",
-            "users" => "user", "reports" or "home" => "chart", "signout" => "log-out", "backup" => "download", "restore" => "rotate-ccw", _ => "" };
+            "users" => "user", "reports" or "home" => "chart", "signout" => "log-out", "adjust" => "plus", "pay" => "check", "advance" => "arrow-right", "save" => "check", "receipt" => "clipboard-list", "edit" => "pencil", "history" => "rotate-ccw", "export" => "download", "backup" => "download", "restore" => "rotate-ccw", _ => "" };
         Rectangle textBounds = bounds;
         if (icon != "")
         {

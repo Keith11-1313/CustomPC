@@ -554,6 +554,45 @@ partial class DashboardForm
         chartSummary.ForeColor = Color.FromArgb(92, 105, 98);
         chartSummary.Visible = false;
         Controls.Add(chartSummary);
+        adminSummary = new TableLayoutPanel();
+        adminSummary.Name = "adminSummary";
+        adminSummary.ColumnCount = 4;
+        adminSummary.RowCount = 1;
+        adminSummary.Visible = false;
+        for (int i = 0; i < 4; i++) adminSummary.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+        adminSales = new Label();
+        adminPaidOrders = new Label();
+        adminLowStock = new Label();
+        adminOutOfStock = new Label();
+        foreach (Label value in new[] { adminSales, adminPaidOrders, adminLowStock, adminOutOfStock })
+        {
+            value.Dock = DockStyle.Fill;
+            value.BackColor = Color.White;
+            value.TextAlign = ContentAlignment.MiddleCenter;
+            value.Font = new Font("Roboto", 12F, FontStyle.Bold);
+            value.Margin = new Padding(4);
+            adminSummary.Controls.Add(value);
+        }
+        Controls.Add(adminSummary);
+        stockAttention = new FlowLayoutPanel();
+        stockAttention.Name = "stockAttention";
+        stockAttention.Visible = false;
+        stockAttention.WrapContents = false;
+        stockAttention.BackColor = Color.White;
+        stockAttention.Padding = new Padding(12);
+        stockAttentionText = new Label();
+        stockAttentionText.AutoSize = true;
+        stockAttentionText.Margin = new Padding(0, 12, 24, 0);
+        lowStockAction = new Button();
+        lowStockAction.Text = "Low stock";
+        lowStockAction.Size = new Size(150, 40);
+        outOfStockAction = new Button();
+        outOfStockAction.Text = "Out of stock";
+        outOfStockAction.Size = new Size(150, 40);
+        stockAttention.Controls.Add(stockAttentionText);
+        stockAttention.Controls.Add(lowStockAction);
+        stockAttention.Controls.Add(outOfStockAction);
+        Controls.Add(stockAttention);
         ResumeLayout(false);
         PerformLayout();
     }
@@ -562,6 +601,15 @@ partial class DashboardForm
     private EmptyStateControl pageError = null!;
     private EmptyStateControl emptyRecent = null!;
     private Button home = null!;
+    private TableLayoutPanel adminSummary = null!;
+    private Label adminSales = null!;
+    private Label adminPaidOrders = null!;
+    private Label adminLowStock = null!;
+    private Label adminOutOfStock = null!;
+    private FlowLayoutPanel stockAttention = null!;
+    private Label stockAttentionText = null!;
+    private Button lowStockAction = null!;
+    private Button outOfStockAction = null!;
     private TableLayoutPanel chartArea = null!;
     private DashboardChart trendChart = null!;
     private DashboardChart distributionChart = null!;

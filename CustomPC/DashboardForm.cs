@@ -24,6 +24,8 @@ public partial class DashboardForm : StoreWindow
             return;
         }
 
+        lowStockAction.Click += (_, _) => OpenScreen("Inventory", inventoryFilter: new InventoryViewFilter(StockState: "Low stock"));
+        outOfStockAction.Click += (_, _) => OpenScreen("Inventory", inventoryFilter: new InventoryViewFilter(StockState: "Out of stock"));
         catalog.Click += CatalogButton_Click;
         home.Click += (_, _) => ShowOverview();
         pageError.ActionClicked += (_, _) => retryPage?.Invoke();
@@ -447,7 +449,9 @@ public partial class DashboardForm : StoreWindow
         statOrders.Visible = store.Session != null;
         statOrdersCaption.Visible = store.Session != null;
         if (operational) RefreshCharts();
-        chartActions.Visible = operational;
+        chartActions.Visible = false;
+        adminSummary.Visible = stockAttention.Visible = operational;
+        FitWorkspace();
         chartSummary.Visible = operational;
         viewQueueOrders.Text = store.IsAdmin ? "View paid parts orders" : "View current work queue";
         if (pageHost.Visible)
@@ -503,9 +507,30 @@ public partial class DashboardForm : StoreWindow
     {
         AppStore store = AppStore.Current;
         int days = period.SelectedIndex == 0 ? 7 : period.SelectedIndex == 2 ? 90 : 30;
+        chartArea.SuspendLayout();
+        chartArea.ColumnStyles.Clear(); chartArea.RowStyles.Clear();
+        chartArea.ColumnCount = 3;
+        chartArea.RowCount = 1;
+        for (int i = 0; i < 3; i++) chartArea.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F / 3));
+        chartArea.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+        chartArea.SetColumnSpan(trendChart, 1);
+        chartArea.SetCellPosition(trendChart, new TableLayoutPanelCellPosition(0, 0));
+        chartArea.SetCellPosition(distributionChart, new TableLayoutPanelCellPosition(1, 0));
+        chartArea.SetCellPosition(stockChart, new TableLayoutPanelCellPosition(2, 0));
+        chartArea.ResumeLayout();
         if (store.IsAdmin)
         {
             var data = store.ReadAdminDashboard(days);
+            adminSales.Text = $"PHP {data.Sales.Sum(v => v.Value):N2}\nConfirmed payments";
+            int paidOrders = store.Payments.Where(p => p.PaidUtc.ToLocalTime().Date >= data.FirstDate && p.PaidUtc.ToLocalTime().Date <= data.LastDate).Select(p => p.OrderId).Distinct().Count();
+            adminPaidOrders.Text = $"{paidOrders}\nPaid orders";
+            int low = (int)data.Inventory.First(v => v.Name == "Low stock").Value;
+            int unavailable = (int)data.Inventory.First(v => v.Name == "Out of stock").Value;
+            adminLowStock.Text = $"{low}\nLow-stock products";
+            adminOutOfStock.Text = $"{unavailable}\nOut-of-stock products";
+            stockAttentionText.Text = low + unavailable == 0 ? "Stock attention: no stock alerts" : $"Stock attention: {low + unavailable} products need replenishment";
+            lowStockAction.Text = $"Low stock ({low})";
+            outOfStockAction.Text = $"Out of stock ({unavailable})";
             chartSummary.Text = $"{data.FirstDate:MMM d}–{data.LastDate:MMM d}: PHP {data.Sales.Sum(value => value.Value):N2} confirmed payments. Inventory is a current snapshot.";
             trendChart.EmptyActionText = "Change period";
             distributionChart.EmptyActionText = "View orders";
@@ -517,6 +542,15 @@ public partial class DashboardForm : StoreWindow
         else if (store.IsStaff)
         {
             var data = store.ReadStaffDashboard(days);
+            adminSales.Text = $"{data.Incoming.Sum(v => v.Value):N0}\nIncoming orders";
+            adminPaidOrders.Text = $"{data.Queue.Sum(v => v.Value):N0}\nCurrent work queue";
+            adminLowStock.Text = $"{data.Queue.Where(v => v.Name == "Ready for Pickup").Sum(v => v.Value):N0}\nReady for pickup";
+            int stockAlerts = data.Stock.Sum(v => v.LowStock + v.OutOfStock);
+            adminOutOfStock.Text = $"{stockAlerts}\nStock alerts";
+            int low = data.Stock.Sum(v => v.LowStock), unavailable = data.Stock.Sum(v => v.OutOfStock);
+            stockAttentionText.Text = stockAlerts == 0 ? "Stock attention: no stock alerts" : $"Stock attention: {stockAlerts} products need replenishment";
+            lowStockAction.Text = $"Low stock ({low})";
+            outOfStockAction.Text = $"Out of stock ({unavailable})";
             chartSummary.Text = $"{data.Incoming.Sum(value => value.Value):N0} incoming orders in {days} days. {data.Queue.Sum(value => value.Value):N0} orders in the current work queue.";
             trendChart.EmptyActionText = "Change period";
             distributionChart.EmptyActionText = "View all orders";
@@ -613,6 +647,16 @@ public partial class DashboardForm : StoreWindow
         chartActions.Width = width;
         int actionsHeight = width < 760 * scale ? (int)(100 * scale) : (int)(54 * scale);
         chartActions.SetBounds(x, ClientSize.Height - actionsHeight - gap, width, actionsHeight);
-        chartArea.SetBounds(x, chartSummary.Bottom + 8, width, Math.Max(160, chartActions.Top - chartSummary.Bottom - 20));
+        if (adminSummary.Visible)
+        {
+            adminSummary.SetBounds(x, chartSummary.Bottom + 8, width, (int)(88 * scale));
+            stockAttention.SetBounds(x, ClientSize.Height - (int)(72 * scale) - gap, width, (int)(72 * scale));
+            stockAttentionText.AutoSize = false;
+            stockAttentionText.Size = new Size(Math.Max(120, width - lowStockAction.Width - outOfStockAction.Width - (int)(72 * scale)), (int)(40 * scale));
+            stockAttentionText.Margin = new Padding(0, 0, 12, 0);
+            stockAttentionText.TextAlign = ContentAlignment.MiddleLeft;
+            chartArea.SetBounds(x, adminSummary.Bottom + 12, width, Math.Max(160, stockAttention.Top - adminSummary.Bottom - 24));
+        }
+        else chartArea.SetBounds(x, chartSummary.Bottom + 8, width, Math.Max(160, chartActions.Top - chartSummary.Bottom - 20));
     }
 }

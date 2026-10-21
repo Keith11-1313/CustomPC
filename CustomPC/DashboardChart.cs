@@ -1,27 +1,37 @@
-using ScottPlot.WinForms;
+using LiveChartsCore;
+using LiveChartsCore.Measure;
+using LiveChartsCore.SkiaSharpView;
+using LiveChartsCore.SkiaSharpView.Painting;
+using LiveChartsCore.SkiaSharpView.WinForms;
+using SkiaSharp;
 
 namespace CustomPC;
 
-// Designer sees a normal panel; ScottPlot is constructed only when a runtime chart is drawn.
 public sealed record ChartSelection(string Label, DateTime? Date = null, string? PartId = null,
     string? Status = null, string? Category = null, string? StockState = null);
 
+// The Designer sees a regular panel. LiveCharts controls and saved data are runtime-only.
 public sealed partial class DashboardChart : Panel
 {
-    private FormsPlot? chart;
+    private Control? chart;
+    private readonly Label chartHeading = new() { Dock = DockStyle.Top, Height = 48,
+        TextAlign = ContentAlignment.MiddleCenter, Font = new Font("Roboto", 11F, FontStyle.Bold) };
     private readonly EmptyStateControl empty = new() { Dock = DockStyle.Fill };
+    private static readonly SKColor Green = SKColor.Parse("54B137");
+    private static readonly SKColor[] StockColors = { Green, SKColor.Parse("D49B25"), SKColor.Parse("C65050") };
     private List<ChartSelection> targets = new();
-    private Func<ScottPlot.Coordinates, int>? clickIndex;
     public event EventHandler? ChartActivated;
     public event Action<ChartSelection>? SelectionOpened;
     public event EventHandler? EmptyActionRequested;
     [System.ComponentModel.DefaultValue("")]
     public string EmptyActionText { get => empty.ActionText; set => empty.ActionText = value; }
+
     public DashboardChart()
     {
         InitializeComponent();
         BackColor = Color.White;
         Controls.Add(empty);
+        Controls.Add(chartHeading);
         empty.Message = "Chart preview";
         empty.Detail = "Saved data is loaded when the application runs.";
         empty.ActionClicked += (_, _) => EmptyActionRequested?.Invoke(this, EventArgs.Empty);
@@ -34,185 +44,153 @@ public sealed partial class DashboardChart : Panel
 
     public void ClearRuntimeData()
     {
-        targets.Clear(); clickIndex = null;
-        selection.DataSource = null; selectionFooter.Visible = false;
-        chart?.Dispose(); chart = null;
+        targets.Clear();
+        selection.DataSource = null;
+        selectionFooter.Visible = false;
+        if (chart != null) { Controls.Remove(chart); chart.Dispose(); chart = null; }
         empty.Visible = true;
     }
 
-    private void SetTargets(List<ChartSelection> items, Func<ScottPlot.Coordinates, int>? resolver)
+    private bool Prepare(string title, bool hasData, string noData)
     {
-        targets = items; clickIndex = resolver;
+        if (Ui.IsDesign) return false;
+        ClearRuntimeData();
+        chartHeading.Text = title;
+        empty.Message = noData;
+        empty.Detail = "";
+        chartHeading.SendToBack();
+        empty.BringToFront();
+        return hasData;
+    }
+
+    private void ShowChart(Control control, List<ChartSelection> options)
+    {
+        chart = control;
+        control.Dock = DockStyle.Fill;
+        control.BackColor = Color.White;
+        control.MinimumSize = Size.Empty;
+        control.DoubleClick += (_, _) => ChartActivated?.Invoke(this, EventArgs.Empty);
+        Controls.Add(control);
+        empty.Visible = false;
+        targets = options;
         selection.DisplayMember = nameof(ChartSelection.Label);
-        selection.DataSource = items;
-        selectionFooter.Visible = items.Count > 0;
-        // Dock the footer first, then give the chart the remaining space.
-        chart?.BringToFront();
+        selection.DataSource = targets;
+        selectionFooter.Visible = targets.Count > 0;
+        chartHeading.SendToBack();
+        control.BringToFront();
         PerformLayout();
     }
 
-    private void Chart_DoubleClick(object? sender, MouseEventArgs e)
+    private void OpenPoint(int index)
     {
-        if (chart != null && clickIndex != null)
-        {
-            int index = clickIndex(chart.Plot.GetCoordinates(e.X, e.Y));
-            if (index >= 0 && index < targets.Count) { SelectionOpened?.Invoke(targets[index]); return; }
-        }
-        ChartActivated?.Invoke(this, EventArgs.Empty);
+        if (index >= 0 && index < targets.Count) SelectionOpened?.Invoke(targets[index]);
     }
 
-    public void Draw(string title, Action<ScottPlot.Plot> draw, bool hasData, string noData)
+    private static Axis NumberAxis(string unit) => new()
     {
-        if (Ui.IsDesign) return;
-        if (!hasData)
-        {
-            targets.Clear(); selection.DataSource = null; selectionFooter.Visible = false;
-            chart?.Plot.Clear();
-            if (chart != null) chart.Visible = false;
-            empty.Message = noData;
-            empty.Detail = "";
-            empty.Visible = true;
-            empty.BringToFront();
-            return;
-        }
-        if (chart == null)
-        {
-            chart = new FormsPlot { MinimumSize = Size.Empty, Dock = DockStyle.Fill };
-            chart.MouseDoubleClick += Chart_DoubleClick;
-            Controls.Add(chart);
-        }
-        empty.Visible = false;
-        chart.Visible = true;
-        chart.Plot.Clear();
-        chart.Plot.FigureBackground.Color = ScottPlot.Color.FromHex("FFFFFF");
-        chart.Plot.DataBackground.Color = ScottPlot.Color.FromHex("FFFFFF");
-        draw(chart.Plot);
-        chart.Plot.Title(title);
-        chart.Plot.Axes.AutoScale();
-        chart.Plot.Axes.Margins(.1, .15);
-        chart.Refresh();
-    }
+        MinLimit = 0, MinStep = 1, TextSize = 11,
+        Labeler = value => unit == "PHP" ? (value >= 1000 ? $"{value / 1000:0.#}k" : value.ToString("0")) : value.ToString("0"),
+        Name = unit, NameTextSize = 11,
+        LabelsPaint = new SolidColorPaint(SKColor.Parse("65736B")),
+        SeparatorsPaint = new SolidColorPaint(SKColor.Parse("EDF1EE")) { StrokeThickness = 1 }
+    };
+    private static Axis CategoryAxis(string[] labels) => new()
+    {
+        Labels = labels, MinStep = 1, ForceStepToMin = true, TextSize = 11,
+        LabelsPaint = new SolidColorPaint(SKColor.Parse("65736B")), SeparatorsPaint = null
+    };
+    private static CartesianChart Cartesian(ISeries[] series, Axis x, Axis y) => new()
+    {
+        Series = series, XAxes = new[] { x }, YAxes = new[] { y },
+        LegendPosition = LegendPosition.Hidden, AnimationsSpeed = TimeSpan.FromMilliseconds(250),
+        TooltipTextSize = 12, ZoomMode = ZoomAndPanMode.None
+    };
+    private static string ShortLabel(string label) => label.Length > 19 ? label[..16] + "..." : label;
 
     public void Line(string title, List<DailyValue> values, string unit, string noData)
     {
-        Draw(title, plot =>
+        if (!Prepare(title, values.Any(v => v.Value > 0), noData)) return;
+        var series = new LineSeries<double>
         {
-            var line = plot.Add.Scatter(values.Select(v => v.Date.ToOADate()).ToArray(), values.Select(v => v.Value).ToArray());
-            line.Color = ScottPlot.Color.FromHex("54B137");
-            line.LineWidth = 2;
-            line.LegendText = unit;
-            int stride = Math.Max(1, (int)Math.Ceiling(values.Count / 7.0));
-            plot.Axes.Bottom.TickGenerator = new ScottPlot.TickGenerators.NumericManual(
-                values.Where((value, index) => index % stride == 0 || index == values.Count - 1)
-                    .Select(value => new ScottPlot.Tick(value.Date.ToOADate(), value.Date.ToString("MMM d"))).ToArray());
-            plot.YLabel(unit);
-        }, values.Any(v => v.Value > 0), noData);
-        if (values.Any(v => v.Value > 0))
-            SetTargets(values.Select(value => new ChartSelection($"{value.Date:MMM d}: {value.Value.ToString(unit == "PHP" ? "N2" : "N0")} {unit}", Date: value.Date)).ToList(),
-                point => (int)Math.Round(point.X - values[0].Date.ToOADate()));
+            Name = unit, Values = values.Select(v => v.Value).ToArray(),
+            Stroke = new SolidColorPaint(Green) { StrokeThickness = 3 },
+            Fill = new SolidColorPaint(Green.WithAlpha(22)), GeometrySize = 5,
+            GeometryFill = new SolidColorPaint(SKColors.White), GeometryStroke = new SolidColorPaint(Green) { StrokeThickness = 2 },
+            XToolTipLabelFormatter = point => values[point.Index].Date.ToString("MMM d"),
+            LineSmoothness = 0.15
+        };
+        series.DataPointerDown += (_, points) => { var point = points.FirstOrDefault(); if (point != null) OpenPoint(point.Index); };
+        int stride = Math.Max(1, (int)Math.Ceiling(values.Count / 3.0));
+        var dates = CategoryAxis(values.Select((v, i) => i % stride == 0 ? v.Date.ToString("MMM d") : "").ToArray());
+        ShowChart(Cartesian(new ISeries[] { series }, dates, NumberAxis(unit)), values.Select(v =>
+            new ChartSelection($"{v.Date:MMM d}: {v.Value:N2} {unit}", Date: v.Date)).ToList());
     }
 
     public void Bars(string title, List<NamedValue> values, bool horizontal, string noData)
     {
-        Draw(title, plot =>
+        if (!Prepare(title, values.Any(v => v.Value > 0), noData)) return;
+        ISeries series;
+        if (horizontal)
         {
-            var bars = plot.Add.Bars(values.Select(v => v.Value).ToArray());
-            bars.Horizontal = horizontal;
-            for (int i = 0; i < bars.Bars.Count; i++)
-            {
-                bars.Bars[i].FillColor = ScottPlot.Color.FromHex("54B137");
-                bars.Bars[i].Label = values[i].Value.ToString("N0");
-            }
-            var ticks = values.Select((v, i) => new ScottPlot.Tick(i, horizontal && v.Name.Length > 24 ? v.Name[..21] + "…"
-                : v.Name == "Pending Payment" ? "Pending\nPayment" : v.Name == "Ready for Pickup" ? "Ready for\nPickup" : v.Name)).ToArray();
-            if (horizontal) { plot.Axes.Left.TickGenerator = new ScottPlot.TickGenerators.NumericManual(ticks); plot.XLabel("Units"); }
-            else { plot.Axes.Bottom.TickGenerator = new ScottPlot.TickGenerators.NumericManual(ticks); plot.YLabel("Orders"); }
-        }, values.Any(v => v.Value > 0), noData);
-        if (values.Any(v => v.Value > 0))
-            SetTargets(values.Select(value => new ChartSelection($"{value.Name}: {value.Value:N0}", PartId: value.Id,
-                Status: value.Id == null && AppStore.Statuses.Contains(value.Name) ? value.Name : null)).ToList(),
-                point => (int)Math.Round(horizontal ? point.Y : point.X));
+            var rows = new RowSeries<double> { Values = values.Select(v => v.Value).ToArray(), Name = "Units",
+                Fill = new SolidColorPaint(Green), Stroke = null, Rx = 5, Ry = 5, MaxBarWidth = 26 };
+            rows.YToolTipLabelFormatter = point => values[point.Index].Name;
+            rows.DataPointerDown += (_, points) => { var point = points.FirstOrDefault(); if (point != null) OpenPoint(point.Index); };
+            series = rows;
+        }
+        else
+        {
+            var columns = new ColumnSeries<double> { Values = values.Select(v => v.Value).ToArray(), Name = "Orders",
+                Fill = new SolidColorPaint(Green), Stroke = null, Rx = 5, Ry = 5, MaxBarWidth = 28 };
+            columns.XToolTipLabelFormatter = point => values[point.Index].Name;
+            columns.DataPointerDown += (_, points) => { var point = points.FirstOrDefault(); if (point != null) OpenPoint(point.Index); };
+            series = columns;
+        }
+        Axis categories = CategoryAxis(values.Select(v => ShortLabel(v.Name == "Pending Payment" ? "Pending" : v.Name == "Ready for Pickup" ? "Ready" : v.Name)).ToArray());
+        if (!horizontal) categories.TextSize = 10;
+        ShowChart(Cartesian(new[] { series }, horizontal ? NumberAxis("Units") : categories,
+            horizontal ? categories : NumberAxis("Orders")), values.Select(v => new ChartSelection($"{v.Name}: {v.Value:N0}",
+                PartId: v.Id, Status: v.Id == null && AppStore.Statuses.Contains(v.Name) ? v.Name : null)).ToList());
     }
 
     public void Donut(List<NamedValue> values)
     {
-        ScottPlot.Plot? piePlot = null;
-        Draw("Inventory health · current", plot =>
+        if (!Prepare("Inventory health - current", values.Any(v => v.Value > 0), "Add products to your catalog")) return;
+        var slices = new List<ISeries>();
+        var options = new List<ChartSelection>();
+        for (int i = 0; i < values.Count; i++)
         {
-            piePlot = plot;
-            string[] colors = { "54B137", "D49B25", "C65050" };
-            var slices = values.Select((v, i) => new ScottPlot.PieSlice
-            {
-                Value = v.Value, FillColor = ScottPlot.Color.FromHex(colors[i]),
-                LegendText = $"{v.Name}: {v.Value:N0}", Label = v.Value > 0 ? v.Value.ToString("N0") : ""
-            }).Where(s => s.Value > 0).ToList();
-            var pie = plot.Add.Pie(slices);
-            pie.DonutFraction = .65;
-            pie.Rotation = ScottPlot.Angle.FromDegrees(0);
-            plot.Axes.Frameless(); plot.HideGrid(); plot.ShowLegend();
-        }, values.Any(v => v.Value > 0), "Add products to your catalog");
-        if (values.Any(v => v.Value > 0))
-        {
-            List<NamedValue> slices = values.Where(v => v.Value > 0).ToList();
-            SetTargets(slices.Select(value => new ChartSelection($"{value.Name}: {value.Value:N0} products", StockState: value.Name)).ToList(), point =>
-            {
-                // ScottPlot draws slices clockwise in pixel space. Resolve the actual ring hit.
-                var origin = piePlot!.GetPixel(ScottPlot.Coordinates.Origin);
-                var pixel = piePlot.GetPixel(point);
-                double dx = pixel.X - origin.X, dy = pixel.Y - origin.Y;
-                double radius = Math.Min(Math.Abs(piePlot.GetPixel(new ScottPlot.Coordinates(1, 0)).X - origin.X),
-                    Math.Abs(piePlot.GetPixel(new ScottPlot.Coordinates(0, 1)).Y - origin.Y));
-                double distance = Math.Sqrt(dx * dx + dy * dy);
-                if (distance < radius * .65 || distance > radius) return -1;
-                double fraction = (Math.Atan2(dy, dx) / (2 * Math.PI) + 1) % 1;
-                double cumulative = 0, total = slices.Sum(slice => slice.Value);
-                for (int i = 0; i < slices.Count; i++)
-                {
-                    cumulative += slices[i].Value / total;
-                    if (fraction <= cumulative) return i;
-                }
-                return -1;
-            });
+            var value = values[i];
+            if (value.Value <= 0) continue;
+            int index = options.Count;
+            var slice = new PieSeries<double> { Values = new[] { value.Value }, Name = $"{value.Name}: {value.Value:N0}",
+                InnerRadius = 58, Fill = new SolidColorPaint(StockColors[i % StockColors.Length]), Stroke = null, HoverPushout = 4 };
+            slice.DataPointerDown += (_, _) => OpenPoint(index);
+            slices.Add(slice);
+            options.Add(new($"{value.Name}: {value.Value:N0} products", StockState: value.Name));
         }
+        ShowChart(new PieChart { Series = slices, LegendPosition = LegendPosition.Bottom, LegendTextSize = 11,
+            AnimationsSpeed = TimeSpan.FromMilliseconds(250), TooltipTextSize = 12 }, options);
     }
 
     public void StackedStock(List<CategoryStock> values)
     {
-        Draw("Stock readiness · current", plot =>
+        if (!Prepare("Stock readiness - current", values.Any(v => v.Available + v.LowStock + v.OutOfStock > 0), "No products in inventory")) return;
+        string[] states = { "Available", "Low stock", "Out of stock" };
+        var series = new List<ISeries>();
+        for (int state = 0; state < 3; state++)
         {
-            string[] colors = { "54B137", "D49B25", "C65050" };
-            string[] labels = { "Available", "Low stock", "Out of stock" };
-            for (int state = 0; state < 3; state++)
-            {
-                var bars = values.Select((v, i) => new ScottPlot.Bar
-                {
-                    Position = i,
-                    ValueBase = state == 0 ? 0 : state == 1 ? v.Available : v.Available + v.LowStock,
-                    Value = state == 0 ? v.Available : state == 1 ? v.Available + v.LowStock : v.Available + v.LowStock + v.OutOfStock,
-                    FillColor = ScottPlot.Color.FromHex(colors[state])
-                }).ToArray();
-                plot.Add.Bars(bars).LegendText = labels[state];
-            }
-            plot.Axes.Bottom.TickGenerator = new ScottPlot.TickGenerators.NumericManual(values.Select((v, i) => new ScottPlot.Tick(i, v.Category == "Motherboard" ? "Board" : v.Category == "Power Supply" ? "PSU" : v.Category)).ToArray());
-            plot.YLabel("Products"); plot.ShowLegend();
-        }, values.Any(v => v.Available + v.LowStock + v.OutOfStock > 0), "No products in inventory");
-        if (values.Any(v => v.Available + v.LowStock + v.OutOfStock > 0))
-        {
-            List<ChartSelection> options = new();
-            foreach (CategoryStock category in values)
-            {
-                options.Add(new($"{category.Category} · Available: {category.Available}", Category: category.Category, StockState: "Available"));
-                options.Add(new($"{category.Category} · Low stock: {category.LowStock}", Category: category.Category, StockState: "Low stock"));
-                options.Add(new($"{category.Category} · Out of stock: {category.OutOfStock}", Category: category.Category, StockState: "Out of stock"));
-            }
-            SetTargets(options, point =>
-            {
-                int category = (int)Math.Round(point.X);
-                if (category < 0 || category >= values.Count || point.Y < 0) return -1;
-                CategoryStock value = values[category];
-                int state = point.Y <= value.Available ? 0 : point.Y <= value.Available + value.LowStock ? 1 : 2;
-                return category * 3 + state;
-            });
+            int stateIndex = state;
+            var rows = new StackedRowSeries<double> { Name = states[state], Values = values.Select(v =>
+                (double)(state == 0 ? v.Available : state == 1 ? v.LowStock : v.OutOfStock)).ToArray(),
+                Fill = new SolidColorPaint(StockColors[state]), Stroke = null, MaxBarWidth = 22 };
+            rows.DataPointerDown += (_, points) => { var point = points.FirstOrDefault(); if (point != null) OpenPoint(point.Index * 3 + stateIndex); };
+            series.Add(rows);
         }
+        var chart = Cartesian(series.ToArray(), NumberAxis("Products"), CategoryAxis(values.Select(v =>
+            v.Category == "Motherboard" ? "Board" : v.Category == "Power Supply" ? "PSU" : v.Category).ToArray()));
+        chart.LegendPosition = LegendPosition.Bottom; chart.LegendTextSize = 10;
+        ShowChart(chart, values.SelectMany(v => states.Select((state, i) => new ChartSelection(
+            $"{v.Category} - {state}: {(i == 0 ? v.Available : i == 1 ? v.LowStock : v.OutOfStock)}", Category: v.Category, StockState: state))).ToList());
     }
 }
