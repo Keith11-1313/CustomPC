@@ -32,7 +32,7 @@ Database/
 
 The default Database folder is beside the solution. If the app is copied outside the solution, it uses Database beside the app. `CUSTOMPC_DATABASE_PATH` overrides the path for testing. Close the app before manually copying the whole folder; use a ZIP backup for normal recovery. Database and its images are ignored by Git.
 
-The prepared catalog contains 42 researched products with local photos. They are ordinary SQLite records, not embedded assets or a runtime seed pack. Current stock, accounts, prices and order counts are saved data and can change. Initial prepared Admin credentials were name `admin`, email `admin@gmail.com`, password `admin@gmail.com`; use the saved password if it has since changed. Add Staff and Customer accounts through User accounts.
+The prepared catalog contains 42 researched products with local photos. They are ordinary SQLite records, not embedded assets or a runtime seed pack. Current stock, accounts, prices and order counts are saved data and can change. Initial prepared Admin credentials were name `admin`, email `admin@gmail.com`, password `AdminPassword@123`; use the saved password if it has since changed. Add Staff and Customer accounts through User accounts.
 
 A missing/empty database opens **Set up CustomPC** to create an administrator. It does not recreate the researched catalog. `CUSTOMPC_DEMO_MODE=1` explicitly enables separate practice fixtures; normal startup does not create demo accounts or stock.
 

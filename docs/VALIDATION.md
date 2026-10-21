@@ -83,3 +83,61 @@ Separate build: zero warnings/errors. Executed 198 checks against a copied datab
 Inventory now uses Designer-editable layout containers for its header, filters, table surface and bottom actions. Refresh sits at the top right beside filters, matching Reports. The table is hidden for an empty result so only the reusable centred empty state is shown. Clear filters also resets Include archived. Dropdown popups match their field width; table header minimum widths now account for measured label text.
 
 Separate build: zero warnings/errors. The focused runner passed 222 checks total, including 24 inventory checks across 1366×728, 1000×650 and 850×600 client sizes: single empty state, centring, Refresh parent/placement, visible action containment, popup width and restoring populated rows. Reviewed empty and populated inventory renders. This run used a copied database and did not validate physical display-scale changes or Visual Studio Designer.
+
+### 21 October 2026 — login branding, password rules and activity clarity
+
+Login uses the supplied Assets/backdrop.png under a dark green tint, at its original pixel dimensions, centred and clipped by the panel without scaling. Brand and hero labels use the bundled Righteous family explicitly with compatible text rendering. Removed the login footer below the account/guest buttons.
+
+New or changed passwords must contain 12–128 characters, uppercase and lowercase letters, a number and a non-whitespace symbol. Setup and account saving share ValidateNewPassword; sign-in still accepts existing passwords. Historical accounts are not reset. Form labels describe the combination requirement.
+
+New audit entries describe order status/customer/total, product price/on-hand/archive state, account role/state, payment amount/order, stock movement quantity/reason and build component count. These are saved-state summaries, not full before/after diffs. Old audit text is preserved because its missing historical values cannot be reconstructed reliably. Activity rows wrap and double-click opens full details.
+
+Separate build: zero warnings/errors. Focused runner: 234 checks passed against a copied database, including six invalid-password cases, one valid combination, saved readable account activity, exclusion of the password from activity, both Righteous font families and removal of the footer. Reviewed the rendered final login screenshot. Actual Visual Studio Designer and physical display-scale settings were not tested.
+
+Login backdrop follow-up: fixed the source photograph's 171-DPI metadata shrinking it inside the bitmap by drawing with explicit pixel source/destination rectangles. The panel now crops the photo at native size, enlarging proportionally only when needed to cover a larger panel. Set the logo PictureBox background to Transparent in Designer and runtime. Separate build passed with zero warnings/errors; 235 focused checks passed, including logo transparency. Visually reviewed the final login render: photo reaches every panel edge and logo has no solid rectangle behind it.
+
+### 21 October 2026 — requested administrator credential and order cleanup
+
+At the owner's request, backed up Database/custompc.db outside the source tree, updated the existing admin@gmail.com account to the supplied new password using salted PBKDF2-SHA256 (600,000 iterations), and cleared 3 orders, 3 builds and 1 payment. All 42 product records and stock values were compared before/after and remained unchanged; all 4 accounts and stock movement history were preserved. Database integrity check returned OK. Cleared the admin login throttle only.
+
+Password validation now rejects a password equal to its account email (ignoring letter case and outer whitespace) in setup, registration/account saves and login. Changing an account email while keeping a password equal to the new email also requires a new password. No automatic password-change dialog was added.
+
+Separate build: zero warnings/errors. The copied-database runner passed its 235 checks plus assertions that the old credential fails without a session, the new credential signs in as Admin, orders/builds/payments are empty, and an otherwise complex password matching its email is rejected. README and Store guide list the updated prepared credentials. Backup: before-account-order-cleanup-20261021-090218.db in the external validation workspace.
+
+### 21 October 2026 — product specifications and chart empty states
+
+Product cards and catalog details now open ProductDetailsForm, with a separate Designer file: product name, price/availability, local photo, scrollable specification rows and Close. Known GPU attributes receive clear labels (graphics memory, colour, cooling, variant, recommended PSU and length); other saved specifications remain intact. No product specifications or stock were changed in the database. EmptyStateControl now centres its icon/message/detail/action as one compact group; empty charts include their title so sales and top-parts panels are distinguishable.
+
+Separate build passed; the existing 235-check focused suite passed. Added rendered previews for the RTX 4070 SUPER specifications dialog and a no-payments chart, and visually inspected both. These additional visual previews are not counted as automated assertions. Visual Studio Designer was not opened.
+
+### 21 October 2026 — action icons and catalog Refresh
+
+Added PNG icons for receipt, edit product/account, movement history and CSV export actions. Pencil was downloaded from Lucide and converted outside the source project; no Svg package was added to CustomPC. Catalog Refresh now sits at the upper right of the filter row and the old bottom refresh row no longer reserves space. Separate build: zero warnings/errors; 245 focused checks passed, including all 21 PNGs and the catalog Refresh placement. Visually reviewed catalog and inventory renders. Corrected a malformed separator in product-card availability text found during review.
+
+### 21 October 2026 — structured product specification table
+
+Replaced the specifications bullet list with a two-column, read-only table with subtle row separators and wrapped values. Product photo and price/stock sit to the left; stock is shown once. ProductSpecifications translates the existing saved text into category-aware attribute names, separates CPU cores/threads when explicit, and retains unrecognised text as Additional detail. Custom `Label: value` entries are supported. No catalog data or stock was changed and no new hardware facts were inferred.
+
+Separate build passed with zero warnings/errors. Focused runner passed 288 checks, including preservation of the recorded details for all 42 products and CPU cores/threads mapping. Visually reviewed CPU dialog at 720×500 and GPU at 900×650; longer specifications remain accessible by scrolling. Visual Studio Designer and actual OS display-scale changes were not tested.
+
+### 21 October 2026 — Admin overview summary and stock attention
+
+Added four Admin cards: confirmed payment amount, distinct paid orders in the selected local-date period, current low-stock product count and current out-of-stock count. Added Stock attention with a clear no-alert state and filtered inventory links. Admin's charts share one row, have persistent headings and retain chart selection/empty-state actions. Removed Admin's duplicate bottom navigation buttons. Staff retains operational charts and its existing navigation. Fixed malformed inventory/stock chart title separators.
+
+Separate build passed with zero warnings/errors; focused runner passed 292 checks including summary-card and stock-attention visibility at 1366×800 and 1000×680. Visually reviewed the smaller Admin overview render. These checks used a database copy; no live sales, stock or accounts were modified. Actual Visual Studio Designer, physical OS scaling and a complete Staff interaction regression were not performed in this change.
+
+### 21 October 2026 — Staff overview and remaining operational icons
+
+Staff now uses the compact three-chart layout with four count-only cards: incoming orders for the selected period, current work queue, ready-for-pickup orders and current stock alerts. Added filtered stock-attention links and removed duplicate bottom navigation buttons. Sales amounts/Admin report access remain unavailable. Corrected malformed category-selection separators and angled stock-chart labels for narrower panels.
+
+Added PNG-backed icons to Adjust stock, Record adjustment, Confirm store payment and Next order stage. The new Lucide arrow was converted outside the project; CustomPC still has no Svg package.
+
+Separate build: zero warnings/errors. Focused suite: 303 checks passed, including all 22 PNGs, Staff cards containing no sales amounts, and Staff report access remaining disabled. Visually reviewed Staff overview at 1100×750, stock-adjustment dialog and empty Orders screen with enabled/disabled icon styles. All QA accounts/data stayed in the copied database. Full payment/stage processing and physical Windows display-scale settings were not retested in this UI change.
+
+### 21 October 2026 — LiveCharts2 replaces ScottPlot
+
+Replaced the ScottPlot.WinForms reference with LiveChartsCore.SkiaSharpView.WinForms 2.0.4. NuGet's resolved dependency list and the compiled assembly reference check confirm ScottPlot is absent. DashboardChart still presents a database-free Designer placeholder and constructs runtime controls only when data exists. Existing backend date calculations, permissions, chart-selection targets and empty-state actions were retained.
+
+The chart layer now uses a green line with light area fill, rounded bars, a donut with an external legend and horizontal stacked stock bars. Axis lines/grids are subtle; date labels are spaced and full product names remain available through tooltips and the labelled selection control. Clicking series points opens the corresponding target; the selection dropdown and Open selected button remain available for keyboard users. Clearing role/account data disposes the runtime chart and clears all targets.
+
+Separate build: zero warnings/errors. Focused runner: 317 checks passed, including all six runtime chart constructions, six labelled navigation actions, disposal/clearing, absence of ScottPlot references and previous Admin/Staff restrictions. Inspected synthetic six-chart render plus real copied-data Admin and Staff renders. Synthetic sales/queue values exist only in the external QA tool, never in the store database. Direct physical mouse-hit testing, Visual Studio Designer and OS scaling changes remain manual checks.

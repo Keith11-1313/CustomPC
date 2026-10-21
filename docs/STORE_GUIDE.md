@@ -6,7 +6,7 @@ For permissions, read [ROLES.md](ROLES.md). For learning the code, start with [C
 
 Open the solution and press F5. Login opens before the dashboard. Guests choose Browse as guest. Closing startup login exits the app. If the database is empty, Setup creates the first Admin and requires a personal password of at least 12 characters.
 
-The prepared Admin was `admin@gmail.com`, password `admin@gmail.com`, name `admin`. Use its current saved credentials if edited. Admin creates Staff/Customer accounts in User accounts. Public registration always creates Customer accounts. Roles are separate; Admin cannot perform Staff or Customer transactions.
+The prepared Admin was `admin@gmail.com`, password `AdminPassword@123`, name `admin`. Use its current saved credentials if edited. Admin creates Staff/Customer accounts in User accounts. Public registration always creates Customer accounts. Roles are separate; Admin cannot perform Staff or Customer transactions.
 
 The sidebar switches hosted pages. Overview/Back returns to the dashboard. Editors close without saving when Back is used. Sign out clears the unfinished build. Cancelling Guest Sign in returns to the Guest workspace; cancelling after signing out ends the app.
 
@@ -79,3 +79,8 @@ Remove-Item Env:/CUSTOMPC_DEMO_MODE
 ```
 
 Before actual store use, perform the manual Designer, file-dialog, printer, Windows DPI and external-drive recovery checks in [VALIDATION.md](VALIDATION.md).
+
+New and changed account passwords use 12–128 characters with uppercase and lowercase letters, a number and a symbol. Existing passwords continue to work until changed. Activity & Backups shows readable saved-state summaries for new actions; double-click a row to read its full details. Older activity entries retain their original text.
+
+
+Admin overview: confirmed-payment and paid-order cards use the selected 7/30/90-day period. Low-stock and out-of-stock cards are current product counts. Stock attention links open inventory with the corresponding stock filter. The three charts retain keyboard-accessible selection controls; empty charts show their headings and a relevant action. Staff retains its operational charts without Admin sales cards.

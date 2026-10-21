@@ -47,7 +47,7 @@ Use [CODE_GUIDE.md](CODE_GUIDE.md) for lessons. This reference answers where beh
 | StoreToolsForm | Activity & Backups (internal class name retained) |
 | StoreDialog | Shared messages, confirmations and product specifications |
 
-Each form retains `.cs`, `.Designer.cs` and `.resx`. ProductCard, ProductThumbnail and EmptyStateControl are reusable Designer-editable controls. DashboardChart has a database-free placeholder and constructs ScottPlot only for runtime data.
+Each form retains `.cs`, `.Designer.cs` and `.resx`. ProductCard, ProductThumbnail and EmptyStateControl are reusable Designer-editable controls. DashboardChart has a database-free placeholder and constructs LiveCharts2 only for runtime data.
 
 ## One main window
 
@@ -137,3 +137,5 @@ Admin sales use local payment date and confirmed amounts; top parts count quanti
 Login compares emails case-insensitively, verifies salted PBKDF2-SHA256 password hashes and rejects archived accounts. Five failed attempts lock an email for five minutes. SaveUser enforces Admin access or Customer-only registration. Privileged methods refresh roles before writes. See [ROLES.md](ROLES.md).
 
 Branding is fixed to CustomPC. No business-name/contact-header settings, supplier module or compatibility toggles remain. The researched product manifest and JSON are documentation; they do not seed products at runtime.
+
+DashboardChart uses LiveCharts2 at runtime. Line creates a LineSeries, Bars chooses RowSeries or ColumnSeries, Donut creates PieSeries, and StackedStock creates three StackedRowSeries for stock states. Prepare disposes the previous chart and chooses the empty state; ShowChart installs the control and its keyboard selection list. Point events use the same ChartSelection objects as Open selected. Charts never calculate sales or decide permissions: AppStore.Dashboards supplies role-checked saved-data totals. The Designer only instantiates the ordinary panel and placeholder.
