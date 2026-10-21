@@ -28,7 +28,7 @@ public class StoreComboBox : ComboBox
     }
     protected override void OnDropDown(EventArgs e)
     {
-        DropDownWidth = Math.Min(Math.Max(Width, 400), Screen.FromControl(this).WorkingArea.Width - 40);
+        DropDownWidth = Width;
         base.OnDropDown(e);
     }
     protected override void WndProc(ref Message message)

@@ -72,6 +72,9 @@ public static class StoreTheme
                 column.Name is "OnHand" or "Reserved" or "Available" ? 95 :
                 column.Name is "Component" or "Part" ? 165 : column is DataGridViewCheckBoxColumn ? 85 : 80;
             column.HeaderText = column.Name switch { "OnHand" => "On hand", "CreatedUtc" => "Created", "DeadlineUtc" => "Pay before", _ => column.HeaderText };
+            int headerWidth = TextRenderer.MeasureText(column.HeaderText,
+                grid.ColumnHeadersDefaultCellStyle.Font ?? grid.Font).Width + 36;
+            column.MinimumWidth = Math.Max(column.MinimumWidth, headerWidth);
             column.FillWeight = column.Name is "Component" or "Part" or "Customer" or "Details" or "Email" ? 240 :
                 column.Name is "Status" or "Action" ? 150 : 90;
         }

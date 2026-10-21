@@ -77,3 +77,9 @@ The running application locked the normal build executable; validation used a se
 Converted all 20 Lucide UI icons to transparent 192×192 PNGs, preserving the license and original source hashes alongside PNG hashes. Removed the SVG assets and Svg package reference. IconAssets now uses System.Drawing with cached PNGs, alpha-based tinting and high-quality bilinear downscaling; no conversion tool is included in the project. Product photos and the live database were unchanged.
 
 Separate build: zero warnings/errors. Executed 198 checks against a copied database: all 20 PNG resources present, no Svg assembly reference, 180 icon rendering/colour checks (20 icons × 3 sizes × 3 colours), and the existing 16 backup-layout/report-caption checks. Inspected the PNG contact sheet and rendered login screen, including the eye icon. NuGet's resolved package list contains no Svg package. Actual Visual Studio Designer and Windows display-scale changes were not tested.
+
+### 20 October 2026 — inventory filters, empty state and Refresh placement
+
+Inventory now uses Designer-editable layout containers for its header, filters, table surface and bottom actions. Refresh sits at the top right beside filters, matching Reports. The table is hidden for an empty result so only the reusable centred empty state is shown. Clear filters also resets Include archived. Dropdown popups match their field width; table header minimum widths now account for measured label text.
+
+Separate build: zero warnings/errors. The focused runner passed 222 checks total, including 24 inventory checks across 1366×728, 1000×650 and 850×600 client sizes: single empty state, centring, Refresh parent/placement, visible action containment, popup width and restoring populated rows. Reviewed empty and populated inventory renders. This run used a copied database and did not validate physical display-scale changes or Visual Studio Designer.

@@ -42,10 +42,19 @@ public partial class InventoryForm : StoreWindow
         emptyInventory.ActionClicked += (_, _) =>
         {
             if (AppStore.Current.IsAdmin && !AppStore.Current.Parts.Any(p => !p.Archived)) AddClicked(this, EventArgs.Empty);
-            else { filteredCategory = null; search.Clear(); stockFilter.SelectedIndex = 0; LoadRows(); }
+            else { filteredCategory = null; search.Clear(); stockFilter.SelectedIndex = 0; archived.Checked = false; LoadRows(); }
         };
 
         LoadRows();
+    }
+
+    private void TableSurface_Resize(object? sender, EventArgs e)
+    {
+        if (emptyInventory == null || tableSurface == null) return;
+        int width = Math.Min((int)(480 * DeviceDpi / 96F), tableSurface.ClientSize.Width);
+        emptyInventory.Width = width;
+        emptyInventory.Location = new Point(Math.Max(0, (tableSurface.ClientSize.Width - width) / 2),
+            Math.Max(0, (tableSurface.ClientSize.Height - emptyInventory.Height) / 2));
     }
 
     private void BackButton_Click(object? sender, EventArgs e)
@@ -202,6 +211,8 @@ public partial class InventoryForm : StoreWindow
 
         Ui.Bind(grid, table);
         emptyInventory.Visible = table.Rows.Count == 0;
+        grid.Visible = table.Rows.Count > 0;
+        TableSurface_Resize(this, EventArgs.Empty);
         if (emptyInventory.Visible)
         {
             bool emptyStore = !store.Parts.Any(p => !p.Archived);
@@ -220,7 +231,7 @@ public partial class InventoryForm : StoreWindow
         history.Enabled = store.IsAdmin;
         // An unavailable role action should not look like a working button.
         int nextLeft = grid.Left;
-        foreach (Button button in new[] { add, edit, adjust, history, refresh })
+        foreach (Button button in new[] { add, edit, adjust, history })
         {
             button.Visible = button.Enabled;
             if (button.Enabled)
