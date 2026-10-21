@@ -29,6 +29,8 @@ internal static class AppFonts
         }
     }
 
+    public static Font Heading(float size) => new Font(fonts.Families.First(f => f.Name == "Righteous"), size, FontStyle.Regular);
+
     public static void Apply(Control control)
     {
         control.Font = Resolve(control.Font);

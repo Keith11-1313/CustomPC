@@ -50,7 +50,7 @@ partial class LoginForm
         logo.Location = new Point(74, 180);
         logo.Size = new Size(266, 180);
         logo.TabIndex = 3;
-        logo.BackColor = Color.FromArgb(32, 41, 35);
+        logo.BackColor = Color.Transparent;
         Controls.Add(logo);
         brandFooter = new Label();
         brandFooter.Name = "brandFooter";
@@ -160,17 +160,6 @@ partial class LoginForm
         guest.Cursor = Cursors.Hand;
         guest.UseMnemonic = false;
         Controls.Add(guest);
-        demo = new Label();
-        demo.Name = "demo";
-        demo.Location = new Point(458, 514);
-        demo.Size = new Size(474, 66);
-        demo.TabIndex = 15;
-        demo.Text = "Store payment and pickup.\nAsk your administrator if you need account access.";
-        demo.Font = new Font("Roboto", 10F, FontStyle.Regular);
-        demo.ForeColor = Color.FromArgb(76, 92, 78);
-        demo.UseMnemonic = false;
-        Controls.Add(demo);
-        AcceptButton = login;
         AutoScaleDimensions = new SizeF(7F, 17F);
         AutoScaleMode = AutoScaleMode.Font;
         Font = new Font("Roboto", 10F);
@@ -230,9 +219,6 @@ partial class LoginForm
         login.Width = 454;
         register.Width = 214;
         guest.Width = 214;
-        demo.Width = 454;
-        authSurface.Controls.Add(demo);
-        demo.Location = new Point(32, 493);
         ResumeLayout(false);
         PerformLayout();
     }
@@ -249,7 +235,6 @@ partial class LoginForm
     private Button login = null!;
     private Button register = null!;
     private Button guest = null!;
-    private Label demo = null!;
     private Label loginHero = null!;
     private Panel authSurface = null!;
 }
