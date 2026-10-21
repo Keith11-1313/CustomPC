@@ -73,6 +73,7 @@ public partial class CatalogForm : StoreWindow
             emptyProducts.Detail = "Check store file access, then retry.";
             emptyProducts.ActionText = "Retry";
             emptyProducts.Visible = true;
+            products.Visible = false;
             emptyProducts.BringToFront();
         }
     }
@@ -167,7 +168,8 @@ public partial class CatalogForm : StoreWindow
 
         Ui.Bind(grid, table);
         emptyProducts.Visible = table.Rows.Count == 0;
-        if (emptyProducts.Visible)
+        products.Visible = table.Rows.Count > 0;
+        if (table.Rows.Count == 0)
         {
             bool emptyStore = !store.Parts.Any(p => !p.Archived);
             emptyProducts.Message = emptyStore && store.IsAdmin ? "Add products to your catalog" : emptyStore ? "The catalog is getting ready" : "No products match these filters";

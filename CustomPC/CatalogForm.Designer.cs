@@ -169,7 +169,7 @@ partial class CatalogForm
         emptyProducts.Location = new Point(260, 220);
         emptyProducts.Size = new Size(420, 240);
         emptyProducts.Visible = false;
-        Controls.Add(emptyProducts);
+
         search.PlaceholderText = "Search model, brand or specifications";
         pageLayout = new TableLayoutPanel();
         pageLayout.Dock = DockStyle.Fill;
@@ -214,6 +214,9 @@ partial class CatalogForm
         designProduct.Name = "designProduct";
         products.Controls.Add(designProduct);
         pageLayout.Controls.Add(products, 0, 2);
+        pageLayout.Controls.Add(emptyProducts, 0, 2);
+        emptyProducts.Dock = DockStyle.Fill;
+        emptyProducts.Margin = products.Margin;
         footerLayout = new FlowLayoutPanel();
         footerLayout.Dock = DockStyle.Fill;
         footerLayout.Padding = new Padding(24, 5, 0, 0);
