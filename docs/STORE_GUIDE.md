@@ -49,7 +49,7 @@ Expiry runs on startup/refresh and the running timer. It does not run while the 
 
 ## Charts and reports
 
-Admin defaults to 30 days: recorded payment amounts by local payment date, quantities of top paid parts, and current inventory health. Staff defaults to seven days: incoming counts by local creation date, current queue and current category stock counts. Staff charts contain no financial amounts. The period selector affects historical charts, not current snapshots.
+Admin defaults to 30 days: recorded payment amounts by local payment date, quantities of top paid parts, and current inventory health. Staff defaults to seven days: incoming counts by local creation date, current queue and current category stock counts. Staff sees operational summary counts and stock-attention links without charts. The period selector affects historical counts and Admin charts, not current snapshots.
 
 Use Open selected, chart double-clicks or labelled navigation buttons to open filtered Orders/Inventory. Admin reports provide inventory, orders, stock movements and sales with CSV export. Receipts use the fixed CustomPC name and support text saving and printing.
 
@@ -83,4 +83,4 @@ Before actual store use, perform the manual Designer, file-dialog, printer, Wind
 New and changed account passwords use 12–128 characters with uppercase and lowercase letters, a number and a symbol. Existing passwords continue to work until changed. Activity & Backups shows readable saved-state summaries for new actions; double-click a row to read its full details. Older activity entries retain their original text.
 
 
-Admin overview: confirmed-payment and paid-order cards use the selected 7/30/90-day period. Low-stock and out-of-stock cards are current product counts. Stock attention links open inventory with the corresponding stock filter. The three charts retain keyboard-accessible selection controls; empty charts show their headings and a relevant action. Staff retains its operational charts without Admin sales cards.
+Admin overview: confirmed-payment and paid-order cards use the selected 7/30/90-day period. Low-stock and out-of-stock cards are current product counts. Stock attention links open inventory with the corresponding stock filter. The three charts retain keyboard-accessible selection controls; empty charts show their headings and a relevant action. Staff sees operational summary cards and stock-attention links without charts. Parts catalog is available only to Customer and Guest; Admin and Staff use Parts & inventory.
