@@ -15,28 +15,32 @@ public partial class DashboardForm
     private static void PaintMetric(object? sender, PaintEventArgs e)
     {
         if (sender is not Label label) return;
+        float scale = label.DeviceDpi / 96F;
+        int Px(int value) => (int)(value * scale);
         e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
         using SolidBrush background = new(Color.White);
         e.Graphics.FillRectangle(background, label.ClientRectangle);
         string[] lines = label.Text.Split('\n', 2);
         Font valueFont = AppFonts.Heading(label.Width < 240 ? 20 : 23);
-        while (valueFont.Size > 14 && TextRenderer.MeasureText(lines[0], valueFont).Width > label.Width - 40)
+        while (valueFont.Size > 14 && TextRenderer.MeasureText(lines[0], valueFont).Width > label.Width - Px(40))
         {
             float smaller = valueFont.Size - 1;
             valueFont.Dispose(); valueFont = AppFonts.Heading(smaller);
         }
         using Font captionFont = AppFonts.Body(10);
         using (valueFont)
-            TextRenderer.DrawText(e.Graphics, lines[0], valueFont, new Rectangle(20, 17, Math.Max(1, label.Width - 40), 40), StoreTheme.Ink,
-                TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix);
-        TextRenderer.DrawText(e.Graphics, lines.Length > 1 ? lines[1] : "", captionFont, new Rectangle(20, 60, Math.Max(1, label.Width - 40), 26), StoreTheme.Muted,
-            TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix);
+            TextRenderer.DrawText(e.Graphics, lines[0], valueFont, new Rectangle(Px(20), Px(14), Math.Max(1, label.Width - Px(40)), Px(42)), StoreTheme.Ink,
+                TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix);
+        TextRenderer.DrawText(e.Graphics, lines.Length > 1 ? lines[1] : "", captionFont, new Rectangle(Px(20), Px(60), Math.Max(1, label.Width - Px(40)), Px(28)), StoreTheme.Muted,
+            TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix);
     }
 
     private void BuildAdaptiveShell()
     {
         MinimumSize = new Size(720, 600);
         sidebar.BackColor = brand.BackColor = brandCaption.BackColor = logo.BackColor = StoreTheme.Ink;
+        SurfaceArtwork.Attach(sidebar, "sidebar.png");
+        brand.BackColor = brandCaption.BackColor = logo.BackColor = Color.Transparent;
         overviewViewport = new Panel { Name = "overviewViewport", AutoScroll = true, BackColor = StoreTheme.Background };
         overviewCanvas = new Panel { Name = "overviewCanvas", BackColor = StoreTheme.Background };
         overviewViewport.Controls.Add(overviewCanvas);
@@ -50,7 +54,13 @@ public partial class DashboardForm
         sidebar.Controls.Add(navigationCaption); sidebar.Controls.Add(accountName); sidebar.Controls.Add(accountRole);
         navigationList = new Panel { Name = "navigationList", AutoScroll = true, BackColor = StoreTheme.Ink };
         sidebar.Controls.Add(navigationList);
-        foreach (Button button in new[] { home, catalog, builder, orders, inventory, users, reports, tools }) button.Parent = navigationList;
+        navigationList.Paint += (_, e) => SurfaceArtwork.Paint(e.Graphics, navigationList);
+        navigationCaption.BackColor = accountName.BackColor = accountRole.BackColor = Color.Transparent;
+        foreach (Button button in new[] { home, catalog, builder, orders, inventory, users, reports, tools })
+        {
+            button.Parent = navigationList;
+            button.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+        }
         foreach (Button button in new[] { home, catalog, builder, orders, inventory, users, reports, tools, signout })
         {
             button.AccessibleName = button.Text;
@@ -71,13 +81,15 @@ public partial class DashboardForm
             value.Font = AppFonts.Body(14, FontStyle.Bold);
             value.Paint += PaintMetric;
         }
-        shoppingActions = new FlowLayoutPanel { BackColor = StoreTheme.Ink, WrapContents = true };
+        shoppingActions = new FlowLayoutPanel { BackColor = Color.Transparent, WrapContents = true };
         var startBuild = new Button { Name = "builder", Text = "Open PC builder", BackColor = StoreTheme.Green, Size = new Size(210, 44) };
         var browse = new Button { Name = "catalog", Text = "Explore parts", BackColor = Color.White, Size = new Size(190, 44) };
         startBuild.Click += (_, _) => OpenScreen("Builder"); browse.Click += (_, _) => OpenScreen("Catalog");
         shoppingActions.Controls.Add(startBuild); shoppingActions.Controls.Add(browse); workflowSurface.Controls.Add(shoppingActions);
         workflowSurface.BackColor = StoreTheme.Ink;
-        workflowTitle.BackColor = guide.BackColor = StoreTheme.Ink;
+        SurfaceArtwork.Attach(workflowSurface, "backdrop.png", Color.FromArgb(218, 24, 43, 30));
+        workflowTitle.BackColor = guide.BackColor = Color.Transparent;
+        guide.Anchor = AnchorStyles.Top | AnchorStyles.Left;
         workflowTitle.ForeColor = Color.White; guide.ForeColor = Color.FromArgb(211, 228, 217);
         FitWorkspace();
     }
@@ -96,11 +108,12 @@ public partial class DashboardForm
             pageHost.SetBounds(side, 0, Math.Max(1, ClientSize.Width - side), ClientSize.Height);
             overviewViewport.Bounds = pageHost.Bounds;
             logo.SetBounds(Px(rail ? 18 : 22), Px(24), Px(40), Px(40));
-            brand.Visible = brandCaption.Visible = navigationCaption!.Visible = !rail;
+            brand.Visible = navigationCaption!.Visible = !rail;
+            brandCaption.Visible = false;
             brand.SetBounds(Px(72), Px(24), Px(146), Px(36));
             brandCaption.SetBounds(Px(24), Px(76), side - Px(40), Px(22));
-            navigationCaption.SetBounds(Px(24), Px(118), side - Px(40), Px(24));
-            int top = Px(rail ? 94 : 154);
+            navigationCaption.SetBounds(Px(24), Px(90), side - Px(40), Px(24));
+            int top = Px(rail ? 94 : 126);
             navigationList!.SetBounds(0, top, side, Math.Max(Px(90), ClientSize.Height - top - Px(rail ? 80 : 142)));
             top = 0;
             foreach (Button button in new[] { home, catalog, builder, orders, inventory, users, reports, tools })
@@ -170,12 +183,11 @@ public partial class DashboardForm
             }
             else
             {
-                workflowSurface.SetBounds(x, y, width, Px(210));
+                workflowSurface.SetBounds(x, y, width, Px(178));
                 workflowTitle.Text = "Build a PC. Make it yours.";
                 workflowTitle.SetBounds(Px(24), Px(22), width - Px(48), Px(48));
-                guide.Text = "Choose compatible parts, reserve your build, and pay at the store.";
-                guide.SetBounds(Px(24), Px(76), width - Px(48), Px(40));
-                shoppingActions!.SetBounds(Px(24), Px(128), width - Px(48), Px(72));
+                guide.Visible = false;
+                shoppingActions!.SetBounds(Px(24), Px(96), width - Px(48), Px(72));
                 y = workflowSurface.Bottom + Px(20);
                 Label[] values = { statParts, statOrders, statStock, statSales }; Label[] captions = { statPartsCaption, statOrdersCaption, statStockCaption, statSalesCaption };
                 int[] items = AppStore.Current.IsCustomer ? new[] { 0, 1, 2, 3 } : new[] { 0, 2, 3 };

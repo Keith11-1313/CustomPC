@@ -113,12 +113,13 @@ public static class StoreTheme
         if (!button.Enabled) fill = Color.FromArgb(236, 239, 236);
         else if (state.Pressed) fill = primary ? Color.FromArgb(14, 87, 58) : Color.FromArgb(224, 233, 229);
         else if (state.Hover) fill = dark ? Color.FromArgb(40, 57, 51) : primary ? Color.FromArgb(16, 103, 68) : Color.FromArgb(241, 245, 243);
-        e.Graphics.Clear(button.Parent?.BackColor ?? Background);
+        SurfaceArtwork.Paint(e.Graphics, button);
         e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
         Rectangle bounds = new(1, 1, Math.Max(1, button.Width - 3), Math.Max(1, button.Height - 3));
         using GraphicsPath shape = RoundedRectangle(bounds, 8);
         using SolidBrush brush = new(fill);
-        e.Graphics.FillPath(brush, shape);
+        if (!navigation || selected || state.Hover || state.Pressed || !dark)
+            e.Graphics.FillPath(brush, shape);
         if (!primary && !dark && !navigation && !categoryFilter && button.Name != "details")
         {
             using Pen outline = new(Border);
@@ -138,14 +139,14 @@ public static class StoreTheme
         Rectangle textBounds = bounds;
         if (icon != "")
         {
-            int textWidth = Math.Min(Math.Max(1, button.Width - 50), TextRenderer.MeasureText(button.Text, button.Font).Width);
+            int textWidth = TextRenderer.MeasureText(button.Text, button.Font).Width;
             int iconLeft = compactNavigation ? (button.Width - 20) / 2 : navigation ? 14 : Math.Max(12, (button.Width - textWidth - 26) / 2);
             IconAssets.Paint(e.Graphics, icon, new Rectangle(iconLeft, (button.Height - 20) / 2, 20, 20), text);
             textBounds.X = iconLeft + 26; textBounds.Width = Math.Max(1, button.Width - textBounds.X - 12);
         }
         if (categoryFilter) { textBounds.X += 14; textBounds.Width -= 24; }
         TextRenderer.DrawText(e.Graphics, compactNavigation ? "" : button.Text, selected ? emphasis : button.Font, textBounds, text,
-            (navigation || categoryFilter ? TextFormatFlags.Left : TextFormatFlags.HorizontalCenter) | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix);
+            (navigation || categoryFilter || icon != "" ? TextFormatFlags.Left : TextFormatFlags.HorizontalCenter) | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix);
         if (button.Focused)
         {
             using var focus = RoundedRectangle(Rectangle.Inflate(bounds, -4, -4), 5);

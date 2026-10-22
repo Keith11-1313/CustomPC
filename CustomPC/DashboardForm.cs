@@ -127,6 +127,7 @@ public partial class DashboardForm : StoreWindow
 
     private void ExpiryTimer_Tick(object? sender, EventArgs e)
     {
+        if (!Visible || Form.ActiveForm is { Modal: true }) return;
         try
         {
             // Refresh also cancels unpaid orders whose payment deadline has passed.
@@ -591,22 +592,9 @@ public partial class DashboardForm : StoreWindow
 
     private void ArrangeRoleMenu()
     {
-        Button[] menu = { catalog, builder, orders, inventory, users, reports, tools };
-        int gap = Math.Max(4, (int)(6 * DeviceDpi / 96F));
-        int firstTop = brandCaption.Bottom + gap;
-        int count = menu.Count(button => button.Enabled) + 1;
-        int height = Math.Clamp((signout.Top - firstTop - gap * (count + 1)) / count, 30, (int)(44 * DeviceDpi / 96F));
-        home.SetBounds(16, firstTop, sidebar.Width - 32, height);
-        int nextTop = home.Bottom + gap;
-        foreach (Button button in menu)
-        {
-            button.Visible = button.Enabled;
-            if (button.Enabled)
-            {
-                button.SetBounds(16, nextTop, sidebar.Width - 32, height);
-                nextTop += height + gap;
-            }
-        }
+        // The menu is inside navigationList now; sidebar coordinates add a
+        // second header offset and leave the menu floating halfway down.
+        LayoutWorkspace();
     }
 
     private void FitWorkspace() => LayoutWorkspace();

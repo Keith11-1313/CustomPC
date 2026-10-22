@@ -12,11 +12,36 @@ public partial class LoginForm : StoreWindow
         }
 
         ApplyBrandAppearance();
-        BuildLoginLayout();
+        Load += (_, _) => RestoreLoginLayout();
+        SizeChanged += (_, _) => { if (IsHandleCreated) RestoreLoginLayout(); };
         AcceptButton = login;
         login.Click += LoginButton_Click;
-        register.Click += RegisterButton_Click;
-        guest.Click += GuestButton_Click;
+        register.LinkClicked += RegisterButton_Click;
+        guest.LinkClicked += GuestButton_Click;
+    }
+
+    private void RestoreLoginLayout()
+    {
+        float scale = DeviceDpi / 96F;
+        int Px(int value) => (int)(value * scale);
+        int leftWidth = (int)(ClientSize.Width * .42F);
+        brandPanel.SetBounds(0, 0, leftWidth, ClientSize.Height);
+        authSurface.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+        authSurface.SetBounds(leftWidth + Px(24), Px(24), Math.Max(Px(300), ClientSize.Width - leftWidth - Px(48)), Math.Max(Px(520), ClientSize.Height - Px(48)));
+        int width = Math.Max(1, authSurface.Width - Px(64));
+        heading.SetBounds(Px(32), Px(42), width, Px(60));
+        emailLabel.SetBounds(Px(32), Px(144), width, Px(24));
+        email.SetBounds(Px(32), Px(176), width, Px(44));
+        passwordLabel.SetBounds(Px(32), Px(244), width, Px(24));
+        password.SetBounds(Px(32), Px(276), width, Px(44));
+        login.SetBounds(Px(32), Px(354), width, Px(48));
+        register.SetBounds(Px(32), Px(422), width, Px(34));
+        guest.SetBounds(Px(32), Px(464), width, Px(34));
+        logo.SetBounds(Px(32), Px(32), Px(64), Px(43));
+        brand.SetBounds(Px(110), Px(29), Math.Max(1, leftWidth - Px(128)), Px(48));
+        brandCaption.SetBounds(Px(38), Px(88), Math.Max(1, leftWidth - Px(64)), Px(46));
+        loginHero.SetBounds(Px(38), Px(215), Math.Max(1, leftWidth - Px(64)), Px(146));
+        brandFooter.SetBounds(Px(38), Math.Max(Px(380), brandPanel.Height - Px(138)), Math.Max(1, leftWidth - Px(64)), Px(100));
     }
 
     private void ApplyBrandAppearance()

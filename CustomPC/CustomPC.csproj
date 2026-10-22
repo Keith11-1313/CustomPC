@@ -14,6 +14,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Assets\logo.png" />
     <EmbeddedResource Include="Assets\backdrop.png" />
+    <EmbeddedResource Include="Assets\sidebar.png" />
     <EmbeddedResource Include="Assets\Icons\*.png" />
     <None Update="Assets\Icons\*.txt" CopyToOutputDirectory="PreserveNewest" />
     <EmbeddedResource Include="Assets\Fonts\*.ttf" />
