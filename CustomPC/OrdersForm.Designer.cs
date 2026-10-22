@@ -52,7 +52,7 @@ partial class OrdersForm
         status.TabIndex = 5;
         status.DropDownStyle = ComboBoxStyle.DropDownList;
         Controls.Add(status);
-        grid = new DataGridView();
+        grid = new StoreGrid();
         grid.Name = "grid";
         grid.Location = new Point(32, 170);
         grid.Size = new Size(1036, 408);

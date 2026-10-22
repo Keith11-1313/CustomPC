@@ -6,6 +6,7 @@ public partial class PartEditForm : StoreWindow
     private string photoFileName = "";
     private string? photoImportPath;
     private bool photoRemoved;
+    private EditorSheet? editorSheet;
 
     public PartEditForm()
     {
@@ -20,6 +21,15 @@ public partial class PartEditForm : StoreWindow
         if (!AppStore.Current.IsAdmin)
             throw new InvalidOperationException("Administrator access is required.");
 
+        specifications.Multiline = true;
+        specifications.ScrollBars = ScrollBars.Vertical;
+        editorSheet = new EditorSheet { Name = "editorSheet" };
+        editorSheet.Bind(this, heading, back, save, "Product identity, pricing and category-specific specifications. Stock is managed separately.", true,
+            (partNameLabel, partName), (categoryLabel, category), (brandLabel, brand), (priceLabel, price),
+            (lowLabel, low), (specificationsLabel, specifications), (socketLabel, socket), (memoryLabel, memory),
+            (wattsLabel, watts), (recommendedPsuLabel, recommendedPsu));
+        editorSheet.AddOption(integratedGraphics); editorSheet.AddOption(videoOutput); editorSheet.AddOption(archived);
+        editorSheet.AddPhoto(photoPreview, choosePhoto, removePhoto, photoStatus);
         category.Items.AddRange(AppStore.Categories);
         category.SelectedIndex = 0;
         category.SelectedIndexChanged += CategoryChanged;
@@ -96,59 +106,16 @@ public partial class PartEditForm : StoreWindow
     // Hidden fields keep their draft values, but unrelated values are not saved.
     private void UpdateCategoryFields()
     {
+        if (editorSheet == null) return;
         string selected = category.Text;
-        bool hasSocket = selected is "CPU" or "Motherboard";
-        bool hasMemory = selected is "Motherboard" or "RAM";
-        bool hasPower = selected != "Case";
-        bool isGpu = selected == "GPU";
-
-        SuspendLayout();
-        AutoScrollPosition = Point.Empty;
-        // Use the existing scaled width to respect Windows DPI and font scaling.
-        float scale = partName.Width / 480f;
-        int Px(int value) => (int)Math.Round(value * scale);
-        int left = partName.Left, second = left + Px(244);
-        void FieldRow(Label label, Control input, bool show, int x, int y)
-        {
-            label.Visible = input.Visible = show;
-            input.TabStop = show;
-            if (!show) return;
-            label.Location = new Point(x, y);
-            input.Location = new Point(x, y + Px(30));
-        }
-
-        stockLabel.Visible = stock.Visible = false;
-        stock.TabStop = false; // Stock changes belong to Staff, not this editor.
-        FieldRow(lowLabel, low, true, second, priceLabel.Top);
-        int row = specifications.Bottom + Px(18);
-        FieldRow(socketLabel, socket, hasSocket, left, row);
-        FieldRow(memoryLabel, memory, hasMemory, hasSocket ? second : left, row);
-        if (hasSocket || hasMemory) row += Px(80);
-
+        editorSheet.SetFieldVisible(socket, selected is "CPU" or "Motherboard");
+        editorSheet.SetFieldVisible(memory, selected is "Motherboard" or "RAM");
+        editorSheet.SetFieldVisible(watts, selected != "Case");
+        editorSheet.SetFieldVisible(recommendedPsu, selected == "GPU");
+        editorSheet.SetFieldVisible(integratedGraphics, selected == "CPU");
+        editorSheet.SetFieldVisible(videoOutput, selected == "Motherboard");
         wattsLabel.Text = selected == "Power Supply" ? "PSU capacity (W)" : "Power use (W)";
-        FieldRow(wattsLabel, watts, hasPower, left, row);
-        recommendedPsuLabel.Text = "Recommended PSU (W)";
-        recommendedPsuLabel.Height = Px(28);
-        FieldRow(recommendedPsuLabel, recommendedPsu, isGpu, second, row);
-        if (hasPower) row += Px(80);
-
-        integratedGraphics.Visible = selected == "CPU";
-        videoOutput.Visible = selected == "Motherboard";
-        integratedGraphics.Enabled = videoOutput.Enabled = true;
-        integratedGraphics.TabStop = selected == "CPU";
-        videoOutput.TabStop = selected == "Motherboard";
-        integratedGraphics.Location = videoOutput.Location = new Point(left, row);
-        if (selected is "CPU" or "Motherboard") row += Px(48);
-
-        archived.Location = new Point(left, row);
-        save.Location = new Point(second + Px(16), row - Px(4));
-        int height = Math.Max(save.Bottom, photoStatus.Bottom) + Px(24);
-        AutoScrollMinSize = new Size(Px(830), height);
-        int availableHeight = Screen.FromControl(this).WorkingArea.Height - (Height - ClientSize.Height);
-        ClientSize = new Size(ClientSize.Width, Math.Min(height, availableHeight));
-        ResumeLayout(true);
     }
-
     private void PartEditForm_Shown(object? sender, EventArgs e)
     {
         UpdateCategoryFields();

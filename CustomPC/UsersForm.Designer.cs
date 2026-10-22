@@ -44,7 +44,7 @@ partial class UsersForm
         archived.TabIndex = 4;
         archived.Text = "Include archived accounts";
         Controls.Add(archived);
-        grid = new DataGridView();
+        grid = new StoreGrid();
         grid.Name = "grid";
         grid.Location = new Point(32, 158);
         grid.Size = new Size(1036, 430);

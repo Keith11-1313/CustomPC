@@ -140,7 +140,7 @@ partial class StoreToolsForm
         refresh.Cursor = Cursors.Hand;
         refresh.UseMnemonic = false;
         Controls.Add(refresh);
-        grid = new DataGridView();
+        grid = new StoreGrid();
         grid.Name = "grid";
         grid.Location = new Point(32, 315);
         grid.Size = new Size(1036, 202);

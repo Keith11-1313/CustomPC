@@ -2,11 +2,23 @@ namespace CustomPC;
 
 public partial class StoreToolsForm : StoreWindow
 {
+    private Panel? backupViewport;
     public StoreToolsForm()
     {
         InitializeComponent();
         back.Click += BackButton_Click;
         if (Ui.IsDesign) return;
+        backupViewport = new Panel { AutoScroll = true, Dock = DockStyle.Fill };
+        contentLayout.Parent = backupViewport;
+        contentLayout.Dock = DockStyle.Top;
+        var workspace = new WorkspacePage { Name = "workspace" };
+        workspace.Bind(this, heading, back, "Store activity, backups and recovery.", backupViewport,
+            null, Array.Empty<Button>());
+        contentLayout.Padding = new Padding(0);
+        contentLayout.RowStyles[0].Height = 0;
+        SizeChanged += (_, _) => FitBackupCards();
+        backupViewport.SizeChanged += (_, _) => FitBackupCards();
+        FitBackupCards();
         AppStore.Current.Refresh();
         if (!AppStore.Current.IsAdmin) throw new InvalidOperationException("Administrator access is required.");
 
@@ -23,6 +35,25 @@ public partial class StoreToolsForm : StoreWindow
             Ui.Message(this, details, "Activity details");
         };
         LoadHistory();
+    }
+
+    private void FitBackupCards()
+    {
+        bool stacked = ClientSize.Width < 820 * DeviceDpi / 96F;
+        backupLayout.SuspendLayout();
+        backupLayout.ColumnCount = stacked ? 1 : 2;
+        backupLayout.RowCount = stacked ? 2 : 1;
+        backupLayout.ColumnStyles.Clear(); backupLayout.RowStyles.Clear();
+        for (int i = 0; i < backupLayout.ColumnCount; i++) backupLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F / backupLayout.ColumnCount));
+        for (int i = 0; i < backupLayout.RowCount; i++) backupLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F / backupLayout.RowCount));
+        backupLayout.SetCellPosition(restoreCard, new TableLayoutPanelCellPosition(stacked ? 0 : 1, stacked ? 1 : 0));
+        contentLayout.RowStyles[1].Height = (stacked ? 440 : 240) * DeviceDpi / 96F;
+        contentLayout.AutoScroll = false;
+        contentLayout.AutoScrollMinSize = Size.Empty;
+        contentLayout.Height = Math.Max(backupViewport?.ClientSize.Height ?? 0, (int)((stacked ? 780 : 560) * DeviceDpi / 96F));
+        contentLayout.Width = Math.Max(1, (backupViewport?.ClientSize.Width ?? ClientSize.Width) - SystemInformation.VerticalScrollBarWidth);
+        saveCard.ColumnStyles.Clear(); saveCard.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        backupLayout.ResumeLayout(true);
     }
 
     // Render the PNG icons; keep the headings as normal editable labels.

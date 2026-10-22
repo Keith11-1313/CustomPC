@@ -13,6 +13,9 @@ public partial class RegisterForm : StoreWindow
         }
 
         AcceptButton = save;
+        var sheet = new EditorSheet { Name = "editorSheet" };
+        sheet.Bind(this, heading, back, save, "Create your customer account to save and order a PC build.", false,
+            (fullNameLabel, fullName), (emailLabel, email), (passwordLabel, password), (confirmLabel, confirm));
         save.Click += SaveButton_Click;
     }
 

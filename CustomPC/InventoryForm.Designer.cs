@@ -59,7 +59,7 @@ partial class InventoryForm
         archived.TabIndex = 6;
         archived.Text = "Include archived";
         Controls.Add(archived);
-        grid = new DataGridView();
+        grid = new StoreGrid();
         grid.Name = "grid";
         grid.Location = new Point(32, 170);
         grid.Size = new Size(1036, 408);

@@ -6,6 +6,10 @@ public partial class SetupForm : StoreWindow
     {
         InitializeComponent();
         if (Ui.IsDesign) return;
+        var sheet = new EditorSheet { Name = "editorSheet" };
+        sheet.Bind(this, heading, back, save, "Create the first administrator for CustomPC.", false,
+            (fullNameLabel, fullName), (emailLabel, email), (passwordLabel, password), (confirmLabel, confirm));
+        sheet.AddOption(help);
         save.Click += SaveButton_Click;
         back.Click += BackButton_Click;
     }

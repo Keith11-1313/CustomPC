@@ -21,6 +21,12 @@ public partial class OrdersForm : StoreWindow
             return;
         }
 
+        var workspace = new WorkspacePage { Name = "workspace" };
+        workspace.Bind(this, heading, back, "Track orders, payment status and pickup progress.", grid,
+            refresh, new[] { receipt, pay, advance, cancel }, (searchLabel, search), (statusLabel, status));
+        workspace.AddNotice(filterCaption);
+        workspace.AddNotice(clearDashboardFilter);
+
         AppStore.Current.Refresh();
         if (!AppStore.Current.CanViewAllOrders && !AppStore.Current.IsCustomer)
             throw new InvalidOperationException("Sign in with an authorized account to view orders.");
@@ -194,8 +200,6 @@ public partial class OrdersForm : StoreWindow
         filterCaption.Visible = viewFilter != null;
         clearDashboardFilter.Visible = viewFilter != null;
         filterCaption.Text = viewFilter?.Description ?? "";
-        grid.Top = viewFilter == null ? 170 : 196;
-        grid.Height = ClientSize.Height - grid.Top - 110;
 
         DataTable table = new DataTable();
         table.Columns.Add("Id", typeof(string));

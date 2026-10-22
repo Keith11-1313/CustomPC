@@ -13,6 +13,10 @@ public partial class UserEditForm : StoreWindow
             return;
         }
 
+        var sheet = new EditorSheet { Name = "editorSheet" };
+        sheet.Bind(this, heading, back, save, "Account identity, role and access.", false,
+            (fullNameLabel, fullName), (emailLabel, email), (roleLabel, role), (passwordLabel, password));
+        sheet.AddOption(archived);
         AppStore.Current.Refresh();
         if (!AppStore.Current.IsAdmin)
             throw new InvalidOperationException("Administrator access is required.");

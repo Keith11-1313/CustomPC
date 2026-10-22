@@ -13,6 +13,11 @@ public partial class UsersForm : StoreWindow
             return;
         }
 
+        var workspace = new WorkspacePage { Name = "workspace" };
+        workspace.Bind(this, heading, back, "Manage store access and account roles.", grid,
+            null, new[] { add, edit }, (searchLabel, search));
+        workspace.AddFilterOption(archived);
+
         if (!AppStore.Current.IsAdmin)
         {
             throw new InvalidOperationException("Admin access required.");

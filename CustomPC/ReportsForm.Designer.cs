@@ -93,7 +93,7 @@ partial class ReportsForm
         summary.UseMnemonic = false;
         summary.Font = new Font("Roboto", 13F, FontStyle.Bold);
         Controls.Add(summary);
-        grid = new DataGridView();
+        grid = new StoreGrid();
         grid.Name = "grid";
         grid.Location = new Point(32, 220);
         grid.Size = new Size(1036, 364);

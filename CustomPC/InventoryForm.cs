@@ -20,6 +20,11 @@ public partial class InventoryForm : StoreWindow
             return;
         }
 
+        var workspace = new WorkspacePage { Name = "workspace" };
+        workspace.Bind(this, heading, back, "Manage products, stock levels and availability in one workspace.", tableSurface,
+            refresh, new[] { add, edit, adjust, history }, (searchLabel, search), (stockLabel, stockFilter));
+        workspace.AddFilterOption(archived);
+
         AppStore store = AppStore.Current;
         if (!store.CanViewInventory)
         {

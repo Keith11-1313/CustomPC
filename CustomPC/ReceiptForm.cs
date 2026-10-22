@@ -18,6 +18,10 @@ public partial class ReceiptForm : StoreWindow
             return;
         }
 
+        var workspace = new WorkspacePage { Name = "workspace" };
+        workspace.Bind(this, heading, back, "Your order summary and store payment details.", receiptText,
+            null, new[] { print, save });
+
         Shown += ReceiptForm_Shown;
         print.Click += PrintButton_Click;
         save.Click += SaveButton_Click;

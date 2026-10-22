@@ -13,6 +13,10 @@ public partial class StockAdjustmentForm : StoreWindow
             return;
         }
 
+        var sheet = new EditorSheet { Name = "editorSheet" };
+        sheet.Bind(this, heading, back, save, "Record a stock receipt or correction with a reason.", false,
+            (quantityLabel, quantity), (reasonLabel, reason));
+        sheet.AddOption(partLabel);
         AppStore.Current.Refresh();
         if (!AppStore.Current.IsStaff)
             throw new InvalidOperationException("Staff access is required.");

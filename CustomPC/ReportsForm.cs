@@ -7,16 +7,16 @@ public partial class ReportsForm : StoreWindow
     public ReportsForm()
     {
         InitializeComponent();
-        SizeChanged += (_, _) =>
-        {
-            filters.Width = Math.Max(1, ClientSize.Width - 64);
-            summary.Width = Math.Max(1, ClientSize.Width - summary.Left - 32);
-        };
         back.Click += BackButton_Click;
         if (Ui.IsDesign)
         {
             return;
         }
+
+        var workspace = new WorkspacePage { Name = "workspace" };
+        workspace.Bind(this, heading, back, "Review saved store records for a selected period.", grid,
+            refresh, new[] { export }, (reportLabel, report), (fromLabel, from), (toLabel, to));
+        workspace.AddNotice(summary);
 
         AppStore store = AppStore.Current;
         store.Refresh();
