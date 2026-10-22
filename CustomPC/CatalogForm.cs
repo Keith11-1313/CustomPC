@@ -37,7 +37,8 @@ public partial class CatalogForm : StoreWindow
         Disposed += (_, _) => searchDelay.Dispose();
         category.SelectedIndexChanged += FilterChanged;
         availability.SelectedIndexChanged += FilterChanged;
-        refresh.Click += RefreshButton_Click;
+        refresh.Visible = false;
+        _ = new AutomaticViewRefresh(this, () => RefreshButton_Click(this, EventArgs.Empty));
         emptyProducts.ActionClicked += EmptyProducts_Click;
         products.SizeChanged += (_, _) => FitProductCards();
         grid.CellDoubleClick += PartsGrid_CellDoubleClick;

@@ -31,7 +31,10 @@ public partial class ReportsForm : StoreWindow
         to.Value = DateTime.Today;
         report.SelectedIndex = 0;
         report.SelectedIndexChanged += ReportChanged;
-        refresh.Click += RefreshClicked;
+        refresh.Visible = false;
+        _ = new AutomaticViewRefresh(this, () => RefreshClicked(this, EventArgs.Empty));
+        from.ValueChanged += ReportChanged;
+        to.ValueChanged += ReportChanged;
         export.Click += ExportClicked;
         LoadReport();
     }

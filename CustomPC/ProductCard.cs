@@ -6,29 +6,47 @@ namespace CustomPC;
 public partial class ProductCard : UserControl
 {
     private bool? compactLayout;
+    private bool fittingText;
     public void UseCompactLayout(bool compact)
     {
-        if (compactLayout == compact) return;
+        if (compactLayout == compact) { FitCardText(); return; }
         compactLayout = compact;
         cardLayout.SuspendLayout();
         cardLayout.Controls.Clear(); cardLayout.ColumnStyles.Clear(); cardLayout.RowStyles.Clear();
         cardLayout.ColumnCount = compact ? 2 : 1; cardLayout.RowCount = compact ? 5 : 6;
-        if (compact) cardLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 112));
+        if (compact) cardLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 112 * DeviceDpi / 96F));
         cardLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         foreach (int height in compact ? new[] { 20, 44, 28, 32, 44 } : new[] { 160, 25, 56, 30, 40, 44 })
-            cardLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, height));
+            cardLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, height * DeviceDpi / 96F));
         cardLayout.Controls.Add(photograph, 0, 0);
         cardLayout.SetRowSpan(photograph, compact ? 5 : 1);
         Control[] right = { categoryCaption, productName, stock, price, cardActions };
         for (int i = 0; i < right.Length; i++) cardLayout.Controls.Add(right[i], compact ? 1 : 0, compact ? i : i + 1);
-        Height = compact ? 200 : 391;
         cardLayout.ResumeLayout(true);
+        FitCardText();
+    }
+    private void FitCardText()
+    {
+        if (fittingText || compactLayout == null) return;
+        fittingText = true;
+        try
+        {
+            float scale = DeviceDpi / 96F;
+            bool compact = compactLayout.Value;
+            int textWidth = Math.Max(40, Width - cardLayout.Padding.Horizontal - (compact ? (int)(112 * scale) : 0) - 8);
+            int nameHeight = Math.Max((int)(44 * scale), TextRenderer.MeasureText(productName.Text, productName.Font,
+                new Size(textWidth, int.MaxValue), TextFormatFlags.WordBreak | TextFormatFlags.NoPrefix).Height + productName.Margin.Vertical + 4);
+            cardLayout.RowStyles[compact ? 1 : 2].Height = nameHeight;
+            Height = (int)cardLayout.RowStyles.Cast<RowStyle>().Sum(row => row.Height) + cardLayout.Padding.Vertical + Padding.Vertical;
+        }
+        finally { fittingText = false; }
     }
     public ProductCard()
     {
         InitializeComponent();
         Padding = new Padding(1);
         SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
+        SizeChanged += (_, _) => FitCardText();
     }
 
     public ProductCard(Part part, AppStore store, Action<Part>? select) : this()

@@ -37,7 +37,8 @@ public partial class OrdersForm : StoreWindow
 
         search.TextChanged += FilterChanged;
         status.SelectedIndexChanged += FilterChanged;
-        refresh.Click += RefreshButton_Click;
+        refresh.Visible = false;
+        _ = new AutomaticViewRefresh(this, () => RefreshButton_Click(this, EventArgs.Empty));
         emptyOrders.ActionClicked += EmptyOrders_Click;
         clearDashboardFilter.Click += (_, _) => { viewFilter = null; LoadRows(); };
         receipt.Click += ReceiptButton_Click;
@@ -87,6 +88,7 @@ public partial class OrdersForm : StoreWindow
 
     private void RefreshTimer_Tick(object? sender, EventArgs e)
     {
+        if (!Visible || Form.ActiveForm is { Modal: true }) return;
         try
         {
             LoadRows();

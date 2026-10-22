@@ -27,7 +27,8 @@ public partial class StoreToolsForm : StoreWindow
 
         backup.Click += BackupButton_Click;
         restore.Click += RestoreButton_Click;
-        refresh.Click += RefreshButton_Click;
+        refresh.Visible = false;
+        _ = new AutomaticViewRefresh(this, () => RefreshButton_Click(this, EventArgs.Empty));
         grid.CellDoubleClick += (_, e) =>
         {
             if (e.RowIndex < 0) return;

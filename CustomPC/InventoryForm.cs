@@ -4,6 +4,7 @@ namespace CustomPC;
 
 public partial class InventoryForm : StoreWindow
 {
+    private readonly Dictionary<string, (string Key, Image Image)> thumbnails = new();
     private string? filteredCategory;
     public InventoryForm(InventoryViewFilter filter) : this()
     {
@@ -19,6 +20,7 @@ public partial class InventoryForm : StoreWindow
         {
             return;
         }
+        Disposed += (_, _) => { foreach (var thumbnail in thumbnails.Values) thumbnail.Image.Dispose(); thumbnails.Clear(); };
 
         var workspace = new WorkspacePage { Name = "workspace" };
         workspace.Bind(this, heading, back, "Manage products, stock levels and availability in one workspace.", tableSurface,
@@ -43,7 +45,8 @@ public partial class InventoryForm : StoreWindow
         edit.Click += EditClicked;
         adjust.Click += AdjustStockClicked;
         history.Click += HistoryClicked;
-        refresh.Click += RefreshClicked;
+        refresh.Visible = false;
+        _ = new AutomaticViewRefresh(this, () => RefreshClicked(this, EventArgs.Empty));
         emptyInventory.ActionClicked += (_, _) =>
         {
             if (AppStore.Current.IsAdmin && !AppStore.Current.Parts.Any(p => !p.Archived)) AddClicked(this, EventArgs.Empty);
@@ -178,6 +181,7 @@ public partial class InventoryForm : StoreWindow
 
         DataTable table = new DataTable();
         table.Columns.Add("Id");
+        table.Columns.Add("Photo", typeof(Image));
         table.Columns.Add("Component");
         table.Columns.Add("Category");
         table.Columns.Add("Price");
@@ -210,11 +214,30 @@ public partial class InventoryForm : StoreWindow
                 continue;
             }
 
-            table.Rows.Add(part.Id, part.Name, part.Category, Ui.Money(part.Price),
+            table.Rows.Add(part.Id, InventoryThumbnail(part, store.DatabasePath), part.Name, part.Category, Ui.Money(part.Price),
                 part.Stock, store.Reserved(part.Id), availableStock, stockStatus, part.Archived);
         }
 
         Ui.Bind(grid, table);
+        DataGridViewAutoSizeColumnsMode sizing = grid.AutoSizeColumnsMode;
+        grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
+        try
+        {
+        if (grid.Columns["Photo"] is DataGridViewImageColumn photoColumn)
+        {
+            photoColumn.ImageLayout = DataGridViewImageCellLayout.Zoom;
+            photoColumn.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            photoColumn.MinimumWidth = photoColumn.Width = (int)(86 * DeviceDpi / 96F);
+            photoColumn.DefaultCellStyle.Padding = new Padding(6);
+            photoColumn.DefaultCellStyle.NullValue = null;
+            photoColumn.SortMode = DataGridViewColumnSortMode.NotSortable;
+        }
+        foreach (DataGridViewRow row in grid.Rows) row.Height = (int)(72 * DeviceDpi / 96F);
+        if (grid.Columns["Price"] is DataGridViewColumn priceColumn)
+            priceColumn.MinimumWidth = Math.Max(priceColumn.MinimumWidth, table.Rows.Cast<DataRow>()
+                .Select(row => TextRenderer.MeasureText(row["Price"].ToString(), grid.Font).Width + (int)(32 * DeviceDpi / 96F)).DefaultIfEmpty(140).Max());
+        }
+        finally { grid.AutoSizeColumnsMode = sizing; }
         emptyInventory.Visible = table.Rows.Count == 0;
         grid.Visible = table.Rows.Count > 0;
         TableSurface_Resize(this, EventArgs.Empty);
@@ -226,6 +249,36 @@ public partial class InventoryForm : StoreWindow
             emptyInventory.ActionText = emptyStore && store.IsAdmin ? "Add product" : "Clear filters";
             emptyInventory.BringToFront();
         }
+    }
+
+    private Image InventoryThumbnail(Part part, string databasePath)
+    {
+        string key = part.PhotoFileName;
+        try { if (key.Length > 0) key += "|" + File.GetLastWriteTimeUtc(ProductPhotos.Resolve(databasePath, part.PhotoFileName)).Ticks; }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException or InvalidOperationException) { key += "|unavailable"; }
+        if (thumbnails.TryGetValue(part.Id, out var cached) && cached.Key == key) return cached.Image;
+        using Image? source = ProductPhotos.ReadForDisplay(databasePath, part.PhotoFileName);
+        Bitmap thumbnail = new(96, 80);
+        using (Graphics graphics = Graphics.FromImage(thumbnail))
+        {
+            graphics.Clear(Color.White);
+            if (source != null)
+            {
+                float scale = Math.Min(88F / source.Width, 72F / source.Height);
+                float width = source.Width * scale, height = source.Height * scale;
+                graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                graphics.DrawImage(source, (96 - width) / 2, (80 - height) / 2, width, height);
+            }
+            else
+            {
+                using Font font = new("Segoe UI", 9);
+                TextRenderer.DrawText(graphics, part.Category + "\nNo photo", font, new Rectangle(2, 2, 92, 76), StoreTheme.Muted,
+                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.WordBreak);
+            }
+        }
+        if (thumbnails.TryGetValue(part.Id, out cached)) cached.Image.Dispose();
+        thumbnails[part.Id] = (key, thumbnail);
+        return thumbnail;
     }
 
     private void ValidateAccess(AppStore store)

@@ -23,6 +23,7 @@ public partial class UsersForm : StoreWindow
             throw new InvalidOperationException("Admin access required.");
         }
 
+        _ = new AutomaticViewRefresh(this, () => FiltersChanged(this, EventArgs.Empty));
         search.TextChanged += FiltersChanged;
         archived.CheckedChanged += FiltersChanged;
         add.Click += AddClicked;
