@@ -14,7 +14,7 @@ The main window opens maximized to use the monitor's working area. Restore it wi
 
 ## Products and stock
 
-Commands are above tables; filters wrap as the page narrows. Refresh is at the upper right. Customer and Guest browse Parts catalog using the category rail, which moves above products in narrower windows. Product editors use scrolling field groups with pinned Save/Cancel buttons.
+Commands are above tables; filters wrap as the page narrows. Visible data pages update automatically when saved data changes; no Refresh button is needed. Customer and Guest browse Parts catalog using the category rail, which moves above products in narrower windows. Product editors use scrolling field groups with pinned Save/Cancel buttons.
 
 Admin adds/edits/archives products in Parts & inventory, including price, specifications and photographs. New products start at zero stock. Staff uses Adjust stock with a quantity change and reason to record actual receipts or corrections. Admin metadata edits preserve Staff stock. Available stock equals on-hand stock minus reservations.
 
@@ -57,7 +57,7 @@ Use Open selected, chart double-clicks or labelled navigation buttons to open fi
 
 ## Activity & Backups
 
-Admin can view the latest 500 activity entries and refresh them. Historical actions from before logging was implemented cannot be reconstructed. Unexpected failures display a diagnostic reference; default logs are still under `%LOCALAPPDATA%/CustomPC/Logs` (an explicit database override places logs beside that override).
+Admin can view the latest 500 activity entries, which update automatically when saved data changes. Historical actions from before logging was implemented cannot be reconstructed. Unexpected failures display a diagnostic reference; default logs are still under `%LOCALAPPDATA%/CustomPC/Logs` (an explicit database override places logs beside that override).
 
 Save backup creates a ZIP containing custompc.db and ProductImages. Choose a new filename; existing backups are refused. One automatic ZIP per local date is saved to Database/Backups when an existing database is opened. An app left open across days gets the next startup backup when reopened.
 

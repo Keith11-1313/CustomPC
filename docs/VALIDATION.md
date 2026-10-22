@@ -184,3 +184,32 @@ Working text now uses Segoe UI, with Righteous retained for the CustomPC wordmar
 - The full responsive/permission harness passed 98 checks during this refinement. The final header, font, role and programmatic-focus harness passed 45 checks, then passed again after the compact category-label correction.
 - Reviewed current rendered wide/compact catalog, Staff overview, reports, login, inventory and product editor. Captured primary screens and responsive variants in the external refined-ui-20261022 directory. The preview archive contains PNG files only.
 - Tests used copied database/photos; live data was unchanged. DrawToBitmap and programmatic focus do not verify native Visual Studio Designer, physical keyboard navigation, actual Windows 125%/150% display scaling, native file dialogs or printer output. Those checks remain manual.
+
+## 2026-10-22 automatic views, artwork and label sizing
+
+Removed visible manual Refresh actions from Catalog, Inventory, Orders, Reports and Activity & Backups. Visible read-only pages check the database/WAL timestamp and length every two seconds, reloading only when saved data changes. Filters, selected record and table scroll are retained. Modal dialogs pause automatic reloads; Orders and overview retain their expiry timers. Report dates now trigger report updates. Failed automatic checks are logged; existing catalog Retry remains available.
+
+Header/action buttons measure their runtime text with icon space. Icon labels now align left after the icon rather than centering again in the remaining space. Removed the obsolete sidebar menu-positioning method, which used sidebar coordinates inside the nested navigation panel and added a second header offset. Dashboard metric drawing now scales its padding and line positions with DPI. The shopping banner uses the existing backdrop.png with proportional cropping; sidebar.png supplied by the user is embedded and rendered behind the navigation.
+
+- External build: zero warnings/errors. git diff --check passed.
+- Responsive and role harness: 98 checks passed with DPI-aware navigation assertions and the restored login layout expectation.
+- Additional focused harness: 10 checks passed, including an external SQLite change appearing in an open Inventory view after polling, preserved search, absent Refresh actions on five views, receipt-label space and top-aligned expanded navigation after opening Orders. The final focused runner passed again after the modal-timer and selection-preservation adjustments.
+- Visually reviewed rendered Orders, Admin sidebar at 1920 client width, Guest banner, Admin metric cards and compact navigation. Captures and copied database/photos remain in the external automatic-ui-20261022 QA folder. The live database was unchanged. Actual OS scale switching, native Designer and physical input checks were not performed.
+
+## 2026-10-22 text clipping audit
+
+Rendered review found the Builder description overlapping the bottom of Back, a total row shorter than its two text lines, the account password label needing two lines, and the product editor description needing more height at narrow widths. Builder header bounds now scale consistently and the total row measures its text. Shared workspace titles/descriptions/footer rows and editor headings/labels now measure wrapped text. Product cards scale their rows and grow for complete product names. Narrow editors use a vertical flow and clear retained horizontal offsets.
+
+The broad responsive harness passed 98 checks during the audit. After the final corrections, 24 focused clipping checks passed for account labels at 580/440 widths, Inventory/Reports/Orders headings at 1100/720, Builder totals and Back at 1440/800, and all six GPU names. Reviewed rendered Builder, GPU catalog and narrow account editor; fixed the horizontal offset found in that last render and reran the focused checks. External build passed with zero warnings/errors; git diff --check passed. Tests used copied data, and live records were unchanged. Physical display-scale switching and native Designer checks remain unexecuted.
+
+### Inventory photo-column regression
+
+The runtime log identified a NullReferenceException in DataGridViewBand.MinimumThickness at InventoryForm.LoadRows while setting the price column's minimum width. Paused fill-column sizing while applying thumbnail and price widths, then restored it. External build passed with zero warnings/errors. Copied-data checks passed for 43 thumbnail cells for Admin and Staff and for opening Inventory through DashboardForm.OpenScreen for both roles. Live data was unchanged.
+
+### Builder checkout review
+
+Added category/model/price rows for all seven selections, integrated-graphics and missing-selection states, selection progress, socket/memory status and the existing backend minimum PSU calculation beside selected PSU capacity. The review scrolls independently while the total and checkout action remain outside it. Reuses existing compatibility/checkout logic. Focused copied-data checks passed for breakdown creation, repeated selection changes without disposing validation, and checkout reachability at 1600/800 client widths. Reviewed the wide render. External build passed with zero warnings/errors; live data was not changed.
+
+### Incompatible builder options
+
+Builder dropdowns now retain all active, in-stock parts. A downloaded warning PNG and an Incompatible label mark options with socket, memory or PSU conflicts against the other current selections. The selected field retains the warning icon and exposes the reason through AccessibleDescription. Named-part explanations appear above the price breakdown. Existing CheckBuild and ordering permissions still block invalid checkout. Tests on copied data verified counts across all seven categories, warning callbacks for an AM4/LGA1700 mismatch, preserved motherboard choice after selecting DDR5 against DDR4, named conflict details, disabled invalid checkout and popup operation. Visually reviewed the conflict render. Build passed with zero warnings/errors; live records were unchanged.
