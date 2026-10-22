@@ -33,6 +33,8 @@ public partial class BuilderForm : StoreWindow
             throw new InvalidOperationException("Customer access is required to build and order a PC. Guests may preview only.");
 
         partSelectors = new ComboBox[] { part0, part1, part2, part3, part4, part5, part6 };
+        foreach (StoreComboBox selector in partSelectors.OfType<StoreComboBox>())
+            selector.WarningText = item => item is Part part ? CandidateConflict(part) : null;
         BuildComponentWorkspace();
         SizeChanged += (_, _) => FitBuilder();
         selectionScroll.SizeChanged += (_, _) => FitBuilder();
@@ -68,14 +70,7 @@ public partial class BuilderForm : StoreWindow
 
             foreach (Part part in store.Parts)
             {
-                bool compatible = partCategory switch
-                {
-                    "Motherboard" when cpu != null => cpu.Socket.Length > 0 && cpu.Socket.Equals(part.Socket, StringComparison.OrdinalIgnoreCase),
-                    "RAM" when motherboard != null => motherboard.MemoryType.Length > 0 && motherboard.MemoryType.Equals(part.MemoryType, StringComparison.OrdinalIgnoreCase),
-                    "Power Supply" => part.Watts >= AppStore.RequiredPowerSupplyWatts(GetSelectedParts()),
-                    _ => true
-                };
-                if (!part.Archived && store.Available(part) > 0 && part.Category == partCategory && compatible)
+                if (!part.Archived && store.Available(part) > 0 && part.Category == partCategory)
                 {
                     availableParts.Add(part);
                 }
@@ -119,13 +114,18 @@ public partial class BuilderForm : StoreWindow
         AppStore store = AppStore.Current;
         List<Part> selectedParts = GetSelectedParts();
         List<string> errors = store.CheckBuild(selectedParts);
+        foreach (StoreComboBox selector in partSelectors.OfType<StoreComboBox>())
+        {
+            selector.AccessibleDescription = selector.SelectedItem is Part part ? CandidateConflict(part) ?? "No conflict with current selections" : "Choose a component";
+            selector.Invalidate();
+        }
         ProductThumbnail[] photos = { photo0, photo1, photo2, photo3, photo4, photo5, photo6 };
         for (int i = 0; i < partSelectors.Length; i++)
             photos[i].Display(partSelectors[i].SelectedItem as Part, store.DatabasePath);
         if (part3.SelectedItem is string) photo3.PlaceholderText = "Integrated graphics";
         for (int i = 0; i < partSelectors.Length; i++)
             if (AppStore.Categories[i] != "GPU" && !partSelectors[i].Items.OfType<Part>().Any())
-                errors.Add("No compatible, in-stock " + AppStore.Categories[i] + " choices. Change the earlier selection or check stock.");
+                errors.Add("No in-stock " + AppStore.Categories[i] + " choices. Check stock.");
         decimal buildTotal = 0;
 
         foreach (Part part in selectedParts)
@@ -153,6 +153,7 @@ public partial class BuilderForm : StoreWindow
         submit.BackColor = submit.Enabled ? Color.FromArgb(84, 177, 55) : Color.FromArgb(226, 232, 224);
 
         submit.Text = store.Session == null ? "Log in and order" : "Confirm build & order";
+        UpdateBuildReview(selectedParts);
     }
 
     private void SubmitButton_Click(object? sender, EventArgs e)
@@ -288,7 +289,7 @@ public partial class BuilderForm : StoreWindow
             }
             builderLayout.RowCount = stacked ? 3 : 2;
             builderLayout.RowStyles.Clear();
-            builderLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 126 * DeviceDpi / 96F));
+            builderLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 92 * DeviceDpi / 96F));
             builderLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
             if (stacked) builderLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 300 * DeviceDpi / 96F));
             builderLayout.SetColumnSpan(selectionScroll, stacked ? 2 : 1);
@@ -297,7 +298,14 @@ public partial class BuilderForm : StoreWindow
             builderLayout.ResumeLayout(true);
             selectionLayout.Width = Math.Max(1, selectionScroll.ClientSize.Width - SystemInformation.VerticalScrollBarWidth);
             selectionLayout.Height = (int)(952 * DeviceDpi / 96F);
-            if (builderDescription != null) builderDescription.SetBounds(32, 76, Math.Max(1, ClientSize.Width - 64), 36);
+            float scale = DeviceDpi / 96F;
+            int Px(int value) => (int)(value * scale);
+            back.Size = new Size(Math.Max(Px(116), TextRenderer.MeasureText(back.Text, back.Font).Width + Px(60)), Px(42));
+            back.Location = new Point(Math.Max(0, headerSurface.ClientSize.Width - back.Width - Px(24)), Px(20));
+            heading.SetBounds(Px(32), Px(20), Math.Max(1, back.Left - Px(48)), Px(54));
+            int totalWidth = Math.Max(1, checkoutLayout.ClientSize.Width - checkoutLayout.Padding.Horizontal - total.Margin.Horizontal);
+            checkoutLayout.RowStyles[0].Height = TextRenderer.MeasureText(total.Text, total.Font,
+                new Size(totalWidth, int.MaxValue), TextFormatFlags.WordBreak | TextFormatFlags.NoPrefix).Height + Px(16);
             headerSurface.BackColor = StoreTheme.Background;
             heading.BackColor = StoreTheme.Background;
             if (validationViewport != null) validation.MaximumSize = new Size(Math.Max(1, validationViewport.ClientSize.Width - SystemInformation.VerticalScrollBarWidth), 0);

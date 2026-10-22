@@ -3,8 +3,8 @@ namespace CustomPC;
 public partial class BuilderForm
 {
     private readonly List<Panel> componentCards = new();
-    private Label? builderDescription;
     private Panel? validationViewport;
+    private TableLayoutPanel? buildReview;
     private void BuildComponentWorkspace()
     {
         MinimumSize = new Size(640, 560);
@@ -35,13 +35,83 @@ public partial class BuilderForm
         }
         selectionLayout.ResumeLayout(true);
         selectionScroll.BackColor = StoreTheme.Background;
-        builderDescription = new Label { Text = "Choose compatible components. Your build stays with you as you browse.", ForeColor = StoreTheme.Muted, AutoEllipsis = true };
-        headerSurface.Controls.Add(builderDescription);
         heading.Font = AppFonts.Heading(25); heading.Text = "Configure your PC";
         total.Font = AppFonts.Body(23, FontStyle.Bold); validation.Font = AppFonts.Body(11);
+        total.TextChanged += (_, _) => FitBuilder();
         checkoutLayout.Padding = new Padding(24); checkoutLayout.RowStyles[0].Height = 90;
         validationViewport = new Panel { Dock = DockStyle.Fill, AutoScroll = true, Margin = new Padding(0, 8, 0, 8) };
-        validation.Parent = validationViewport; validation.Dock = DockStyle.Top; validation.AutoSize = true;
+        buildReview = new TableLayoutPanel { Dock = DockStyle.Top, AutoSize = true, ColumnCount = 2, Margin = Padding.Empty };
+        buildReview.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        buildReview.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+        validationViewport.Controls.Add(buildReview);
+        validationViewport.SizeChanged += (_, _) => FitReviewText();
+        validation.Dock = DockStyle.Top; validation.AutoSize = true;
         checkoutLayout.Controls.Add(validationViewport, 0, 1);
+    }
+
+    private void UpdateBuildReview(List<Part> parts)
+    {
+        if (buildReview == null) return;
+        buildReview.SuspendLayout();
+        buildReview.Controls.Remove(validation);
+        while (buildReview.Controls.Count > 0) buildReview.Controls[0].Dispose();
+        buildReview.RowStyles.Clear(); buildReview.RowCount = 0;
+        void Full(Control control)
+        {
+            if (control is Label label) label.UseMnemonic = false;
+            int row = buildReview.RowCount++;
+            buildReview.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            buildReview.Controls.Add(control, 0, row); buildReview.SetColumnSpan(control, 2);
+        }
+        bool integrated = part3.SelectedItem is string;
+        Full(new Label { Text = $"Your build · {parts.Count + (integrated ? 1 : 0)} of 7 selections", AutoSize = true,
+            Font = AppFonts.Body(11, FontStyle.Bold), Margin = new Padding(0, 0, 0, 16) });
+        string[] conflicts = parts.Select(CandidateConflict).Where(reason => !string.IsNullOrEmpty(reason)).SelectMany(reason => reason!.Split('\n')).Distinct().ToArray();
+        if (conflicts.Length > 0)
+            Full(new Label { Name = "compatibilityConflicts", Text = "Incompatible selections\n" + string.Join("\n\n", conflicts),
+                AutoSize = true, Font = AppFonts.Body(10), ForeColor = Color.Firebrick, Margin = new Padding(0, 0, 0, 16) });
+        foreach (string category in AppStore.Categories)
+        {
+            Part? part = parts.FirstOrDefault(part => part.Category == category);
+            int row = buildReview.RowCount++;
+            buildReview.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            var item = new Label { Text = category + "\n" + (part?.Name ?? (category == "GPU" && integrated ? "Integrated graphics" : "Not selected")),
+                AutoSize = true, UseMnemonic = false, Dock = DockStyle.Top, Font = AppFonts.Body(10),
+                ForeColor = part != null || category == "GPU" && integrated ? StoreTheme.Ink : StoreTheme.Muted,
+                Margin = new Padding(0, 0, 12, 16) };
+            var price = new Label { Text = part != null ? Ui.Money(part.Price) : "—", AutoSize = true,
+                Font = AppFonts.Body(10, FontStyle.Bold), TextAlign = ContentAlignment.TopRight, Margin = new Padding(0, 0, 0, 16) };
+            buildReview.Controls.Add(item, 0, row); buildReview.Controls.Add(price, 1, row);
+        }
+        Part? cpu = parts.FirstOrDefault(part => part.Category == "CPU");
+        Part? board = parts.FirstOrDefault(part => part.Category == "Motherboard");
+        Part? ram = parts.FirstOrDefault(part => part.Category == "RAM");
+        Part? psu = parts.FirstOrDefault(part => part.Category == "Power Supply");
+        string socket = cpu == null || board == null ? "Choose CPU and motherboard" :
+            cpu.Socket.Length > 0 && cpu.Socket.Equals(board.Socket, StringComparison.OrdinalIgnoreCase) ? cpu.Socket + " matches" : "Check socket compatibility";
+        string memory = ram == null || board == null ? "Choose RAM and motherboard" :
+            ram.MemoryType.Length > 0 && ram.MemoryType.Equals(board.MemoryType, StringComparison.OrdinalIgnoreCase) ? ram.MemoryType + " matches" : "Check memory compatibility";
+        long required = AppStore.RequiredPowerSupplyWatts(parts);
+        string power = parts.Count == 0 ? "Choose components first" : $"Minimum PSU: {required:N0} W for selected parts\n" +
+            (psu == null ? "Power supply not selected" : $"Selected PSU: {psu.Watts:N0} W" + (psu.Watts >= required ? " · Sufficient" : " · More power required"));
+        Full(new Label { Text = "Compatibility & power", AutoSize = true, Font = AppFonts.Body(11, FontStyle.Bold), Margin = new Padding(0, 8, 0, 10) });
+        Full(new Label { Text = "Socket: " + socket + "\nMemory: " + memory + "\n" + power,
+            AutoSize = true, Font = AppFonts.Body(10), ForeColor = StoreTheme.Ink, Margin = new Padding(0, 0, 0, 16) });
+        validation.Margin = new Padding(0, 0, 0, 12);
+        Full(validation);
+        buildReview.ResumeLayout(true);
+        FitReviewText();
+    }
+
+    private void FitReviewText()
+    {
+        if (buildReview == null || validationViewport == null) return;
+        int width = Math.Max(1, validationViewport.ClientSize.Width - SystemInformation.VerticalScrollBarWidth);
+        buildReview.Width = width;
+        int priceWidth = buildReview.Controls.OfType<Label>().Where(label => buildReview.GetColumn(label) == 1)
+            .Select(label => label.PreferredWidth).DefaultIfEmpty(0).Max();
+        foreach (Label label in buildReview.Controls.OfType<Label>())
+            if (buildReview.GetColumn(label) == 0)
+                label.MaximumSize = new Size(Math.Max(1, width - (buildReview.GetColumnSpan(label) == 2 ? 0 : priceWidth + 16)), 0);
     }
 }
