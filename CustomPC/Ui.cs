@@ -50,6 +50,32 @@ internal static class Ui
         grid.CellFormatting += StatusCell_Formatting;
         grid.CellPainting -= CheckboxCell_Paint;
         grid.CellPainting += CheckboxCell_Paint;
+        grid.CellPainting -= StatusCell_Paint;
+        grid.CellPainting += StatusCell_Paint;
+    }
+
+    private static void StatusCell_Paint(object? sender, DataGridViewCellPaintingEventArgs e)
+    {
+        if (sender is not DataGridView grid || e.RowIndex < 0 || e.ColumnIndex < 0 || e.Graphics == null) return;
+        if (grid.Columns[e.ColumnIndex].Name is not ("Status" or "Availability" or "StockState")) return;
+        string text = e.FormattedValue?.ToString() ?? "";
+        if (text.Length == 0) return;
+        e.PaintBackground(e.ClipBounds, true);
+        Color ink = text is "Cancelled" or "Out of stock" ? Color.FromArgb(157, 48, 54) :
+            text is "Pending Payment" or "Low stock" ? Color.FromArgb(132, 83, 18) : StoreTheme.Action;
+        Color fill = text is "Cancelled" or "Out of stock" ? Color.FromArgb(253, 237, 238) :
+            text is "Pending Payment" or "Low stock" ? Color.FromArgb(252, 244, 223) : StoreTheme.Selection;
+        int width = Math.Min(e.CellBounds.Width - 16, TextRenderer.MeasureText(text, grid.Font).Width + 22);
+        Rectangle badge = new(e.CellBounds.Left + 8, e.CellBounds.Top + (e.CellBounds.Height - 28) / 2, Math.Max(1, width), 28);
+        e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+        using var shape = StoreTheme.RoundedRectangle(badge, 7);
+        using SolidBrush brush = new(fill);
+        e.Graphics.FillPath(brush, shape);
+        TextRenderer.DrawText(e.Graphics, text, grid.Font, Rectangle.Inflate(badge, -8, 0), ink,
+            TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix);
+        if ((e.State & DataGridViewElementStates.Selected) != 0 && grid.Focused)
+            ControlPaint.DrawFocusRectangle(e.Graphics, Rectangle.Inflate(e.CellBounds, -2, -2));
+        e.Handled = true;
     }
 
     private static void CheckboxCell_Paint(object? sender, DataGridViewCellPaintingEventArgs e)

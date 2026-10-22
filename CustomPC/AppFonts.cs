@@ -29,11 +29,13 @@ internal static class AppFonts
         }
     }
 
-    public static Font Heading(float size) => new Font(fonts.Families.First(f => f.Name == "Righteous"), size, FontStyle.Regular);
+    public static Font Heading(float size) => new Font("Segoe UI", size, FontStyle.Bold);
+    public static Font Brand(float size) => new Font(fonts.Families.First(f => f.Name == "Righteous"), size, FontStyle.Regular);
+    public static Font Body(float size, FontStyle style = FontStyle.Regular) => new Font("Segoe UI", size, style);
 
     public static void Apply(Control control)
     {
-        control.Font = Resolve(control.Font);
+        control.Font = Resolve(control.Font, control.Name is "brand" or "loginHero");
         if (control is DataGridView grid)
         {
             if (grid.ColumnHeadersDefaultCellStyle.Font != null)
@@ -44,15 +46,15 @@ internal static class AppFonts
         foreach (Control child in control.Controls) Apply(child);
     }
 
-    private static Font Resolve(Font original)
+    private static Font Resolve(Font original, bool brand = false)
     {
         // Designer keeps ordinary font-name assignments. Windows may silently substitute
         // an installed font, so recover the requested name and use our private font family.
         string name = original.OriginalFontName ?? original.Name;
         if (name != "Righteous" && name != "Roboto") return original;
-        if (original.Name == name) return original;
-        FontFamily family = fonts.Families.First(f => f.Name == name);
-        return new Font(family, original.Size, name == "Righteous" ? FontStyle.Regular : original.Style, original.Unit);
+        if (brand) return Brand(original.Size);
+        return new Font("Segoe UI", original.Size,
+            name == "Righteous" ? FontStyle.Bold : original.Style, original.Unit);
     }
 
     [DllImport("gdi32.dll")]

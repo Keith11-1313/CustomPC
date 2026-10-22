@@ -7,6 +7,7 @@ public class StoreWindow : Form
     public StoreWindow()
     {
         if (Ui.IsDesign) return;
+        DoubleBuffered = true;
         Icon = BrandLogo.WindowIcon;
         AppFonts.Apply(this);
     }
@@ -52,6 +53,11 @@ public class StoreWindow : Form
             {
                 // AutoScroll's virtual width must not stretch a table beyond the visible page.
                 grid.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+                int filterBottom = Controls.Cast<Control>()
+                    .Where(control => control is StoreTextField or ComboBox or StoreCheckBox)
+                    .Where(control => control.Top < grid.Top)
+                    .Select(control => control.Bottom).DefaultIfEmpty(grid.Top - 12).Max();
+                grid.Top = Math.Max(grid.Top, filterBottom + 12);
                 grid.Width = Math.Max(280, ClientSize.Width - grid.Left - 32);
                 FlowLayoutPanel? actions = Controls.OfType<FlowLayoutPanel>().FirstOrDefault(row => row.Name == "actionRow");
                 grid.Height = Math.Max(100, ClientSize.Height - grid.Top - (actions?.Height ?? 16) - 16);

@@ -5,6 +5,7 @@
     <TargetFramework>net10.0-windows10.0.19041</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
     <ImplicitUsings>enable</ImplicitUsings>
     <Product>CustomPC</Product>
     <Description>PC building, inventory and store order management for one Windows workstation.</Description>
@@ -23,7 +24,7 @@
     <Compile Update="*Form.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Update="EmptyStateControl.cs;ProductCard.cs;ProductThumbnail.cs">
+    <Compile Update="EmptyStateControl.cs;ProductCard.cs;ProductThumbnail.cs;WorkspacePage.cs;EditorSheet.cs">
       <SubType>UserControl</SubType>
     </Compile>
   </ItemGroup>

@@ -100,7 +100,7 @@ public class StoreTextField : UserControl
         e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
         using GraphicsPath path = StoreTheme.RoundedRectangle(new Rectangle(1, 1, Width - 3, Height - 3), 7);
         using SolidBrush fill = new(Enabled ? BackColor : Color.FromArgb(241, 243, 242));
-        using Pen outline = new(ContainsFocus ? Color.FromArgb(56, 132, 37) : Color.FromArgb(194, 204, 198), ContainsFocus ? 2 : 1);
+        using Pen outline = new(ContainsFocus ? StoreTheme.Action : StoreTheme.Border, ContainsFocus ? 2 : 1);
         e.Graphics.FillPath(fill, path); e.Graphics.DrawPath(outline, path);
         IconAssets.Paint(e.Graphics, FieldIcon, new Rectangle(12, (Height - 18) / 2, 18, 18), StoreTheme.Muted);
     }

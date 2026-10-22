@@ -12,8 +12,8 @@ public class StoreCheckBox : CheckBox
         e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
         Rectangle box = new(2, Math.Max(2, (Height - 18) / 2), 18, 18);
         using GraphicsPath path = StoreTheme.RoundedRectangle(box, 4);
-        using SolidBrush fill = new(Checked ? Color.FromArgb(61, 137, 39) : Color.White);
-        using Pen border = new(Checked ? Color.FromArgb(61, 137, 39) : Color.FromArgb(155, 171, 161), 1.4F);
+        using SolidBrush fill = new(Checked ? StoreTheme.Action : Color.White);
+        using Pen border = new(Checked ? StoreTheme.Action : StoreTheme.Border, 1.4F);
         e.Graphics.FillPath(fill, path); e.Graphics.DrawPath(border, path);
         if (Checked) IconAssets.Paint(e.Graphics, "check", Rectangle.Inflate(box, -2, -2), Color.White);
         Rectangle text = new(30, 0, Math.Max(1, Width - 32), Height);
