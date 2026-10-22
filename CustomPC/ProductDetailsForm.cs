@@ -3,9 +3,14 @@ namespace CustomPC;
 // Product details are presented as labelled attributes, using only saved product data.
 public partial class ProductDetailsForm : StoreWindow
 {
+    private bool? compactSpecifications;
     public ProductDetailsForm()
     {
         InitializeComponent();
+        MaximizeBox = false; MinimizeBox = false; ShowInTaskbar = false;
+        MinimumSize = new Size(480, 560);
+        SizeChanged += (_, _) => FitSpecifications();
+        Shown += (_, _) => FitSpecifications();
         Disposed += (_, _) => photo.Image?.Dispose();
         Load += (_, _) =>
         {
@@ -17,6 +22,36 @@ public partial class ProductDetailsForm : StoreWindow
             specifications.DefaultCellStyle.SelectionForeColor = StoreTheme.Ink;
             specifications.ClearSelection();
         };
+    }
+
+    private void FitSpecifications()
+    {
+        bool compact = ClientSize.Width < 760 * DeviceDpi / 96F;
+        if (compactSpecifications == compact) return;
+        compactSpecifications = compact;
+        layout.SuspendLayout();
+        foreach (Control control in new Control[] { heading, photo, summary, specifications, close })
+        {
+            layout.SetColumnSpan(control, 1); layout.SetRowSpan(control, 1);
+        }
+        layout.RowStyles.Clear(); layout.RowCount = compact ? 5 : 4;
+        layout.ColumnStyles[0].Width = compact ? 100 : 36;
+        layout.ColumnStyles[1].Width = compact ? 0 : 64;
+        layout.Controls.Remove(heading); layout.Controls.Remove(photo); layout.Controls.Remove(summary); layout.Controls.Remove(specifications); layout.Controls.Remove(close);
+        layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 96));
+        if (compact)
+        {
+            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 150)); layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 64));
+            layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100)); layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 56));
+            layout.Controls.Add(heading, 0, 0); layout.Controls.Add(photo, 0, 1); layout.Controls.Add(summary, 0, 2); layout.Controls.Add(specifications, 0, 3); layout.Controls.Add(close, 0, 4);
+        }
+        else
+        {
+            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 56)); layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100)); layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 88));
+            layout.Controls.Add(heading, 0, 0); layout.SetColumnSpan(heading, 2); layout.Controls.Add(photo, 0, 1); layout.SetRowSpan(photo, 2);
+            layout.Controls.Add(specifications, 1, 1); layout.SetRowSpan(specifications, 2); layout.Controls.Add(summary, 0, 3); layout.Controls.Add(close, 1, 3);
+        }
+        layout.ResumeLayout(true);
     }
 
     public ProductDetailsForm(Part part) : this()

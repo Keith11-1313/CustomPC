@@ -14,7 +14,7 @@ partial class ProductDetailsForm
         heading = new Label();
         summary = new Label();
         photo = new PictureBox();
-        specifications = new DataGridView();
+        specifications = new StoreGrid();
         close = new Button();
         SuspendLayout();
         layout.Dock = DockStyle.Fill;

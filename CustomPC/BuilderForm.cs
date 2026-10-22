@@ -33,6 +33,7 @@ public partial class BuilderForm : StoreWindow
             throw new InvalidOperationException("Customer access is required to build and order a PC. Guests may preview only.");
 
         partSelectors = new ComboBox[] { part0, part1, part2, part3, part4, part5, part6 };
+        BuildComponentWorkspace();
         SizeChanged += (_, _) => FitBuilder();
         selectionScroll.SizeChanged += (_, _) => FitBuilder();
         Shown += (_, _) => FitBuilder();
@@ -278,7 +279,7 @@ public partial class BuilderForm : StoreWindow
         fittingBuilder = true;
         try
         {
-            bool stacked = ClientSize.Width < 900 * DeviceDpi / 96F;
+            bool stacked = ClientSize.Width < 1050 * DeviceDpi / 96F;
             builderLayout.SuspendLayout();
             if (!stacked)
             {
@@ -287,15 +288,19 @@ public partial class BuilderForm : StoreWindow
             }
             builderLayout.RowCount = stacked ? 3 : 2;
             builderLayout.RowStyles.Clear();
-            builderLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 84 * DeviceDpi / 96F));
+            builderLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 126 * DeviceDpi / 96F));
             builderLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-            if (stacked) builderLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 260 * DeviceDpi / 96F));
+            if (stacked) builderLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 300 * DeviceDpi / 96F));
             builderLayout.SetColumnSpan(selectionScroll, stacked ? 2 : 1);
             builderLayout.SetCellPosition(checkoutLayout, new TableLayoutPanelCellPosition(stacked ? 0 : 1, stacked ? 2 : 1));
             builderLayout.SetColumnSpan(checkoutLayout, stacked ? 2 : 1);
             builderLayout.ResumeLayout(true);
             selectionLayout.Width = Math.Max(1, selectionScroll.ClientSize.Width - SystemInformation.VerticalScrollBarWidth);
-            selectionLayout.Height = Math.Max((int)(560 * DeviceDpi / 96F), selectionScroll.ClientSize.Height);
+            selectionLayout.Height = (int)(952 * DeviceDpi / 96F);
+            if (builderDescription != null) builderDescription.SetBounds(32, 76, Math.Max(1, ClientSize.Width - 64), 36);
+            headerSurface.BackColor = StoreTheme.Background;
+            heading.BackColor = StoreTheme.Background;
+            if (validationViewport != null) validation.MaximumSize = new Size(Math.Max(1, validationViewport.ClientSize.Width - SystemInformation.VerticalScrollBarWidth), 0);
         }
         finally { fittingBuilder = false; }
     }

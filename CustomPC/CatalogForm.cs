@@ -5,6 +5,7 @@ namespace CustomPC;
 public partial class CatalogForm : StoreWindow
 {
     private BuildDraft draft = new();
+    private readonly System.Windows.Forms.Timer searchDelay = new() { Interval = 180 };
     public CatalogForm(BuildDraft sharedDraft) : this() { draft = sharedDraft; }
     public CatalogForm()
     {
@@ -29,13 +30,16 @@ public partial class CatalogForm : StoreWindow
         });
         availability.SelectedIndex = 0;
 
-        search.TextChanged += FilterChanged;
+        BuildBrowseWorkspace();
+
+        search.TextChanged += (_, _) => { searchDelay.Stop(); searchDelay.Start(); };
+        searchDelay.Tick += (_, _) => { searchDelay.Stop(); LoadRows(); };
+        Disposed += (_, _) => searchDelay.Dispose();
         category.SelectedIndexChanged += FilterChanged;
         availability.SelectedIndexChanged += FilterChanged;
         refresh.Click += RefreshButton_Click;
         emptyProducts.ActionClicked += EmptyProducts_Click;
         products.SizeChanged += (_, _) => FitProductCards();
-        products.ControlAdded += (_, _) => FitProductCards();
         grid.CellDoubleClick += PartsGrid_CellDoubleClick;
 
         LoadRows();
@@ -52,13 +56,19 @@ public partial class CatalogForm : StoreWindow
     {
         // Fill each row evenly instead of leaving a large unused strip on the right.
         int available = products.ClientSize.Width - products.Padding.Horizontal - SystemInformation.VerticalScrollBarWidth;
-        int columns = Math.Max(1, available / 278);
-        int width = Math.Max(220, available / columns - 20);
-        foreach (ProductCard card in products.Controls.OfType<ProductCard>()) card.Width = width;
+        bool compact = available < 700 * DeviceDpi / 96F || products.ClientSize.Height < 440 * DeviceDpi / 96F;
+        int columns = compact ? 1 : Math.Max(1, available / 302);
+        int width = Math.Max(240, available / columns - 16);
+        foreach (ProductCard card in products.Controls.OfType<ProductCard>())
+        {
+            card.UseCompactLayout(compact);
+            card.Width = width;
+        }
     }
 
     private void FilterChanged(object? sender, EventArgs e)
     {
+        searchDelay.Stop();
         LoadRows();
     }
 
@@ -118,6 +128,8 @@ public partial class CatalogForm : StoreWindow
 
     private void LoadRows()
     {
+        UpdateCategorySelection();
+        products.SuspendLayout();
         AppStore store = AppStore.Current;
         string searchText = search.Text.Trim();
 
@@ -170,6 +182,9 @@ public partial class CatalogForm : StoreWindow
         }
 
         Ui.Bind(grid, table);
+        catalogWorkspace?.SetResults(table.Rows.Count, "components  •  Prices in PHP");
+        products.ResumeLayout(true);
+        FitProductCards();
         emptyProducts.Visible = table.Rows.Count == 0;
         products.Visible = table.Rows.Count > 0;
         if (table.Rows.Count == 0)

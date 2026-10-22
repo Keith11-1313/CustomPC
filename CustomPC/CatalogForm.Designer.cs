@@ -67,7 +67,7 @@ partial class CatalogForm
         availability.TabIndex = 7;
         availability.DropDownStyle = ComboBoxStyle.DropDownList;
         Controls.Add(availability);
-        grid = new DataGridView();
+        grid = new StoreGrid();
         grid.Name = "grid";
         grid.Location = new Point(32, 158);
         grid.Size = new Size(1036, 430);
