@@ -153,3 +153,34 @@ Separate build: zero warnings/errors. Twelve focused checks passed for Admin and
 The Catalog empty state now docks in the same layout cell as the product list, with only the matching view visible, rather than retaining fixed coordinates. The initial sibling-overlay attempt failed rendered review and was replaced with this shared layout cell. Message setup uses the result row count so it also works before the form becomes visible. Retry uses the same fitted overlay. Clear filters was verified to hide the empty state and restore product cards.
 
 Separate build: zero warnings/errors. Nine focused checks passed across 1660×850, 1100×688 and 850×600 client sizes for overlay bounds/visibility, message and Clear filters. Inspected the wide rendered Catalog empty state. QA used a database copy; live data was unchanged.
+
+## 2026-10-22 shared UI refresh
+
+- Shared controls now use Roboto body text, darker green primary actions with white text, quieter borders, and visible keyboard focus. Righteous remains the display face.
+- Tables use lighter headers, consistent rows, labelled status badges, readable monetary columns and explicit Pay before wording. Orders filters have a minimum gap above the table.
+- Catalog cards have clearer prices, stock labels and action spacing; login label/field spacing was adjusted. Sidebar selection includes a visible marker.
+- External build passed with zero warnings/errors. The isolated WinForms harness rendered 25 screens; login, catalog, builder, inventory, Orders and Staff overview bitmaps were visually reviewed. Final focused harness passed 19 checks covering Admin/Staff/Customer/Guest catalog and chart visibility at 1366x768 and 1100x700, direct operational-role catalog rejection, and Orders filter spacing.
+- All harness data and rendered images are outside the source project. Live database was not modified. These checks use DrawToBitmap; Visual Studio Designer, actual Windows 125%/150% scaling, native dialogs and printer output were not tested in this pass.
+
+## 2026-10-22 structural UI overhaul
+
+Replaced the former fixed workspace composition with adaptive navigation, reusable list workspaces, editor sheets, category navigation, compact product rows, component cards, a responsive login and stacked backup cards. This supersedes the earlier shared-style-only pass above. See ADAPTIVE_UI.md for the researched direction and implementation map.
+
+Executed against an isolated database copy and copied product photographs, outside the source project:
+
+- Build: zero warnings and zero errors.
+- Full UI harness: 98 responsive and permission checks passed. Admin, Staff, Customer and Guest were exercised at 1440x900, 1100x720 and 800x600. Checks cover navigation breakpoints, role-specific catalog/chart visibility, direct Admin/Staff catalog rejection, build-draft preservation through catalog/builder navigation, all seven categories and filter recovery, empty catalog views, category-specific editor fields at 860/520 widths, pinned Save reachability, compact login and stacked backups without horizontal page scrolling.
+- Final focused harness: 35 additional checks passed for list-page headers at 1440/1100/720 widths, visible report summaries, fitted Refresh/Back commands, compact-rail accessible names and programmatic focus. It also rechecked Customer inventory restriction and Staff chart removal.
+- Captured 25 primary screens and responsive variants. Reviewed rendered login, registration, product editor, catalog (wide and compact), builder, specifications, inventory, Orders, reports, backups and role overviews; repaired issues found in dropdown bitmap clipping, small builder validation, report headers and notices. The review uses DrawToBitmap, not screenshots of a manually operated desktop session.
+- Search is debounced; card layout is batched. Tables/form painting are double buffered, and hidden overview charts are not reconstructed behind hosted pages. No benchmark or speed multiplier is claimed.
+- PerMonitorV2 is configured. Actual OS DPI changes at 125%/150%, native Visual Studio Designer, Narrator, physical keyboard-only navigation, native file dialogs and printers remain manual checks. Programmatic focus is not a substitute for that testing.
+- Live store data was not changed by these tests. QA source, build output and image artifacts remain outside the source project.
+
+## 2026-10-22 visual refinement of the adaptive UI
+
+Working text now uses Segoe UI, with Righteous retained for the CustomPC wordmark. Emerald primary actions, quieter category navigation and Details actions, separated metric values/captions, tighter workspace headers and consistent focus outlines replace the earlier typography and button treatment. Editor dialogs have focused window chrome. Compact catalog category tabs now retain full names and calculate the rows they need.
+
+- External build passed with zero warnings/errors; git diff --check passed.
+- The full responsive/permission harness passed 98 checks during this refinement. The final header, font, role and programmatic-focus harness passed 45 checks, then passed again after the compact category-label correction.
+- Reviewed current rendered wide/compact catalog, Staff overview, reports, login, inventory and product editor. Captured primary screens and responsive variants in the external refined-ui-20261022 directory. The preview archive contains PNG files only.
+- Tests used copied database/photos; live data was unchanged. DrawToBitmap and programmatic focus do not verify native Visual Studio Designer, physical keyboard navigation, actual Windows 125%/150% display scaling, native file dialogs or printer output. Those checks remain manual.

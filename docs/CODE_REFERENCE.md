@@ -139,3 +139,12 @@ Login compares emails case-insensitively, verifies salted PBKDF2-SHA256 password
 Branding is fixed to CustomPC. No business-name/contact-header settings, supplier module or compatibility toggles remain. The researched product manifest and JSON are documentation; they do not seed products at runtime.
 
 DashboardChart uses LiveCharts2 at runtime. Line creates a LineSeries, Bars chooses RowSeries or ColumnSeries, Donut creates PieSeries, and StackedStock creates three StackedRowSeries for stock states. Prepare disposes the previous chart and chooses the empty state; ShowChart installs the control and its keyboard selection list. Point events use the same ChartSelection objects as Open selected. Charts never calculate sales or decide permissions: AppStore.Dashboards supplies role-checked saved-data totals. The Designer only instantiates the ordinary panel and placeholder.
+
+## Adaptive desktop layout
+
+- `WorkspacePage.cs` and its Designer file arrange list pages into a header, command bar, wrapping filters and data area. The original buttons/fields keep their click and validation handlers.
+- `EditorSheet.cs` groups existing editor controls, scrolls fields independently and keeps Save/Cancel outside that scrolling area. `PartEditForm.UpdateCategoryFields` changes group visibility.
+- `DashboardForm.Layout.cs` owns expanded/compact navigation and overview reflow. `CatalogForm.Layout.cs` moves category filters between a rail and a wrapping row. `ProductCard.UseCompactLayout` switches between a vertical tile and a horizontal product row.
+- `LoginForm.Layout.cs` centers the form and removes the photo pane at narrow widths. `BuilderForm.Layout.cs` creates component cards and keeps the existing compatibility selectors; `FitBuilder` moves checkout below the list on smaller windows.
+- `StoreGrid.cs` enables double-buffered table painting. Catalog search uses a short Windows Forms timer and batches card layout. The dashboard avoids rebuilding hidden charts while a hosted page is open.
+- The application requests PerMonitorV2 DPI support. Bitmap resize checks do not replace actual OS scaling, Designer or keyboard accessibility testing.

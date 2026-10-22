@@ -62,7 +62,7 @@ The keyword `partial` lets the same class be written across multiple files. Here
 
 **Answer:** No. Text changes its caption. The event connection determines which method runs.
 
-**Try the branding:** in the login Designer, select `heading` and look at Font in Properties: it requests Righteous. Select `login`: its font requests Roboto. The bundled fonts are loaded by `AppFonts.cs`; `StoreWindow.cs` applies them to real controls. They are private to this application, so they may not appear in Windows' installed-font list. Your image is `CustomPC/Assets/logo.png`; `BrandLogo.cs` displays it. The green button colour is `#54B137` and its dark text is `#202923`.
+**Try the branding:** `AppFonts.cs` defines Segoe UI for application headings and working text, while the CustomPC brand keeps its bundled Righteous font. Existing Designer font names are mapped at runtime, so changing a legacy Font property alone may not change the final typeface. `StoreTheme.cs` owns the shared colours and control styling. The primary action colour is `#147750` with white text. Your logo is `CustomPC/Assets/logo.png`; `BrandLogo.cs` displays it.
 
 **Checkpoint:** To replace the logo, would you edit the login button handler?
 
