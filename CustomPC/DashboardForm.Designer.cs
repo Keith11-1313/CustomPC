@@ -375,7 +375,7 @@ partial class DashboardForm
         recentTitle.ForeColor = Color.FromArgb(32, 41, 35);
         recentTitle.UseMnemonic = false;
         Controls.Add(recentTitle);
-        recent = new DataGridView();
+        recent = new StoreGrid();
         recent.Name = "recent";
         recent.Location = new Point(612, 357);
         recent.Size = new Size(456, 270);

@@ -203,11 +203,11 @@ partial class LoginForm
         authSurface.Controls.Add(emailLabel);
         emailLabel.Location = new Point(32, 144);
         authSurface.Controls.Add(email);
-        email.Location = new Point(32, 178);
+        email.Location = new Point(32, 172);
         authSurface.Controls.Add(passwordLabel);
-        passwordLabel.Location = new Point(32, 230);
+        passwordLabel.Location = new Point(32, 248);
         authSurface.Controls.Add(password);
-        password.Location = new Point(32, 264);
+        password.Location = new Point(32, 276);
         authSurface.Controls.Add(login);
         login.Location = new Point(32, 354);
         authSurface.Controls.Add(register);

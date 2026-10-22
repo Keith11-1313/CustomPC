@@ -12,6 +12,7 @@ public partial class LoginForm : StoreWindow
         }
 
         ApplyBrandAppearance();
+        BuildLoginLayout();
         AcceptButton = login;
         login.Click += LoginButton_Click;
         register.Click += RegisterButton_Click;
@@ -22,8 +23,8 @@ public partial class LoginForm : StoreWindow
     {
         brand.UseCompatibleTextRendering = true;
         loginHero.UseCompatibleTextRendering = true;
-        brand.Font = AppFonts.Heading(24F);
-        loginHero.Font = AppFonts.Heading(29F);
+        brand.Font = AppFonts.Brand(24F);
+        loginHero.Font = AppFonts.Brand(29F);
         using Stream stream = typeof(LoginForm).Assembly.GetManifestResourceStream("CustomPC.Assets.backdrop.png")!;
         using Image photo = Image.FromStream(stream);
         // Dark green stays dominant; the PC photograph adds a quiet texture behind the text.

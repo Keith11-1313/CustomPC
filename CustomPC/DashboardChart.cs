@@ -17,7 +17,7 @@ public sealed partial class DashboardChart : Panel
     private readonly Label chartHeading = new() { Dock = DockStyle.Top, Height = 48,
         TextAlign = ContentAlignment.MiddleCenter, Font = new Font("Roboto", 11F, FontStyle.Bold) };
     private readonly EmptyStateControl empty = new() { Dock = DockStyle.Fill };
-    private static readonly SKColor Green = SKColor.Parse("54B137");
+    private static readonly SKColor Green = SKColor.Parse("147750");
     private static readonly SKColor[] StockColors = { Green, SKColor.Parse("D49B25"), SKColor.Parse("C65050") };
     private List<ChartSelection> targets = new();
     public event EventHandler? ChartActivated;

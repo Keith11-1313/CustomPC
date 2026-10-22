@@ -24,12 +24,13 @@ public partial class DashboardForm : StoreWindow
             return;
         }
 
+        BuildAdaptiveShell();
         lowStockAction.Click += (_, _) => OpenScreen("Inventory", inventoryFilter: new InventoryViewFilter(StockState: "Low stock"));
         outOfStockAction.Click += (_, _) => OpenScreen("Inventory", inventoryFilter: new InventoryViewFilter(StockState: "Out of stock"));
         catalog.Click += CatalogButton_Click;
         home.Click += (_, _) => ShowOverview();
         pageError.ActionClicked += (_, _) => retryPage?.Invoke();
-        emptyRecent.ActionClicked += (_, _) => OpenScreen("Builder");
+        emptyRecent.ActionClicked += (_, _) => OpenScreen(AppStore.Current.IsStaff ? "Orders" : "Builder");
         period.SelectedIndexChanged += (_, _) => { if (period.SelectedIndex >= 0) RefreshCharts(); };
         trendChart.ChartActivated += (_, _) => OpenChartOrders(false);
         distributionChart.ChartActivated += (_, _) => OpenChartOrders(true);
@@ -355,6 +356,10 @@ public partial class DashboardForm : StoreWindow
         orders.Text = store.IsAdmin ? "View orders" : store.IsStaff ? "Orders & payments" : "My orders";
         ArrangeRoleMenu();
 
+        // Refresh still checks expiry and account permissions. Hosted pages do not need
+        // an invisible overview (including its charts) rebuilt behind them.
+        if (pageHost.Visible) { FitWorkspace(); return; }
+
         int activeParts = 0;
         int availableParts = 0;
         int lowStockParts = 0;
@@ -434,7 +439,9 @@ public partial class DashboardForm : StoreWindow
         recentOrders.Columns.Add("Id"); recentOrders.Columns.Add("Order");
         if (store.CanViewAllOrders) recentOrders.Columns.Add("Customer");
         recentOrders.Columns.Add("Status");
-        foreach (CustomerOrder order in store.VisibleOrders().OrderByDescending(o => o.CreatedUtc).Take(6))
+        foreach (CustomerOrder order in store.VisibleOrders()
+            .Where(o => !store.IsStaff || o.Status is not ("Completed" or "Cancelled"))
+            .OrderByDescending(o => o.CreatedUtc).Take(6))
         {
             if (store.CanViewAllOrders) recentOrders.Rows.Add(order.Id, order.Number, order.CustomerName, order.Status);
             else recentOrders.Rows.Add(order.Id, order.Number, order.Status);
@@ -445,14 +452,17 @@ public partial class DashboardForm : StoreWindow
         period.Visible = operational;
         summarySurface.Visible = !operational;
         workflowSurface.Visible = !operational;
-        recent.Visible = !operational && store.IsCustomer;
-        recentTitle.Visible = !operational && store.IsCustomer;
-        emptyRecent.Visible = store.IsCustomer && recentOrders.Rows.Count == 0;
+        recent.Visible = store.IsStaff || store.IsCustomer;
+        recentTitle.Visible = store.IsStaff || store.IsCustomer;
+        recentTitle.Text = store.IsStaff ? "Current work queue" : "Your recent orders";
+        emptyRecent.Message = store.IsStaff ? "No orders need attention right now" : "Your first build starts here";
+        emptyRecent.ActionText = store.IsStaff ? "View all orders" : "Open PC builder";
+        emptyRecent.Visible = (store.IsCustomer || store.IsStaff) && recentOrders.Rows.Count == 0;
         if (emptyRecent.Visible) { recent.Visible = false; emptyRecent.BringToFront(); }
         statOrders.Visible = store.Session != null;
         statOrdersCaption.Visible = store.Session != null;
         if (operational) RefreshCharts();
-        chartActions.Visible = false;
+        chartActions.Visible = store.IsStaff;
         adminSummary.Visible = stockAttention.Visible = operational;
         FitWorkspace();
         chartSummary.Visible = operational;
@@ -504,6 +514,7 @@ public partial class DashboardForm : StoreWindow
     {
         try { DrawCharts(); }
         catch (Exception error) { ShowDashboardFailure(error); }
+        FitWorkspace();
     }
 
     private void DrawCharts()
@@ -570,7 +581,7 @@ public partial class DashboardForm : StoreWindow
         foreach (var item in menu)
         {
             bool selected = item.Value == screen;
-            item.Key.BackColor = selected ? Color.FromArgb(222, 241, 212) : StoreTheme.Ink;
+            item.Key.BackColor = selected ? StoreTheme.Selection : StoreTheme.Ink;
             item.Key.ForeColor = selected ? StoreTheme.Ink : Color.White;
             item.Key.FlatAppearance.BorderSize = 0;
             item.Key.FlatAppearance.MouseOverBackColor = selected ? Color.FromArgb(123, 195, 92) : Color.FromArgb(54, 68, 58);
@@ -598,69 +609,5 @@ public partial class DashboardForm : StoreWindow
         }
     }
 
-    private void FitWorkspace()
-    {
-        if (Ui.IsDesign || sidebar == null || pageHost == null) return;
-        AutoScroll = false;
-        AutoScrollMinSize = Size.Empty;
-        AutoScrollPosition = Point.Empty;
-        float scale = DeviceDpi / 96F;
-        int gap = (int)(24 * scale);
-        int sideWidth = Math.Min((int)(248 * scale), Math.Max(200, ClientSize.Width / 4));
-        sidebar.SetBounds(0, 0, sideWidth, ClientSize.Height);
-        pageHost.SetBounds(sideWidth, 0, Math.Max(1, ClientSize.Width - sideWidth), ClientSize.Height);
-        pageHost.AutoScroll = false;
-        brand.Width = Math.Max(1, sideWidth - brand.Left - 10);
-        float brandSize = Math.Min(20F, 20F * brand.Width / (156 * scale));
-        if (Math.Abs(brand.Font.Size - brandSize) > .1F)
-        {
-            Font previous = brand.Font;
-            brand.Font = new Font(previous.FontFamily, brandSize, previous.Style);
-            previous.Dispose();
-        }
-        brandCaption.Width = Math.Max(1, sideWidth - brandCaption.Left - 12);
-        signout.SetBounds(16, Math.Max(0, ClientSize.Height - signout.Height - 24), sideWidth - 32, signout.Height);
-        ArrangeRoleMenu();
-
-        int x = sideWidth + gap, width = Math.Max(1, ClientSize.Width - x - gap);
-        heading.Left = x; heading.Width = width;
-        identity.Left = x;
-        period.Left = ClientSize.Width - period.Width - gap;
-        identity.Width = Math.Max(1, period.Left - x - gap);
-        summarySurface.SetBounds(x, (int)(128 * scale), width, summarySurface.Height);
-        Label[] values = { statParts, statOrders, statStock, statSales };
-        Label[] captions = { statPartsCaption, statOrdersCaption, statStockCaption, statSalesCaption };
-        int column = width / 4;
-        for (int i = 0; i < values.Length; i++)
-        {
-            values[i].Left = 16 + i * column; values[i].Width = Math.Max(1, column - 24);
-            captions[i].Left = values[i].Left; captions[i].Width = values[i].Width;
-        }
-        int y = summarySurface.Bottom + gap;
-        workflowSurface.SetBounds(x, y, width / 3, Math.Max(120, ClientSize.Height - y - gap));
-        guide.Width = Math.Max(1, workflowSurface.Width - guide.Left - 16);
-        workflowTitle.Width = Math.Max(1, workflowSurface.Width - workflowTitle.Left - 16);
-        recentTitle.SetBounds(workflowSurface.Right + gap, y, Math.Max(1, width - workflowSurface.Width - gap), recentTitle.Height);
-        recent.SetBounds(recentTitle.Left, recentTitle.Bottom + 8, recentTitle.Width, Math.Max(80, ClientSize.Height - recentTitle.Bottom - gap - 8));
-        emptyRecent.Bounds = recent.Bounds;
-
-        chartSummary.Left = x; chartSummary.Width = width;
-        chartActions.Width = width;
-        int actionsHeight = width < 760 * scale ? (int)(100 * scale) : (int)(54 * scale);
-        chartActions.SetBounds(x, ClientSize.Height - actionsHeight - gap, width, actionsHeight);
-        if (adminSummary.Visible)
-        {
-            adminSummary.SetBounds(x, chartSummary.Bottom + 8, width, (int)(88 * scale));
-            int attentionTop = AppStore.Current.IsStaff
-                ? adminSummary.Bottom + (int)(20 * scale)
-                : ClientSize.Height - (int)(72 * scale) - gap;
-            stockAttention.SetBounds(x, attentionTop, width, (int)(72 * scale));
-            stockAttentionText.AutoSize = false;
-            stockAttentionText.Size = new Size(Math.Max(120, width - lowStockAction.Width - outOfStockAction.Width - (int)(72 * scale)), (int)(40 * scale));
-            stockAttentionText.Margin = new Padding(0, 0, 12, 0);
-            stockAttentionText.TextAlign = ContentAlignment.MiddleLeft;
-            chartArea.SetBounds(x, adminSummary.Bottom + 12, width, Math.Max(160, stockAttention.Top - adminSummary.Bottom - 24));
-        }
-        else chartArea.SetBounds(x, chartSummary.Bottom + 8, width, Math.Max(160, chartActions.Top - chartSummary.Bottom - 20));
-    }
+    private void FitWorkspace() => LayoutWorkspace();
 }
