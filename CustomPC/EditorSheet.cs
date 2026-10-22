@@ -5,7 +5,6 @@ public class EditorSheet : UserControl
 {
     private readonly TableLayoutPanel layout = new() { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 3, Padding = new Padding(24, 12, 24, 0) };
     private readonly Panel header = new() { Dock = DockStyle.Fill, Margin = new Padding(0) };
-    private readonly Label description = new() { Dock = DockStyle.Bottom, Height = 44, ForeColor = StoreTheme.Muted };
     private readonly FlowLayoutPanel fields = new() { Dock = DockStyle.Fill, WrapContents = true, AutoScroll = true, BackColor = Color.White, Padding = new Padding(20), Margin = new Padding(0) };
     private readonly FlowLayoutPanel actions = new() { Dock = DockStyle.Fill, FlowDirection = FlowDirection.RightToLeft, Padding = new Padding(0, 16, 0, 0), Margin = new Padding(0) };
     private readonly Dictionary<Control, Control> groups = new();
@@ -14,18 +13,24 @@ public class EditorSheet : UserControl
     {
         layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 112)); layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100)); layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 76));
-        header.Controls.Add(description); layout.Controls.Add(header, 0, 0); layout.Controls.Add(fields, 0, 1); layout.Controls.Add(actions, 0, 2);
+        layout.Controls.Add(header, 0, 0); layout.Controls.Add(fields, 0, 1); layout.Controls.Add(actions, 0, 2);
         Controls.Add(layout); Dock = DockStyle.Fill; BackColor = StoreTheme.Background; Font = new Font("Roboto", 10F);
         SizeChanged += (_, _) => Reflow(); fields.SizeChanged += (_, _) => Reflow();
+        Load += (_, _) => Reflow();
+        DpiChangedAfterParent += (_, _) => Reflow();
     }
     public void Bind(Form owner, Label heading, Button back, Button save, string detail, bool wide, params (Label Label, Control Input)[] inputs)
     {
         owner.SuspendLayout(); foreach (Control old in owner.Controls) old.Visible = false; twoColumns = wide;
         heading.Parent = header; heading.Dock = DockStyle.Top; heading.Height = 54; heading.Visible = true; heading.Font = AppFonts.Heading(24); heading.BackColor = BackColor;
-        description.Text = detail;
         foreach (var pair in inputs) AddField(pair.Label, pair.Input);
         save.Parent = actions; save.Dock = DockStyle.None; save.Size = new Size(190, 44); save.Visible = true;
         back.Parent = actions; back.Dock = DockStyle.None; back.Size = new Size(116, 44); back.Text = "Cancel"; back.Visible = true;
+        foreach (Button button in new[] { save, back })
+        {
+            button.TextChanged += (_, _) => Reflow();
+            button.FontChanged += (_, _) => Reflow();
+        }
         owner.Controls.Add(this); BringToFront(); owner.AutoScroll = false; owner.AutoScrollMinSize = Size.Empty;
         owner.MinimumSize = new Size(440, 440); owner.ClientSize = new Size(wide ? 860 : 580, wide ? 730 : 680);
         owner.MinimizeBox = false; owner.MaximizeBox = false; owner.ShowInTaskbar = false;
@@ -37,13 +42,16 @@ public class EditorSheet : UserControl
         int inputHeight = input is StoreTextField text && text.Multiline ? 108 : 42;
         Panel group = new() { Height = inputHeight + 40, Width = 240, Margin = new Padding(0, 0, 16, 12) };
         label.Parent = group; label.Dock = DockStyle.Top; label.Height = 28; label.Visible = true; label.BackColor = Color.White;
+        label.FontChanged += (_, _) => Reflow();
         input.Parent = group; input.Dock = DockStyle.Bottom; input.Height = inputHeight; input.Visible = true; input.AccessibleName = label.Text;
         groups[input] = group; fields.Controls.Add(group);
     }
-    public void AddOption(Control option)
+    public void AddOption(Control option, bool first = false)
     {
         Panel group = new() { Height = 54, Width = 240, Margin = new Padding(0, 0, 16, 8) };
-        option.Parent = group; option.Dock = DockStyle.Fill; option.Visible = true; groups[option] = group; fields.Controls.Add(group); Reflow();
+        option.Parent = group; option.Dock = DockStyle.Fill; option.Visible = true; groups[option] = group; fields.Controls.Add(group);
+        if (first) fields.Controls.SetChildIndex(group, 0);
+        Reflow();
     }
     public void AddPhoto(PictureBox photo, Button choose, Button remove, Label status)
     {
@@ -64,9 +72,43 @@ public class EditorSheet : UserControl
     private void Reflow()
     {
         if (fitting) return; fitting = true;
-        try { int columns = twoColumns && fields.ClientSize.Width >= 660 * DeviceDpi / 96F ? 2 : 1;
+        try {
+        int headingHeight = 0;
+        foreach (Label title in header.Controls.OfType<Label>())
+        {
+            title.Height = Math.Max((int)(54 * DeviceDpi / 96F), TextRenderer.MeasureText(title.Text, title.Font,
+                new Size(Math.Max(1, header.Width), int.MaxValue), TextFormatFlags.WordBreak).Height + 4);
+            headingHeight = title.Height;
+        }
+        layout.RowStyles[0].Height = headingHeight + 12;
+        int columns = twoColumns && fields.ClientSize.Width >= 660 * DeviceDpi / 96F ? 2 : 1;
+        fields.FlowDirection = columns == 1 ? FlowDirection.TopDown : FlowDirection.LeftToRight;
+        fields.WrapContents = columns != 1;
         int width = Math.Max(100, (fields.ClientSize.Width - fields.Padding.Horizontal - SystemInformation.VerticalScrollBarWidth) / columns - 16);
-        fields.SuspendLayout(); foreach (Control field in fields.Controls) field.Width = width; fields.ResumeLayout(true); }
+        fields.SuspendLayout();
+        foreach (Control field in fields.Controls)
+        {
+            field.Width = width;
+            if (field.Controls.Count == 1 && field.Controls[0] is Label summary)
+                field.Height = Math.Max((int)(54 * DeviceDpi / 96F), TextRenderer.MeasureText(summary.Text, summary.Font,
+                    new Size(width, int.MaxValue), TextFormatFlags.WordBreak).Height + 12);
+            if (field.GetType() == typeof(Panel) && field.Controls.OfType<Label>().FirstOrDefault() is Label label &&
+                field.Controls.Cast<Control>().FirstOrDefault(control => control != label) is Control input)
+            {
+                label.Height = Math.Max((int)(28 * DeviceDpi / 96F), TextRenderer.MeasureText(label.Text, label.Font,
+                    new Size(width, int.MaxValue), TextFormatFlags.WordBreak).Height + 4);
+                field.Height = input.Height + label.Height + 12;
+            }
+        }
+        foreach (Button button in actions.Controls.OfType<Button>())
+        {
+            button.Width = Math.Max((int)(116 * DeviceDpi / 96F), TextRenderer.MeasureText(button.Text, button.Font).Width + (int)(64 * DeviceDpi / 96F));
+            button.Height = (int)(44 * DeviceDpi / 96F);
+        }
+        fields.ResumeLayout(true);
+        fields.AutoScrollMinSize = Size.Empty;
+        fields.AutoScrollPosition = new Point(0, -fields.AutoScrollPosition.Y);
+        }
         finally { fitting = false; }
     }
 }

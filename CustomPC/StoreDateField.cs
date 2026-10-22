@@ -15,7 +15,9 @@ public class StoreDateField : UserControl
         Controls.Add(input);
         input.Enter += (_, _) => Invalidate();
         input.Leave += (_, _) => Invalidate();
+        input.ValueChanged += (_, _) => ValueChanged?.Invoke(this, EventArgs.Empty);
     }
+    public event EventHandler? ValueChanged;
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
     public DateTime Value { get => input.Value; set => input.Value = value; }
     [DefaultValue(DateTimePickerFormat.Long)]

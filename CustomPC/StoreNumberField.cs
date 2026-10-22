@@ -15,7 +15,9 @@ public class StoreNumberField : UserControl
         input.Enter += (_, _) => Invalidate();
         input.Leave += (_, _) => Invalidate();
         Click += (_, _) => input.Focus();
+        input.ValueChanged += (_, _) => ValueChanged?.Invoke(this, EventArgs.Empty);
     }
+    public event EventHandler? ValueChanged;
     [DefaultValue(typeof(decimal), "0")]
     public decimal Value { get => input.Value; set => input.Value = value; }
     [DefaultValue(typeof(decimal), "0")]
