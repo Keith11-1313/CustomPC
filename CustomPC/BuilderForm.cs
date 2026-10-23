@@ -178,7 +178,7 @@ public partial class BuilderForm : StoreWindow
                 confirmedTotal += selectedPart.Price;
             }
 
-            if (!Ui.Confirm(this, "Confirm this build for " + Ui.Money(confirmedTotal) + " and reserve its parts for 24 hours?"))
+            if (!ShopPolicies.ConfirmOrder(this, confirmedTotal))
             {
                 return;
             }

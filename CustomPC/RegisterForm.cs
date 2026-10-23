@@ -16,6 +16,10 @@ public partial class RegisterForm : StoreWindow
         var sheet = new EditorSheet { Name = "editorSheet" };
         sheet.Bind(this, heading, back, save, "Create your customer account to save and order a PC build.", false,
             (fullNameLabel, fullName), (emailLabel, email), (passwordLabel, password), (confirmLabel, confirm));
+        var policies = new FlowLayoutPanel { WrapContents = true };
+        policies.Controls.Add(ShopPolicies.Link("Privacy Notice", "privacy", this));
+        policies.Controls.Add(ShopPolicies.Link("Terms & Conditions", "terms", this));
+        sheet.AddOption(policies);
         save.Click += SaveButton_Click;
     }
 

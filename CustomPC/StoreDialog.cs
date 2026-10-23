@@ -7,7 +7,20 @@ public partial class StoreDialog : StoreWindow
     public StoreDialog()
     {
         InitializeComponent();
+        body.UseMnemonic = false;
         bodyPanel.SizeChanged += (_, _) => body.MaximumSize = new Size(Math.Max(1, bodyPanel.Width - 32), 0);
+    }
+    internal void AddPolicyLink(LinkLabel link)
+    {
+        layout.SuspendLayout();
+        layout.Controls.Remove(actions);
+        layout.RowCount = 4;
+        layout.RowStyles[2].Height = 44;
+        layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 68));
+        layout.Controls.Add(link, 0, 2);
+        layout.Controls.Add(actions, 0, 3);
+        ClientSize = new Size(ClientSize.Width, ClientSize.Height + 44);
+        layout.ResumeLayout(true);
     }
     public StoreDialog(string title, string message, bool confirmation = false) : this()
     {

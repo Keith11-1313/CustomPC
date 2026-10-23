@@ -23,6 +23,7 @@ public partial class ReceiptForm : StoreWindow
         workspace.Bind(this, heading, back, "", preview,
             null, new[] { print });
 
+        workspace.AddNotice(ShopPolicies.Link("Warranty & Returns", "warranty", this));
         Shown += ReceiptForm_Shown;
         print.Click += PrintButton_Click;
     }

@@ -11,6 +11,10 @@ public partial class LoginForm : StoreWindow
             return;
         }
 
+        var privacy = ShopPolicies.Link("Privacy Notice", "privacy", this);
+        privacy.Name = "loginPrivacyLink"; privacy.AutoSize = false;
+        privacy.TextAlign = ContentAlignment.MiddleCenter;
+        authSurface.Controls.Add(privacy);
         ApplyBrandAppearance();
         Load += (_, _) => RestoreLoginLayout();
         SizeChanged += (_, _) => { if (IsHandleCreated) RestoreLoginLayout(); };
@@ -27,7 +31,7 @@ public partial class LoginForm : StoreWindow
         int leftWidth = (int)(ClientSize.Width * .42F);
         brandPanel.SetBounds(0, 0, leftWidth, ClientSize.Height);
         authSurface.Anchor = AnchorStyles.Top | AnchorStyles.Left;
-        authSurface.SetBounds(leftWidth + Px(24), Px(24), Math.Max(Px(300), ClientSize.Width - leftWidth - Px(48)), Math.Max(Px(520), ClientSize.Height - Px(48)));
+        authSurface.SetBounds(leftWidth + Px(24), Px(24), Math.Max(Px(300), ClientSize.Width - leftWidth - Px(48)), Math.Max(Px(552), ClientSize.Height - Px(48)));
         int width = Math.Max(1, authSurface.Width - Px(64));
         heading.SetBounds(Px(32), Px(42), width, Px(60));
         emailLabel.SetBounds(Px(32), Px(144), width, Px(24));
@@ -37,6 +41,7 @@ public partial class LoginForm : StoreWindow
         login.SetBounds(Px(32), Px(354), width, Px(48));
         register.SetBounds(Px(32), Px(422), width, Px(34));
         guest.SetBounds(Px(32), Px(464), width, Px(34));
+        authSurface.Controls["loginPrivacyLink"]?.SetBounds(Px(32), Px(506), width, Px(34));
         logo.SetBounds(Px(32), Px(32), Px(64), Px(43));
         brand.SetBounds(Px(110), Px(29), Math.Max(1, leftWidth - Px(128)), Px(48));
         brandCaption.SetBounds(Px(38), Px(88), Math.Max(1, leftWidth - Px(64)), Px(46));
