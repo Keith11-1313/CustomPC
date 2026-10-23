@@ -455,8 +455,11 @@ public partial class DashboardForm : StoreWindow
         workflowSurface.Visible = !operational;
         recent.Visible = store.IsStaff || store.IsCustomer;
         recentTitle.Visible = store.IsStaff || store.IsCustomer;
-        recentTitle.Text = store.IsStaff ? "Current work queue" : "Your recent orders";
-        emptyRecent.Message = store.IsStaff ? "No orders need attention right now" : "Your first build starts here";
+        recentTitle.Text = store.IsStaff ? "Open orders" : "Your recent orders";
+        emptyRecent.Message = store.IsStaff ? "No open orders right now" : "Your first build starts here";
+        emptyRecent.Detail = store.IsStaff
+            ? "Orders awaiting payment, preparation or pickup will appear here."
+            : "Choose your components to create your first order.";
         emptyRecent.ActionText = store.IsStaff ? "View all orders" : "Open PC builder";
         emptyRecent.Visible = (store.IsCustomer || store.IsStaff) && recentOrders.Rows.Count == 0;
         if (emptyRecent.Visible) { recent.Visible = false; emptyRecent.BringToFront(); }
@@ -467,7 +470,9 @@ public partial class DashboardForm : StoreWindow
         adminSummary.Visible = stockAttention.Visible = operational;
         FitWorkspace();
         chartSummary.Visible = operational;
-        viewQueueOrders.Text = store.IsAdmin ? "View paid parts orders" : "View current work queue";
+        viewQueueOrders.Text = store.IsAdmin ? "View paid parts orders" : "View open orders";
+        viewPeriodOrders.Text = store.IsStaff ? "View received orders" : "View period orders";
+        viewStock.Text = store.IsStaff ? "View inventory" : "View current inventory";
         if (pageHost.Visible)
         {
             foreach (Control control in Controls)
@@ -543,10 +548,10 @@ public partial class DashboardForm : StoreWindow
             int unavailable = (int)data.Inventory.First(v => v.Name == "Out of stock").Value;
             adminLowStock.Text = $"{low}\nLow-stock products";
             adminOutOfStock.Text = $"{unavailable}\nOut-of-stock products";
-            stockAttentionText.Text = low + unavailable == 0 ? "Stock attention: no stock alerts" : $"Stock attention: {low + unavailable} products need replenishment";
+            stockAttentionText.Text = low + unavailable == 0 ? "No low-stock or out-of-stock products." : $"Products needing stock: {low + unavailable:N0}";
             lowStockAction.Text = $"Low stock ({low})";
             outOfStockAction.Text = $"Out of stock ({unavailable})";
-            chartSummary.Text = $"{data.FirstDate:MMM d}–{data.LastDate:MMM d}: PHP {data.Sales.Sum(value => value.Value):N2} confirmed payments. Inventory is a current snapshot.";
+            chartSummary.Text = $"{data.FirstDate:MMM d}–{data.LastDate:MMM d}: PHP {data.Sales.Sum(value => value.Value):N2} confirmed payments. Stock levels reflect current inventory.";
             trendChart.EmptyActionText = "Change period";
             distributionChart.EmptyActionText = "View orders";
             stockChart.EmptyActionText = "Add products";
@@ -557,16 +562,16 @@ public partial class DashboardForm : StoreWindow
         else if (store.IsStaff)
         {
             var data = store.ReadStaffDashboard(days);
-            adminSales.Text = $"{data.Incoming.Sum(v => v.Value):N0}\nIncoming orders";
-            adminPaidOrders.Text = $"{data.Queue.Sum(v => v.Value):N0}\nCurrent work queue";
+            adminSales.Text = $"{data.Incoming.Sum(v => v.Value):N0}\nOrders received";
+            adminPaidOrders.Text = $"{data.Queue.Sum(v => v.Value):N0}\nOpen orders";
             adminLowStock.Text = $"{data.Queue.Where(v => v.Name == "Ready for Pickup").Sum(v => v.Value):N0}\nReady for pickup";
             int stockAlerts = data.Stock.Sum(v => v.LowStock + v.OutOfStock);
-            adminOutOfStock.Text = $"{stockAlerts}\nStock alerts";
+            adminOutOfStock.Text = $"{stockAlerts}\nProducts needing stock";
             int low = data.Stock.Sum(v => v.LowStock), unavailable = data.Stock.Sum(v => v.OutOfStock);
-            stockAttentionText.Text = stockAlerts == 0 ? "Stock attention: no stock alerts" : $"Stock attention: {stockAlerts} products need replenishment";
+            stockAttentionText.Text = stockAlerts == 0 ? "No low-stock or out-of-stock products." : $"Products needing stock: {stockAlerts:N0}";
             lowStockAction.Text = $"Low stock ({low})";
             outOfStockAction.Text = $"Out of stock ({unavailable})";
-            chartSummary.Text = $"{data.Incoming.Sum(value => value.Value):N0} incoming orders in {days} days. {data.Queue.Sum(value => value.Value):N0} orders in the current work queue.";
+            chartSummary.Text = $"Orders received in the last {days} days: {data.Incoming.Sum(value => value.Value):N0}. Open orders right now: {data.Queue.Sum(value => value.Value):N0}.";
             // Staff use operational counts and stock links without loading chart controls.
             trendChart.ClearRuntimeData();
             distributionChart.ClearRuntimeData();

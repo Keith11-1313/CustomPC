@@ -56,12 +56,12 @@ public partial class DashboardForm
         sidebar.Controls.Add(navigationList);
         navigationList.Paint += (_, e) => SurfaceArtwork.Paint(e.Graphics, navigationList);
         navigationCaption.BackColor = accountName.BackColor = accountRole.BackColor = Color.Transparent;
-        foreach (Button button in new[] { home, catalog, builder, orders, inventory, users, reports, tools })
+        foreach (Button button in new[] { home, catalog, builder, orders, inventory, reports, users, tools })
         {
             button.Parent = navigationList;
             button.Anchor = AnchorStyles.Top | AnchorStyles.Left;
         }
-        foreach (Button button in new[] { home, catalog, builder, orders, inventory, users, reports, tools, signout })
+        foreach (Button button in new[] { home, catalog, builder, orders, inventory, reports, users, tools, signout })
         {
             button.AccessibleName = button.Text;
             navigationTips.SetToolTip(button, button.Text);
@@ -116,7 +116,7 @@ public partial class DashboardForm
             int top = Px(rail ? 94 : 126);
             navigationList!.SetBounds(0, top, side, Math.Max(Px(90), ClientSize.Height - top - Px(rail ? 80 : 142)));
             top = 0;
-            foreach (Button button in new[] { home, catalog, builder, orders, inventory, users, reports, tools })
+            foreach (Button button in new[] { home, catalog, builder, orders, inventory, reports, users, tools })
             {
                 button.Visible = button == home || button.Enabled;
                 if (!button.Visible) continue;
@@ -178,8 +178,24 @@ public partial class DashboardForm
                 }
                 stockAttention.WrapContents = true;
                 stockAttentionText.AutoSize = false;
-                stockAttentionText.Size = new Size(Math.Max(Px(220), width - Px(350)), Px(42));
-                stockAttention.SetBounds(x, y, width, Px(width < Px(700) ? 120 : 72)); y = stockAttention.Bottom + Px(28);
+                stockAttention.SuspendLayout();
+                foreach (Button button in new[] { lowStockAction, outOfStockAction })
+                    button.Size = new Size(Math.Max(Px(150), TextRenderer.MeasureText(button.Text, button.Font).Width + Px(32)), Px(42));
+                int innerWidth = Math.Max(1, width - stockAttention.Padding.Horizontal);
+                int actionsWidth = lowStockAction.Width + lowStockAction.Margin.Horizontal + outOfStockAction.Width + outOfStockAction.Margin.Horizontal;
+                int labelWidth = innerWidth - actionsWidth - stockAttentionText.Margin.Horizontal;
+                bool wrapStockActions = labelWidth < Px(220);
+                stockAttentionText.Size = new Size(Math.Max(1, wrapStockActions ? innerWidth - stockAttentionText.Margin.Horizontal : labelWidth), Px(42));
+                int textHeight = TextRenderer.MeasureText(stockAttentionText.Text, stockAttentionText.Font,
+                    new Size(stockAttentionText.Width, int.MaxValue), TextFormatFlags.WordBreak).Height;
+                stockAttentionText.Height = Math.Max(Px(42), textHeight + Px(4));
+                int textRow = stockAttentionText.Height + stockAttentionText.Margin.Vertical;
+                int actionRow = Math.Max(lowStockAction.Height + lowStockAction.Margin.Vertical, outOfStockAction.Height + outOfStockAction.Margin.Vertical);
+                int alertHeight = stockAttention.Padding.Vertical + (wrapStockActions ? textRow + actionRow : Math.Max(textRow, actionRow));
+                if (actionsWidth > innerWidth) alertHeight += actionRow;
+                stockAttention.SetBounds(x, y, width, alertHeight);
+                stockAttention.ResumeLayout(true);
+                y = stockAttention.Bottom + Px(28);
             }
             else
             {
