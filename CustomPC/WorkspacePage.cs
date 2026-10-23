@@ -43,6 +43,7 @@ public partial class WorkspacePage : UserControl
             pair.Label.Parent = field; pair.Label.Dock = DockStyle.None; pair.Label.SetBounds(0, 0, 220, 25);
             pair.Label.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right; pair.Label.Visible = true;
             pair.Input.Parent = field; pair.Input.Dock = DockStyle.None; pair.Input.SetBounds(0, 29, 220, 40);
+            pair.Input.SizeChanged += (_, _) => field.Height = Math.Max(78, pair.Input.Bottom + 12);
             pair.Input.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right; pair.Input.Visible = true;
             pair.Input.AccessibleName = pair.Label.Text;
             fields.Add(field); filters.Controls.Add(field);
@@ -105,5 +106,40 @@ public partial class WorkspacePage : UserControl
         control.Dock = DockStyle.None; control.Width = 300;
         if (control is Label label) { label.AutoSize = true; label.MaximumSize = new Size(600, 0); }
         commands.Controls.Add(control); control.Visible = true;
+    }
+
+    public void AddSummaryAction(Label summary, Button action)
+    {
+        var row = new Panel { Margin = new Padding(0, 0, 0, 8) };
+        summary.Parent = row; summary.AutoSize = false; summary.MaximumSize = Size.Empty;
+        summary.Font = AppFonts.Body(10.5F); summary.ForeColor = StoreTheme.Muted;
+        summary.TextAlign = ContentAlignment.MiddleRight; summary.Visible = true;
+        action.Parent = row; action.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+        action.Visible = true;
+        bool fitting = false;
+        void Fit()
+        {
+            if (fitting) return;
+            fitting = true;
+            try
+            {
+                int gap = (int)(20 * DeviceDpi / 96F);
+                row.Width = Math.Max(1, commands.ClientSize.Width - commands.Padding.Horizontal);
+                action.Size = new Size(TextRenderer.MeasureText(action.Text, action.Font).Width + (int)(64 * DeviceDpi / 96F), (int)(42 * DeviceDpi / 96F));
+                int textWidth = Math.Max(1, row.Width - action.Width - gap);
+                int height = Math.Max(action.Height, TextRenderer.MeasureText(summary.Text, summary.Font,
+                    new Size(textWidth, int.MaxValue), TextFormatFlags.WordBreak | TextFormatFlags.NoPrefix).Height + 8);
+                row.Height = height;
+                summary.SetBounds(action.Width + gap, 0, textWidth, height);
+                action.Location = Point.Empty;
+            }
+            finally { fitting = false; }
+        }
+        commands.Controls.Add(row);
+        commands.SizeChanged += (_, _) => Fit();
+        summary.TextChanged += (_, _) => Fit();
+        action.FontChanged += (_, _) => Fit();
+        Load += (_, _) => Fit();
+        Fit();
     }
 }

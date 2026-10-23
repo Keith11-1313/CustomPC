@@ -183,7 +183,7 @@ internal static class Ui
 
             foreach (DataGridViewColumn column in grid.Columns)
             {
-                if (column.Visible)
+                if (column.Visible && column is not DataGridViewImageColumn)
                 {
                     visibleColumns.Add(column);
                     headings.Add(EscapeCsvValue(column.HeaderText));

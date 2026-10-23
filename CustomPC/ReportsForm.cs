@@ -4,6 +4,7 @@ namespace CustomPC;
 
 public partial class ReportsForm : StoreWindow
 {
+    private readonly ProductTablePhotos thumbnails = new();
     public ReportsForm()
     {
         InitializeComponent();
@@ -14,9 +15,10 @@ public partial class ReportsForm : StoreWindow
         }
 
         var workspace = new WorkspacePage { Name = "workspace" };
+        Disposed += (_, _) => thumbnails.Dispose();
         workspace.Bind(this, heading, back, "Review saved store records for a selected period.", grid,
             refresh, new[] { export }, (reportLabel, report), (fromLabel, from), (toLabel, to));
-        workspace.AddNotice(summary);
+        workspace.AddSummaryAction(summary, export);
 
         AppStore store = AppStore.Current;
         store.Refresh();
@@ -143,6 +145,7 @@ public partial class ReportsForm : StoreWindow
     {
         DataTable table = new DataTable();
         table.Columns.Add("Id");
+        table.Columns.Add("Photo", typeof(Image));
         table.Columns.Add("Part");
         table.Columns.Add("Category");
         table.Columns.Add("OnHand", typeof(int));
@@ -163,7 +166,7 @@ public partial class ReportsForm : StoreWindow
 
             int reservedStock = store.Reserved(part.Id);
             int availableStock = store.Available(part);
-            table.Rows.Add(part.Id, part.Name, part.Category, part.Stock, reservedStock,
+            table.Rows.Add(part.Id, thumbnails.Read(part, store.DatabasePath), part.Name, part.Category, part.Stock, reservedStock,
                 availableStock, store.StockState(part), Ui.Money(part.Price));
             partCount++;
             availableUnits += availableStock;
@@ -171,7 +174,23 @@ public partial class ReportsForm : StoreWindow
         }
 
         Ui.Bind(grid, table);
-        summary.Text = $"Current inventory: {partCount} parts / {availableUnits} available units / {reservedUnits} reserved units";
+        var sizing = grid.AutoSizeColumnsMode;
+        grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
+        try
+        {
+            if (grid.Columns["Photo"] is DataGridViewImageColumn photo)
+            {
+                photo.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+                photo.MinimumWidth = photo.Width = (int)(86 * DeviceDpi / 96F);
+                photo.ImageLayout = DataGridViewImageCellLayout.Zoom;
+                photo.DefaultCellStyle.Padding = new Padding(6);
+                photo.DefaultCellStyle.NullValue = null;
+                photo.SortMode = DataGridViewColumnSortMode.NotSortable;
+            }
+            foreach (DataGridViewRow row in grid.Rows) row.Height = (int)(72 * DeviceDpi / 96F);
+        }
+        finally { grid.AutoSizeColumnsMode = sizing; }
+        summary.Text = $"{partCount:N0} products   •   Available: {availableUnits:N0} units   •   Reserved: {reservedUnits:N0} units";
     }
 
     private void LoadOrdersReport(AppStore store)

@@ -211,18 +211,6 @@ partial class OrdersForm
         emptyOrders.Visible = false;
         grid.Controls.Add(emptyOrders);
         grid.SizeChanged += OrdersGrid_SizeChanged;
-        filterCaption = new Label();
-        filterCaption.Location = new Point(32, 157);
-        filterCaption.Size = new Size(800, 30);
-        filterCaption.ForeColor = Color.FromArgb(92, 105, 98);
-        filterCaption.Visible = false;
-        Controls.Add(filterCaption);
-        clearDashboardFilter = new Button();
-        clearDashboardFilter.Text = "Clear dashboard filter";
-        clearDashboardFilter.Location = new Point(850, 152);
-        clearDashboardFilter.Size = new Size(218, 34);
-        clearDashboardFilter.Visible = false;
-        Controls.Add(clearDashboardFilter);
         actionRow = new FlowLayoutPanel();
         actionRow.Name = "actionRow";
         actionRow.Dock = DockStyle.Bottom;
@@ -265,6 +253,4 @@ partial class OrdersForm
     private Button refresh = null!;
     private Button back = null!;
     private EmptyStateControl emptyOrders = null!;
-    private Label filterCaption = null!;
-    private Button clearDashboardFilter = null!;
 }

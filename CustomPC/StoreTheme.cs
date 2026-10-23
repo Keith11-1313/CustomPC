@@ -24,13 +24,14 @@ public static class StoreTheme
         // Display type belongs to headings. Working controls use the readable body face.
         if (control is Button or StoreTextField or ComboBox or NumericUpDown or CheckBox or DataGridView)
             control.Font = control is Button && control.Parent?.Name is not ("navigationList" or "sidebar") ? emphasis : body;
+        if (control is SearchClearButton) control.Font = AppFonts.Body(11);
         if (control is Label label && label.Font.Size <= 10.5F)
         {
             label.Font = label.Font.Bold ? emphasis : body;
         }
         if (control is DataGridView grid) ApplyGrid(grid);
         if (control is ComboBox combo && control is not StoreComboBox) combo.FlatStyle = FlatStyle.Standard;
-        if (control is Button button && button is not PasswordEyeButton && !buttons.TryGetValue(button, out _))
+        if (control is Button button && button is not PasswordEyeButton && button is not SearchClearButton && !buttons.TryGetValue(button, out _))
         {
             ButtonState state = new();
             buttons.Add(button, state);

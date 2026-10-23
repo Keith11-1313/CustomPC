@@ -4,7 +4,7 @@ namespace CustomPC;
 public sealed record OrderViewFilter(DateTime? FirstDate = null, DateTime? LastDate = null,
     bool PaidDate = false, string? Status = null, string? PartId = null, bool WorkQueue = false)
 {
-    public string Description => WorkQueue ? "Current work queue" + (Status == null ? "" : ": " + Status)
+    public string Description => WorkQueue ? "Open orders" + (Status == null ? "" : ": " + Status)
         : (PaidDate ? "Payment date" : "Created date") + $": {FirstDate:MMM d, yyyy} – {LastDate:MMM d, yyyy}";
     public bool Matches(CustomerOrder order, AppStore store)
     {

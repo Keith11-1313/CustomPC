@@ -24,8 +24,6 @@ public partial class OrdersForm : StoreWindow
         var workspace = new WorkspacePage { Name = "workspace" };
         workspace.Bind(this, heading, back, "Track orders, payment status and pickup progress.", grid,
             refresh, new[] { receipt, pay, advance, cancel }, (searchLabel, search), (statusLabel, status));
-        workspace.AddNotice(filterCaption);
-        workspace.AddNotice(clearDashboardFilter);
 
         AppStore.Current.Refresh();
         if (!AppStore.Current.CanViewAllOrders && !AppStore.Current.IsCustomer)
@@ -40,7 +38,7 @@ public partial class OrdersForm : StoreWindow
         refresh.Visible = false;
         _ = new AutomaticViewRefresh(this, () => RefreshButton_Click(this, EventArgs.Empty));
         emptyOrders.ActionClicked += EmptyOrders_Click;
-        clearDashboardFilter.Click += (_, _) => { viewFilter = null; LoadRows(); };
+        search.SearchCleared += (_, _) => { viewFilter = null; LoadRows(); };
         receipt.Click += ReceiptButton_Click;
         pay.Click += PayButton_Click;
         advance.Click += AdvanceButton_Click;
@@ -199,9 +197,7 @@ public partial class OrdersForm : StoreWindow
         heading.Text = store.IsAdmin ? "Order monitoring" : store.IsStaff ? "Orders & payments" : "My orders";
         Text = "CustomPC | " + heading.Text;
         string searchText = search.Text.Trim();
-        filterCaption.Visible = viewFilter != null;
-        clearDashboardFilter.Visible = viewFilter != null;
-        filterCaption.Text = viewFilter?.Description ?? "";
+        search.FilterText = viewFilter?.Description ?? "";
 
         DataTable table = new DataTable();
         table.Columns.Add("Id", typeof(string));

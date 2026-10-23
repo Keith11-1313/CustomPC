@@ -4,7 +4,7 @@ namespace CustomPC;
 
 public partial class InventoryForm : StoreWindow
 {
-    private readonly Dictionary<string, (string Key, Image Image)> thumbnails = new();
+    private readonly ProductTablePhotos thumbnails = new();
     private string? filteredCategory;
     public InventoryForm(InventoryViewFilter filter) : this()
     {
@@ -20,11 +20,11 @@ public partial class InventoryForm : StoreWindow
         {
             return;
         }
-        Disposed += (_, _) => { foreach (var thumbnail in thumbnails.Values) thumbnail.Image.Dispose(); thumbnails.Clear(); };
+        Disposed += (_, _) => thumbnails.Dispose();
 
         var workspace = new WorkspacePage { Name = "workspace" };
         workspace.Bind(this, heading, back, "Manage products, stock levels and availability in one workspace.", tableSurface,
-            refresh, new[] { add, edit, adjust, history }, (searchLabel, search), (stockLabel, stockFilter));
+            refresh, new[] { add, edit, adjust }, (searchLabel, search), (stockLabel, stockFilter));
         workspace.AddFilterOption(archived);
 
         AppStore store = AppStore.Current;
@@ -44,7 +44,6 @@ public partial class InventoryForm : StoreWindow
         add.Click += AddClicked;
         edit.Click += EditClicked;
         adjust.Click += AdjustStockClicked;
-        history.Click += HistoryClicked;
         refresh.Visible = false;
         _ = new AutomaticViewRefresh(this, () => RefreshClicked(this, EventArgs.Empty));
         emptyInventory.ActionClicked += (_, _) =>
@@ -144,21 +143,6 @@ public partial class InventoryForm : StoreWindow
         }
     }
 
-    private void HistoryClicked(object? sender, EventArgs e)
-    {
-        try
-        {
-            AppStore.Current.Refresh();
-            ValidateAccess(AppStore.Current);
-            using ReportsForm reportsForm = new ReportsForm("Stock movements");
-            reportsForm.ShowDialog(this);
-        }
-        catch (Exception exception)
-        {
-            Ui.ShowError(this, exception);
-        }
-    }
-
     private void RefreshClicked(object? sender, EventArgs e)
     {
         try
@@ -214,7 +198,7 @@ public partial class InventoryForm : StoreWindow
                 continue;
             }
 
-            table.Rows.Add(part.Id, InventoryThumbnail(part, store.DatabasePath), part.Name, part.Category, Ui.Money(part.Price),
+            table.Rows.Add(part.Id, thumbnails.Read(part, store.DatabasePath), part.Name, part.Category, Ui.Money(part.Price),
                 part.Stock, store.Reserved(part.Id), availableStock, stockStatus, part.Archived);
         }
 
@@ -251,45 +235,14 @@ public partial class InventoryForm : StoreWindow
         }
     }
 
-    private Image InventoryThumbnail(Part part, string databasePath)
-    {
-        string key = part.PhotoFileName;
-        try { if (key.Length > 0) key += "|" + File.GetLastWriteTimeUtc(ProductPhotos.Resolve(databasePath, part.PhotoFileName)).Ticks; }
-        catch (Exception error) when (error is IOException or UnauthorizedAccessException or InvalidOperationException) { key += "|unavailable"; }
-        if (thumbnails.TryGetValue(part.Id, out var cached) && cached.Key == key) return cached.Image;
-        using Image? source = ProductPhotos.ReadForDisplay(databasePath, part.PhotoFileName);
-        Bitmap thumbnail = new(96, 80);
-        using (Graphics graphics = Graphics.FromImage(thumbnail))
-        {
-            graphics.Clear(Color.White);
-            if (source != null)
-            {
-                float scale = Math.Min(88F / source.Width, 72F / source.Height);
-                float width = source.Width * scale, height = source.Height * scale;
-                graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                graphics.DrawImage(source, (96 - width) / 2, (80 - height) / 2, width, height);
-            }
-            else
-            {
-                using Font font = new("Segoe UI", 9);
-                TextRenderer.DrawText(graphics, part.Category + "\nNo photo", font, new Rectangle(2, 2, 92, 76), StoreTheme.Muted,
-                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.WordBreak);
-            }
-        }
-        if (thumbnails.TryGetValue(part.Id, out cached)) cached.Image.Dispose();
-        thumbnails[part.Id] = (key, thumbnail);
-        return thumbnail;
-    }
-
     private void ValidateAccess(AppStore store)
     {
         add.Enabled = store.IsAdmin;
         edit.Enabled = store.IsAdmin;
         adjust.Enabled = store.IsStaff;
-        history.Enabled = store.IsAdmin;
         // An unavailable role action should not look like a working button.
         int nextLeft = grid.Left;
-        foreach (Button button in new[] { add, edit, adjust, history })
+        foreach (Button button in new[] { add, edit, adjust })
         {
             button.Visible = button.Enabled;
             if (button.Enabled)

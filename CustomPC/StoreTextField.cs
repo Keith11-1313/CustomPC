@@ -10,6 +10,27 @@ public class StoreTextField : UserControl
     private readonly TextBox input = new() { BorderStyle = BorderStyle.None };
     private readonly PasswordEyeButton passwordEye = new() { Visible = false };
     private readonly ToolTip eyeTip = new();
+    private readonly SearchClearButton clearSearch = new() { Visible = false };
+    private readonly Label filterChip = new() { Visible = false, AutoEllipsis = true, BackColor = StoreTheme.Selection, ForeColor = StoreTheme.Action, Padding = new Padding(6, 0, 6, 0), TextAlign = ContentAlignment.MiddleLeft, UseMnemonic = false };
+    private string filterText = "";
+    [DefaultValue("")]
+    public string FilterText
+    {
+        get => filterText;
+        set
+        {
+            if (filterText == value) return;
+            filterText = value ?? ""; filterChip.Text = filterText;
+            eyeTip.SetToolTip(filterChip, filterText);
+            Height = (int)(40 * DeviceDpi / 96F);
+            PerformLayout(); Invalidate();
+        }
+    }
+    public event EventHandler? SearchCleared;
+    public void ClearSearch()
+    {
+        FilterText = ""; input.Clear(); SearchCleared?.Invoke(this, EventArgs.Empty); input.Focus();
+    }
     private bool showPasswordToggle;
     private bool eyeClickedWithMouse;
     public StoreTextField()
@@ -19,6 +40,10 @@ public class StoreTextField : UserControl
         Size = new Size(220, 40);
         Controls.Add(input);
         Controls.Add(passwordEye);
+        Controls.Add(filterChip); Controls.Add(clearSearch);
+        filterChip.FontChanged += (_, _) => { PerformLayout(); Invalidate(); };
+        clearSearch.Click += (_, _) => ClearSearch();
+        Load += (_, _) => PerformLayout();
         passwordEye.MouseDown += (_, _) => eyeClickedWithMouse = true;
         passwordEye.Click += (_, _) =>
         {
@@ -29,10 +54,15 @@ public class StoreTextField : UserControl
             eyeClickedWithMouse = false;
         };
         UpdateEye();
-        input.TextChanged += (_, _) => OnTextChanged(EventArgs.Empty);
+        input.TextChanged += (_, _) => { PerformLayout(); OnTextChanged(EventArgs.Empty); };
         input.GotFocus += (_, _) => Invalidate();
         input.LostFocus += (_, _) => Invalidate();
-        input.KeyDown += (_, e) => OnKeyDown(e);
+        input.KeyDown += (_, e) =>
+        {
+            if (e.KeyCode == Keys.Escape && IsSearch && (Text.Length > 0 || filterText.Length > 0))
+            { ClearSearch(); e.SuppressKeyPress = true; return; }
+            OnKeyDown(e);
+        };
         input.KeyPress += (_, e) => OnKeyPress(e);
         Click += (_, _) => input.Focus();
     }
@@ -72,7 +102,7 @@ public class StoreTextField : UserControl
     public string[] Lines => input.Lines;
     protected override void SetBoundsCore(int x, int y, int width, int height, BoundsSpecified specified)
     {
-        if (input != null && !input.Multiline && height > 0) height = Math.Max(38, height);
+        if (input != null && !input.Multiline && height > 0) height = Math.Max((int)(38 * DeviceDpi / 96F), height);
         base.SetBoundsCore(x, y, width, height, specified);
     }
 
@@ -84,13 +114,25 @@ public class StoreTextField : UserControl
         base.OnLayout(e);
         if (input == null) return;
         int left = FieldIcon == "" ? 12 : 38;
+        bool filtered = IsSearch && filterText.Length > 0;
+        bool canClear = IsSearch && (Text.Length > 0 || filtered);
+        int chipHeight = Math.Min(Height - 8, (int)(28 * DeviceDpi / 96F));
+        filterChip.Visible = filtered;
+        int chipWidth = filtered ? Math.Min(TextRenderer.MeasureText(filterText, filterChip.Font).Width + filterChip.Padding.Horizontal + 12,
+            Math.Max(1, Width - left - 44 - (int)(80 * DeviceDpi / 96F))) : 0;
+        filterChip.SetBounds(left, (Height - chipHeight) / 2, Math.Max(1, chipWidth), chipHeight);
+        if (filtered) left += chipWidth + 8;
+        clearSearch.Visible = canClear;
+        clearSearch.SetBounds(Math.Max(0, Width - 36), Math.Max(2, (Height - 30) / 2), 30, 30);
         input.BackColor = Enabled ? BackColor : Color.FromArgb(241, 243, 242);
         input.ForeColor = StoreTheme.Ink;
-        input.SetBounds(left, Multiline ? 10 : Math.Max(4, (Height - input.PreferredHeight) / 2),
-            Math.Max(1, Width - left - (showPasswordToggle ? 44 : 12)), Multiline ? Math.Max(1, Height - 20) : input.PreferredHeight);
+        int inputTop = Multiline ? 10 : Math.Max(4, (Height - input.PreferredHeight) / 2);
+        input.SetBounds(left, inputTop,
+            Math.Max(1, Width - left - (showPasswordToggle || canClear ? 44 : 12)), Multiline ? Math.Max(1, Height - 20) : input.PreferredHeight);
         passwordEye.SetBounds(Math.Max(0, Width - 40), 3, 34, Math.Max(20, Height - 6));
         input.AccessibleName = AccessibleName ?? Name;
     }
+    private bool IsSearch => Name.Contains("search", StringComparison.OrdinalIgnoreCase);
     private string FieldIcon => Name.Contains("search", StringComparison.OrdinalIgnoreCase) ? "search" :
         Name.Contains("email", StringComparison.OrdinalIgnoreCase) ? "email" :
         Name.Contains("password", StringComparison.OrdinalIgnoreCase) ? "lock" : "";
