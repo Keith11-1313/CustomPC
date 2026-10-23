@@ -143,10 +143,15 @@ public sealed partial class AppStore
         catch { File.Delete(target); throw; }
     }
 
-    public void RestoreBackup(string source, string adminPassword)
+    public void VerifyAdministratorPassword(string password)
     {
         Refresh(); RequireAdmin();
-        if (!VerifyPassword(adminPassword, Session!.PasswordHash)) throw new InvalidOperationException("Administrator password is incorrect.");
+        if (!VerifyPassword(password, Session!.PasswordHash)) throw new InvalidOperationException("Your password is incorrect. Try again.");
+    }
+
+    public void RestoreBackup(string source, string adminPassword)
+    {
+        VerifyAdministratorPassword(adminPassword);
         if (Path.GetExtension(source).Equals(".zip", StringComparison.OrdinalIgnoreCase))
         {
             RestoreCompleteBackup(source, adminPassword);
