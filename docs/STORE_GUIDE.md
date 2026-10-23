@@ -40,7 +40,7 @@ Name, brand, price, low-stock threshold, specifications and photo controls remai
 ## Build, payment and pickup
 
 1. Customer or Guest chooses CPU, motherboard, RAM, storage, PSU and case. GPU is optional only with verified CPU integrated graphics and motherboard video output.
-   Motherboard choices follow the selected CPU socket; RAM follows the motherboard's memory type; PSU choices meet the selected components' stored power requirements. Changing an earlier component clears later selections that no longer fit. The integrated-graphics option appears only for a verified CPU/board pair. Guest checkout is labelled **Log in and order** and becomes available for a complete valid build.
+   All active, in-stock parts remain in each dropdown. Warning icons mark socket, RAM-type or PSU conflicts with the other selections. Selecting an incompatible part keeps the choice and explains the conflict in the build review. Checkout stays disabled until the build is valid. The integrated-graphics option appears only for a verified CPU/board pair. Guest checkout is labelled **Log in and order** and becomes available for a complete valid build.
 2. Socket, memory and PSU checks always run. PSU must cover estimated component power plus 100 W and recorded recommended PSU requirements. BIOS support, case dimensions and cooler clearance still need physical review.
 3. Valid Guest checkout opens login. Customer login continues the same checkout and saves the selected build/order to that account after confirmation. Cancelled login retains the preview; Admin/Staff login returns to their own dashboard.
 4. The order reserves stock and has a 24-hour payment deadline. Staff records full payment received at the store.
@@ -51,7 +51,7 @@ Expiry runs on startup/refresh and the running timer. It does not run while the 
 
 ## Charts and reports
 
-Admin defaults to 30 days: recorded payment amounts by local payment date, quantities of top paid parts, and current inventory health. Staff defaults to seven days: incoming counts by local creation date, current queue and current category stock counts. Staff sees operational summary counts and stock-attention links without charts. The period selector affects historical counts and Admin charts, not current snapshots.
+Admin defaults to 30 days: recorded payment amounts by local payment date, quantities of top paid parts, and current inventory health. Staff defaults to seven days: Orders received uses local order creation dates; Open orders, Ready for pickup and Products needing stock reflect current data. Staff sees operational summary counts and stock-attention links without charts. The period selector affects historical counts and Admin charts, not current snapshots.
 
 Use Open selected, chart double-clicks or labelled navigation buttons to open filtered Orders/Inventory. Admin reports provide inventory, orders, stock movements and sales with CSV export. Receipts use the fixed CustomPC name and support text saving and printing.
 
@@ -61,7 +61,7 @@ Admin can view the latest 500 activity entries, which update automatically when 
 
 Save backup creates a ZIP containing custompc.db and ProductImages. Choose a new filename; existing backups are refused. One automatic ZIP per local date is saved to Database/Backups when an existing database is opened. An app left open across days gets the next startup backup when reopened.
 
-Restore requires the current Admin password and confirmation. It replaces records/photos from the selected ZIP, saves a safety backup first, then closes the app. Reopen with credentials from the restored snapshot. Older database-only `.db` backups remain supported but do not contain photos. If recovery itself fails, preserve the named recovery files and safety ZIP before continuing.
+Click Restore backup to open Confirm your password. Enter Your password and choose Choose backup; only a verified current Admin can proceed to the file picker. Cancel stops the flow. The selected backup then requires confirmation. It replaces records/photos from the selected ZIP, saves a safety backup first, then closes the app. The app does not reopen automatically: open CustomPC manually and sign in with credentials from the restored backup. Older database-only `.db` backups remain supported but do not contain photos. If recovery itself fails, preserve the named recovery files and safety ZIP before continuing.
 
 ## Practice separately
 
@@ -86,3 +86,15 @@ New and changed account passwords use 12–128 characters with uppercase and low
 
 
 Admin overview: confirmed-payment and paid-order cards use the selected 7/30/90-day period. Low-stock and out-of-stock cards are current product counts. Stock attention links open inventory with the corresponding stock filter. The three charts retain keyboard-accessible selection controls; empty charts show their headings and a relevant action. Staff sees operational summary cards and stock-attention links without charts. Parts catalog is available only to Customer and Guest; Admin and Staff use Parts & inventory.
+
+## Current screen controls
+
+- Orders, Parts & inventory, User accounts and Parts catalog search as you type. Search is case-insensitive and ignores leading/trailing spaces; catalog search waits briefly while you type.
+- The × inside a search field clears its text. Escape does the same. On Orders it also removes the dashboard date/open-order constraint. Other category, stock and status selections remain unchanged.
+- Orders dashboard filters appear as an inline chip after the search icon, beside the typing area. Narrow chips expose the full filter through a tooltip. Open orders means Pending Payment, Paid, Processing, Assembly or Ready for Pickup; completed/cancelled orders are excluded from that view.
+- Inventory tables in Parts & inventory and the Inventory report include product thumbnails. Missing/unreadable images use a category placeholder. CSV exports contain text/number columns, not images.
+- Admin sidebar order is Overview, View orders, Parts & inventory, Reports, User accounts, Activity & Backups. Staff and shopping roles retain only their permitted pages. The old Custom PC builds sidebar caption is removed.
+- The builder review lists selected models and prices, selection progress, socket/memory compatibility and the minimum PSU capacity for the current choices. Integrated graphics counts as a resolved graphics choice only when supported. The total and checkout action stay outside the scrolling review.
+- Adjust stock shows the selected product/photo and on-hand, reserved and available counts. Choose Add stock or Remove stock, enter a positive quantity and a reason, and review Stock after adjustment. Saving is disabled for missing reasons or quantities that violate stock/reservation limits; the business method checks again before saving.
+- Activity & Backups has compact Save backup and Restore backup actions. Save backup confirms the saved file location. Restore opens the Your password dialog before file selection; wrong passwords remain in that dialog. After a confirmed successful restore the app closes and must be reopened manually.
+- Login uses Create account and Browse as guest text links below Sign in.

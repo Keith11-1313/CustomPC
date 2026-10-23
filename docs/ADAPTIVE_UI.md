@@ -7,7 +7,7 @@ CustomPC remains a Windows Forms application with focused modal editors and one 
 - Canvas: #F7F8FA; product/data surfaces: #FFFFFF; navigation/text: #1B2725; primary action: #147750; selected surface: #E6F3ED; border: #DEE4DF.
 - Righteous is reserved for the CustomPC brand. Segoe UI is used for application headings, working controls and data, with distinct title, value, body and caption sizes. Labels identify fields; icon-only rail buttons retain accessible names and tooltips.
 - Main shell: expanded navigation at 1180 effective pixels and above; a compact rail below it. Navigation scrolls independently on short windows. Overview scrolls vertically while navigation stays in place.
-- Data pages: title and description, commands, wrapping filter groups, then a single data surface. Saved changes update visible data pages automatically; Back remains at the upper right. Page headers and command spacing are compact, with restrained secondary buttons and emerald primary actions. Commands preserve role permissions.
+- Data pages: title, commands, wrapping filter groups, then a single data surface. Descriptive subtitles have been removed. Saved changes update visible data pages automatically; Back remains at the upper right. Page headers and command spacing are compact, with restrained secondary buttons and emerald primary actions. Commands preserve role permissions.
 - Catalog: category rail on wide pages, wrapping category buttons on narrow pages. Cards fill available columns and change to compact horizontal rows in short or narrow product areas. Search waits 180 ms after typing to avoid rebuilding photographs on every keystroke.
 - Builder: individual component cards with photos, selectors and Details actions. Checkout moves below the component list at narrower widths. The list scrolls independently.
 - Editors: labelled field groups reflow from two columns to one; field area scrolls and Save/Cancel remain in a separate action bar. Category-specific fields are removed from layout rather than disabled.
@@ -15,7 +15,7 @@ CustomPC remains a Windows Forms application with focused modal editors and one 
 
 ## Implementation map
 
-WorkspacePage and WorkspacePage.Designer define the shared list workspace. EditorSheet owns editor field reflow. DashboardForm.Layout, CatalogForm.Layout, LoginForm.Layout and BuilderForm.Layout define screen-specific composition. Existing form Designer files still own the editable controls and the business handlers remain in their original forms.
+WorkspacePage and WorkspacePage.Designer define the shared list workspace. EditorSheet owns editor field reflow. DashboardForm.Layout, CatalogForm.Layout, BuilderForm.Layout and StockAdjustmentForm.Layout define screen-specific composition. LoginForm.RestoreLoginLayout keeps the restored photo-panel/inset-card layout; LoginForm.Layout.cs has been removed. Existing form Designer files still own the editable controls and the business handlers remain in their original forms.
 
 ## Research used
 
@@ -26,3 +26,9 @@ WorkspacePage and WorkspacePage.Designer define the shared list workspace. Edito
 These are design principles adapted to WinForms, not a claim that the application uses WinUI or its native materials. Native Designer, accessibility tools, printer and actual OS DPI checks must be recorded separately from bitmap renders.
 
 Typography reference: Microsoft Windows typography guidance (https://learn.microsoft.com/en-us/windows/apps/design/signature-experiences/typography). Segoe UI is used for WinForms/GDI compatibility; this is not a claim of native WinUI controls.
+
+## Current refinements (23 October 2026)
+
+Search icons, filter chips, typing areas and × controls share one row. Chips remeasure when runtime fonts change. Empty/error messages remain where they explain the next action; generic descriptive subtitles have been removed. The sidebar uses sidebar.png; the shopping banner and login photograph retain a dark green tint. Supplied images are cropped proportionally rather than stretched.
+
+Stock adjustment has a dedicated product/action/result composition instead of the generic editor sheet. The result preview and actions remain outside its scrolling fields. Inventory and Inventory reports share cached photo thumbnails; CSV stays text-only. Backup actions are compact and the password is requested in a focused dialog only after clicking Restore backup. The sidebar lists Reports before User accounts and no longer shows the Custom PC builds caption.

@@ -4,7 +4,7 @@ An account has one role. Admin does not inherit Staff or Customer actions. Guest
 
 | Action | Guest | Customer | Staff | Admin |
 | --- | --- | --- | --- | --- |
-| Browse/search catalog | Yes | Yes | Yes | Yes |
+| Browse/search catalog | Yes | Yes | No | No |
 | Prepare a PC build | Yes | Yes | No | No |
 | Create order | Login required | Own account | No | No |
 | View orders/receipts | No | Own only | All | All, read-only |

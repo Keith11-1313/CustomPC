@@ -57,7 +57,7 @@ Management pages use a bottom actionRow FlowLayoutPanel. Buttons wrap; the table
 
 DashboardForm.FitWorkspace keeps the sidebar fixed and positions the hosted page within the visible client area. The main window starts maximized; StoreWindow leaves maximized borders to Windows and clamps restored windows to usable monitor bounds. Hosted pages no longer inherit a fixed 650-pixel scrolling minimum.
 
-BuilderForm.FitBuilder switches to a stacked checkout layout when the page narrows. selectionScroll owns vertical scrolling; checkout stays outside that scroll area. LoadPartChoices rebuilds lists in component order, preserves IDs still offered, and clears incompatible downstream IDs. CPU socket filters motherboards; board memory type filters RAM; AppStore.RequiredPowerSupplyWatts supplies the same wattage rule used at checkout. These filters do not replace CheckBuild or physical fit/BIOS review. They do not rank performance or automatically choose a "best" product.
+BuilderForm.FitBuilder switches to a stacked checkout layout when the page narrows. selectionScroll owns vertical scrolling; checkout stays outside that scroll area. LoadPartChoices rebuilds lists in component order and preserves selected IDs that are still active and in stock. Incompatible parts stay selectable. BuilderForm.Conflicts.CandidateConflict compares a candidate against the other choices; StoreComboBox.WarningText paints warning indicators. Named socket/memory/PSU reasons appear in the build review. AppStore.RequiredPowerSupplyWatts uses the same power rule as checkout. CheckBuild still blocks invalid ordering; physical fit/BIOS review remains separate. They do not rank performance or automatically choose a "best" product.
 
 ## From a click to saved data
 
@@ -122,7 +122,7 @@ ZIP backup contains custompc.db and ProductImages. Restore validates paths, reco
 
 StoreTextField wraps a normal TextBox in a padded, rounded surface. Text, masking, maximum length and multiline receipt behavior are forwarded to that inner control; the TextChanged event is forwarded to the form. StoreNumberField and StoreDateField do the same for numeric entry and the Windows calendar. Their values still go through the existing business validation.
 
-StoreComboBox keeps the Windows popup and keyboard selection, but draws rows with padding and a visible selected state. StoreCheckBox keeps CheckBox behavior and uses a downloaded check icon. IconAssets loads transparent 192×192 Lucide PNGs from embedded Assets/Icons resources. System.Drawing reuses the loaded bitmaps, scales them to the control and tints them for its colour. No SVG package or runtime conversion is needed. Source URLs/hashes and the full license remain in that folder. No icon download happens at runtime. StoreDialog replaces app confirmations/messages; Ui.Confirm returns true only for Confirm. Closing or cancelling it does not approve an action. Windows file and print dialogs remain native.
+StoreComboBox keeps the Windows popup and keyboard selection, but draws rows with padding and a visible selected state. StoreCheckBox keeps CheckBox behavior and uses a downloaded check icon. IconAssets loads transparent PNG assets (primarily Lucide, plus the attributed Icons8 warning icon) from embedded Assets/Icons resources. System.Drawing reuses the loaded bitmaps, scales them to the control and tints them for its colour. No SVG package or runtime conversion is needed. Source metadata, attribution notes and the Lucide license remain in that folder; the warning icon attribution is recorded in README.txt. No icon download happens at runtime. StoreDialog replaces app confirmations/messages; Ui.Confirm returns true only for Confirm. Closing or cancelling it does not approve an action. Windows file and print dialogs remain native.
 
 StoreTextField.ShowPasswordToggle enables PasswordEyeButton. It toggles UseSystemPasswordChar without changing Text, preserves selection, and updates its accessible name between Show password and Hide password. The old login checkbox and its handler were removed. Login, registration, setup, account editing and backup-restore password fields use this control.
 
@@ -145,6 +145,22 @@ DashboardChart uses LiveCharts2 at runtime. Line creates a LineSeries, Bars choo
 - `WorkspacePage.cs` and its Designer file arrange list pages into a header, command bar, wrapping filters and data area. The original buttons/fields keep their click and validation handlers.
 - `EditorSheet.cs` groups existing editor controls, scrolls fields independently and keeps Save/Cancel outside that scrolling area. `PartEditForm.UpdateCategoryFields` changes group visibility.
 - `DashboardForm.Layout.cs` owns expanded/compact navigation and overview reflow. `CatalogForm.Layout.cs` moves category filters between a rail and a wrapping row. `ProductCard.UseCompactLayout` switches between a vertical tile and a horizontal product row.
-- `LoginForm.Layout.cs` centers the form and removes the photo pane at narrow widths. `BuilderForm.Layout.cs` creates component cards and keeps the existing compatibility selectors; `FitBuilder` moves checkout below the list on smaller windows.
+- `LoginForm.cs` uses RestoreLoginLayout to fit the restored photo panel and inset sign-in card; the former LoginForm.Layout.cs is removed. `BuilderForm.Layout.cs` creates component cards and keeps the existing compatibility selectors; `FitBuilder` moves checkout below the list on smaller windows.
 - `StoreGrid.cs` enables double-buffered table painting. Catalog search uses a short Windows Forms timer and batches card layout. The dashboard avoids rebuilding hidden charts while a hosted page is open.
 - The application requests PerMonitorV2 DPI support. Bitmap resize checks do not replace actual OS scaling, Designer or keyboard accessibility testing.
+
+## Current UI helper map (23 October 2026)
+
+| Source | Current responsibility |
+| --- | --- |
+| AutomaticViewRefresh.cs | Checks saved database/WAL changes every two seconds for visible read-only views; preserves filters/record selection/scroll and pauses for modal dialogs |
+| StoreTextField.cs / SearchClearButton.cs | Inline filter chip, aligned search icon, query editing, keyboard-accessible × and Escape clearing; SearchCleared lets Orders remove its typed dashboard filter |
+| BuilderForm.Conflicts.cs | Candidate socket/memory/PSU warnings without mutating the draft; selected conflicts remain subject to backend CheckBuild |
+| BuilderForm.Layout.cs | Component cards and scrolling model/price/compatibility review with a persistent checkout action |
+| ProductTablePhotos.cs | Detached cached thumbnails and category placeholders, shared by inventory and Inventory reports; cache disposed with its owning form |
+| StockAdjustmentForm.Layout.cs | Product summary, Add/Remove controls, positive quantity, reason and pinned resulting-stock preview/actions |
+| RestorePasswordForm.cs / .Designer.cs | Your password dialog; verifies through AppStore.VerifyAdministratorPassword before returning OK and clears the field on disposal |
+| StoreToolsForm.cs | Save confirmation, password → file picker → restore confirmation, and manual-reopen instructions; RestoreBackup rechecks authorization/password before replacement |
+| SurfaceArtwork.cs | Proportional cropping/tint for supplied banner/sidebar images; no product photo data is embedded here |
+
+WorkspacePage no longer renders descriptive page subtitles. AddSummaryAction positions Export CSV on the left and a responsive report summary on the right. Ui.Export omits DataGridViewImageColumn values. StoreComboBox paints its closed surface in one buffered pass while Windows retains popup/keyboard behavior. Dashboard navigation places Reports before User accounts; Staff has no runtime charts. The latest login layout uses the inset white card and photo panel, with native LinkLabel account/guest actions.

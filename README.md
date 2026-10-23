@@ -42,4 +42,4 @@ Admin manages catalog metadata/photos, accounts, reports and **Activity & Backup
 
 Compatibility checks are mandatory: required categories, stock, graphics output, socket, RAM type and PSU capacity. There are no editable compatibility rules, supplier management, business-name customization or database-location field. Receipts use **CustomPC**.
 
-Admin charts show confirmed payments, top-selling parts and current inventory health. Staff charts show incoming-order counts, current work queue and stock readiness. Date charts offer 7/30/90 days; queue and inventory remain current snapshots.
+Admin charts show confirmed payments, top-selling parts and current inventory health. Staff has no charts: it shows orders received, open orders, ready-for-pickup orders and products needing stock. The 7/30/90-day selector affects historical order/payment totals and Admin charts. Open orders and stock levels reflect current saved data.

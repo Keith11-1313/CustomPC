@@ -2,7 +2,13 @@
 
 This page separates executed checks from manual checks. Test counts overlap between runs and must not be added into a unique-test total. The application remains under revision.
 
-## Latest relevant run
+## Reading the evidence
+
+Entries below record behavior at the time of each run. Later dated entries supersede older UI behavior; earlier results are retained rather than rewritten. In particular, earlier downstream compatibility filtering, Staff charts, page descriptions and the two-line filter chip are historical, not the current interface.
+
+Current implementation as of 23 October 2026 includes Staff operational cards without charts, incompatible builder choices with warnings, inline removable search filters, report thumbnails with text-only CSV, a dedicated stock-adjustment layout and password verification before restore file selection. Restore requires manual relaunch. Documentation cleanup itself was checked against current source and Markdown links; no new runtime, native-dialog, restore, printer or physical DPI checks were executed for that cleanup. Prior executed checks retain their own stated scope and limitations.
+
+## Historical baseline run
 
 **15 October 2026, 16:21 â€” 501 checks passed, 0 failed. Build: 0 warnings, 0 errors.** The external harness operated real WinForms controls against an isolated copy of the saved database. No test accounts, stock or orders were written into the live database.
 
@@ -213,3 +219,9 @@ Added category/model/price rows for all seven selections, integrated-graphics an
 ### Incompatible builder options
 
 Builder dropdowns now retain all active, in-stock parts. A downloaded warning PNG and an Incompatible label mark options with socket, memory or PSU conflicts against the other current selections. The selected field retains the warning icon and exposes the reason through AccessibleDescription. Named-part explanations appear above the price breakdown. Existing CheckBuild and ordering permissions still block invalid checkout. Tests on copied data verified counts across all seven categories, warning callbacks for an AM4/LGA1700 mismatch, preserved motherboard choice after selecting DDR5 against DDR4, named conflict details, disabled invalid checkout and popup operation. Visually reviewed the conflict render. Build passed with zero warnings/errors; live records were unchanged.
+
+## 2026-10-23 searchable fields and dashboard filter chip
+
+Orders now shows the dashboard date/queue constraint inside the search field. Removed the separate caption and Clear dashboard filter button. All four search fields (Orders, Inventory, Users, Catalog) show a keyboard-accessible × when text or a search filter is present; Escape also clears it. Orders clears its dashboard constraint together with the query. Ordinary text clearing leaves other category/status filters in place. The date filter remains a typed OrderViewFilter rather than editable query text, preserving its date and role checks.
+
+Copied-data validation passed 23 checks for trimmed/case-insensitive matching input, no-result input, × restoring rows, visibility of clear actions, a future payment-date constraint yielding no rows, filter-only clearing and debounced Catalog results. Reviewed the rendered Orders chip. External build passed with zero warnings/errors. Live data was unchanged; physical keyboard and OS scale switching were not exercised.

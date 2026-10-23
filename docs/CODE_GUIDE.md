@@ -285,9 +285,9 @@ The first line chooses a database for apps started from **this PowerShell proces
 
 1. Sign in as `staff@custompc.local`, password `CustomPC123!` in the fresh practice database.
 2. Open Parts & inventory. Select one component row and note its **OnHand** number.
-3. Click **Adjust stock**. Set **Quantity change** to `2`, enter `Learning exercise` in **Reason / supply reference**, and click **Record adjustment**.
-4. Expect OnHand to increase by 2. Movement history is an Admin report, so Staff does not see that button. Stay signed in as Staff for the next step.
-5. Select the component again and click Adjust stock. Set Quantity change to `0` with the same reason, then click Record adjustment. Expect an error and no extra stock change. Click Back to leave the unsaved editor. Its earlier successful adjustment stays saved.
+3. Click **Adjust stock**, choose **Add stock**, set **Quantity to add** to `2`, enter `Learning exercise` in **Reason / reference**, review the resulting stock, and click **Add stock**.
+4. Expect OnHand to increase by 2. The inventory Movement history shortcut has been removed. Admin can inspect adjustments in Reports → Stock movements. Stay signed in as Staff for the next step.
+5. Select the component again and click Adjust stock. Choose **Remove stock** and enter a quantity larger than the available stock. Expect an invalid-removal message and a disabled save action. The quantity field accepts positive numbers; the Add/Remove choice supplies the sign. Click **Cancel** to leave without saving. Its earlier successful adjustment stays saved.
 6. Close the app. The PowerShell command should finish. Run the same `dotnet run` line again; the saved stock should remain.
 7. Close the app. Remove the override from this PowerShell process:
 
@@ -301,12 +301,12 @@ The practice database remains in `%TEMP%\CustomPC-Learning\guide.db`; removing t
 Now open `StockAdjustmentForm.cs` and find `SaveClicked`. Its important lines are:
 
 ```csharp
-int stockChange = (int)quantity.Value;
+int stockChange = (int)quantity.Value * (adjustmentType.SelectedIndex == 1 ? -1 : 1);
 AppStore.Current.AdjustStock(partId, stockChange, reason.Text);
 DialogResult = DialogResult.OK;
 ```
 
-`quantity.Value` reads the numeric control. `(int)` converts its value to a whole number; `stockChange` stores that number. `partId` identifies the selected component. `reason.Text` reads the explanation. `AdjustStock` validates and saves before the form reports OK.
+`quantity.Value` reads the numeric control. `(int)` converts its value to a whole number; `stockChange` stores it as positive for Add stock or negative for Remove stock. `partId` identifies the selected component. `reason.Text` reads the explanation. `AdjustStock` validates and saves before the form reports OK.
 
 Press F12 on `AdjustStock` to reach `AppStore.Inventory.cs`. It reloads saved records, requires Staff-only access, rejects zero or a blank reason, checks stock limits and reservations, changes the Part, records the movement, and calls `SaveData`. Admin cannot call this operation. To inspect the recorded movement, switch to Admin, open Reports, and choose Stock movements; find your quantity 2 and Learning exercise reason.
 
