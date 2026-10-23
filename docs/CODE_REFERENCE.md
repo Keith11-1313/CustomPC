@@ -40,6 +40,7 @@ Use [CODE_GUIDE.md](CODE_GUIDE.md) for lessons. This reference answers where beh
 | DashboardForm | Main window, sidebar, role dashboard and account switching |
 | CatalogForm / BuilderForm | Product cards, draft selections and checkout |
 | OrdersForm / ReceiptForm | Order actions and owned/read-authorized receipt |
+| ReceiptDocument.cs | Shared paper preview and paginated print layout with wrapped component names, quantities, prices and payment-aware instructions |
 | InventoryForm / PartEditForm | Inventory list and Admin product metadata/photos |
 | StockAdjustmentForm | Staff stock change with reason |
 | UsersForm / UserEditForm | Admin account management |
@@ -120,7 +121,7 @@ ZIP backup contains custompc.db and ProductImages. Restore validates paths, reco
 
 ### Shared appearance
 
-StoreTextField wraps a normal TextBox in a padded, rounded surface. Text, masking, maximum length and multiline receipt behavior are forwarded to that inner control; the TextChanged event is forwarded to the form. StoreNumberField and StoreDateField do the same for numeric entry and the Windows calendar. Their values still go through the existing business validation.
+StoreTextField wraps a normal TextBox in a padded, rounded surface. Text, masking, maximum length and multiline text behavior are forwarded to that inner control; the TextChanged event is forwarded to the form. StoreNumberField and StoreDateField do the same for numeric entry and the Windows calendar. Their values still go through the existing business validation.
 
 StoreComboBox keeps the Windows popup and keyboard selection, but draws rows with padding and a visible selected state. StoreCheckBox keeps CheckBox behavior and uses a downloaded check icon. IconAssets loads transparent PNG assets (primarily Lucide, plus the attributed Icons8 warning icon) from embedded Assets/Icons resources. System.Drawing reuses the loaded bitmaps, scales them to the control and tints them for its colour. No SVG package or runtime conversion is needed. Source metadata, attribution notes and the Lucide license remain in that folder; the warning icon attribution is recorded in README.txt. No icon download happens at runtime. StoreDialog replaces app confirmations/messages; Ui.Confirm returns true only for Confirm. Closing or cancelling it does not approve an action. Windows file and print dialogs remain native.
 

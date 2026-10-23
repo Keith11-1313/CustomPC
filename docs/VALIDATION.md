@@ -8,6 +8,10 @@ Entries below record behavior at the time of each run. Later dated entries super
 
 Current implementation as of 23 October 2026 includes Staff operational cards without charts, incompatible builder choices with warnings, inline removable search filters, report thumbnails with text-only CSV, a dedicated stock-adjustment layout and password verification before restore file selection. Restore requires manual relaunch. Documentation cleanup itself was checked against current source and Markdown links; no new runtime, native-dialog, restore, printer or physical DPI checks were executed for that cleanup. Prior executed checks retain their own stated scope and limitations.
 
+## Receipt redesign - 24 October 2026
+
+The application and external receipt harness built with 0 warnings and 0 errors. Rendered the real receipt form at 1040x900 and 640x600 using an isolated database copy, plus paid/unpaid sample documents and a 35-item order spanning four numbered pages. Checked long customer/component names and exercised the actual PrintPage handler against a 300-DPI bitmap; reviewed the resulting paper layout. Preview and printing share ReceiptDocument; payment-aware instructions are shown on the receipt. The later print-margin correction removes text export and uses quarter-inch outer print margins. No live order/stock records were changed. A physical printer, native print dialog and Windows display scaling were not exercised.
+
 ## Historical baseline run
 
 **15 October 2026, 16:21 â€” 501 checks passed, 0 failed. Build: 0 warnings, 0 errors.** The external harness operated real WinForms controls against an isolated copy of the saved database. No test accounts, stock or orders were written into the live database.
