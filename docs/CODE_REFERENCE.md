@@ -39,6 +39,7 @@ Use [CODE_GUIDE.md](CODE_GUIDE.md) for lessons. This reference answers where beh
 | LoginForm / RegisterForm | Authentication, Guest access and Customer registration |
 | DashboardForm | Main window, sidebar, role dashboard and account switching |
 | CatalogForm / BuilderForm | Product cards, draft selections and checkout |
+| ShopPolicies.cs / PolicyForm | Shared shop-policy text, navigation links and scrollable policy reader; terms link on order confirmation |
 | OrdersForm / ReceiptForm | Order actions and owned/read-authorized receipt |
 | ReceiptDocument.cs | Shared paper preview and paginated print layout with wrapped component names, quantities, prices and payment-aware instructions |
 | InventoryForm / PartEditForm | Inventory list and Admin product metadata/photos |

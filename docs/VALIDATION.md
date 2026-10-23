@@ -12,6 +12,10 @@ Current implementation as of 23 October 2026 includes Staff operational cards wi
 
 The application and external receipt harness built with 0 warnings and 0 errors. Rendered the real receipt form at 1040x900 and 640x600 using an isolated database copy, plus paid/unpaid sample documents and a 35-item order spanning four numbered pages. Checked long customer/component names and exercised the actual PrintPage handler against a 300-DPI bitmap; reviewed the resulting paper layout. Preview and printing share ReceiptDocument; payment-aware instructions are shown on the receipt. The later print-margin correction removes text export and uses quarter-inch outer print margins. No live order/stock records were changed. A physical printer, native print dialog and Windows display scaling were not exercised.
 
+## Shop-policy dialogs - 24 October 2026
+
+Built the application and isolated policy harness with 0 warnings and 0 errors. Rendered all three policy readers at normal and compact sizes and scrolled each to its final section; compact readers had no horizontal scrollbar. Exercised all six policy links on login, registration, product details, receipts and order confirmation. Each opened the intended reader and returned without submitting its owner. Cancelling order confirmation returned false. Reviewed login, registration, confirmation, receipt and compact product renders. No order, payment, stock or customer records were created by these checks; the harness used an existing isolated database copy. Physical DPI changes and manual keyboard-only traversal remain separate checks.
+
 ## Historical baseline run
 
 **15 October 2026, 16:21 â€” 501 checks passed, 0 failed. Build: 0 warnings, 0 errors.** The external harness operated real WinForms controls against an isolated copy of the saved database. No test accounts, stock or orders were written into the live database.

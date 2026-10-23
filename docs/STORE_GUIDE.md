@@ -12,6 +12,12 @@ The sidebar switches hosted pages. Overview/Back returns to the dashboard. Edito
 
 The main window opens maximized to use the monitor's working area. Restore it with the title-bar button to resize it. The sidebar stays in place and changes to an icon rail in narrower windows; hover or focus a destination for its label. Navigation can scroll on short screens. In a narrower builder, checkout moves below the parts; scroll the component list to reach the remaining categories. The total and order action stay visible.
 
+## Shop policies
+
+Customer-facing Terms & Conditions, Warranty & Returns, and Privacy Notice open as scrollable dialogs. Privacy is linked from login and registration; registration also links to the terms. Order confirmation shows the total, 24-hour reservation/payment rule and a Terms & Conditions link. Product details and receipts link to Warranty & Returns. Close or Esc returns to the original screen without submitting it.
+
+The wording is centralized in `ShopPolicies.cs`. Opening a policy does not record consent, create an order or change account data. Warranty handling, privacy requests and retention remain shop procedures; these notices do not introduce automatic retention/deletion or warranty-processing features.
+
 ## Products and stock
 
 Commands are above tables; filters wrap as the page narrows. Visible data pages update automatically when saved data changes; no Refresh button is needed. Customer and Guest browse Parts catalog using the category rail, which moves above products in narrower windows. Product editors use scrolling field groups with pinned Save/Cancel buttons.
