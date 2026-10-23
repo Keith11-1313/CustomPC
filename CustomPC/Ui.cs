@@ -259,7 +259,8 @@ internal static class Ui
         receipt.AppendLine("Created: " + createdDate);
         receipt.AppendLine("Status: " + order.Status);
         receipt.AppendLine("Payment: " + paymentStatus);
-        receipt.AppendLine("Pay before: " + paymentDeadline);
+        if (paymentStatus == "Unpaid" && order.Status == "Pending Payment")
+            receipt.AppendLine("Pay before: " + paymentDeadline);
         receipt.AppendLine(sectionSeparator);
 
         foreach (OrderLine line in order.Lines)
@@ -277,8 +278,14 @@ internal static class Ui
         receipt.AppendLine(sectionSeparator);
         receipt.AppendLine("TOTAL: " + Money(order.Total));
         receipt.AppendLine();
-        receipt.AppendLine("Present this receipt and pay at the physical store within 24 hours.");
-        receipt.AppendLine("Unpaid orders are cancelled when their deadline expires.");
+        if (paymentStatus != "Unpaid")
+            receipt.AppendLine("Payment confirmed at the store. Keep this receipt for collection.");
+        else if (order.Status == "Pending Payment")
+        {
+            receipt.AppendLine("Pay at the physical store before the payment deadline.");
+            receipt.AppendLine("Unpaid orders are cancelled when their deadline expires.");
+        }
+        else receipt.AppendLine("No confirmed payment is recorded for this order.");
         receipt.AppendLine("Pickup only. No online payment or delivery.");
         receipt.AppendLine();
         receipt.AppendLine("Compatibility covers stored socket, memory and power rules only.");

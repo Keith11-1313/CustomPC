@@ -5,7 +5,8 @@ namespace CustomPC;
 public partial class ReceiptForm : StoreWindow
 {
     private string? orderId;
-    private string[] printLines = Array.Empty<string>();
+    private ReceiptDocument? document;
+    private readonly ReceiptPreview preview = new() { Name = "receiptPreview" };
     private int printPosition;
 
     public ReceiptForm()
@@ -19,12 +20,11 @@ public partial class ReceiptForm : StoreWindow
         }
 
         var workspace = new WorkspacePage { Name = "workspace" };
-        workspace.Bind(this, heading, back, "Your order summary and store payment details.", receiptText,
-            null, new[] { print, save });
+        workspace.Bind(this, heading, back, "", preview,
+            null, new[] { print });
 
         Shown += ReceiptForm_Shown;
         print.Click += PrintButton_Click;
-        save.Click += SaveButton_Click;
     }
 
     public ReceiptForm(string id) : this()
@@ -50,13 +50,15 @@ public partial class ReceiptForm : StoreWindow
 
         if (selectedOrder == null)
         {
-            receiptText.Clear();
-            save.Enabled = false;
+            document = null;
+            preview.SetDocument(null);
             print.Enabled = false;
             throw new InvalidOperationException("Receipt access denied.");
         }
 
-        receiptText.Text = Ui.Receipt(selectedOrder, store);
+        document = new ReceiptDocument(selectedOrder, store.Payments.FirstOrDefault(p => p.OrderId == selectedOrder.Id));
+        preview.SetDocument(document);
+        preview.AccessibleDescription = Ui.Receipt(selectedOrder, store);
     }
 
     private void BackButton_Click(object? sender, EventArgs e)
@@ -68,8 +70,7 @@ public partial class ReceiptForm : StoreWindow
 
     private void ReceiptForm_Shown(object? sender, EventArgs e)
     {
-        receiptText.Select(0, 0);
-        receiptText.ScrollToCaret();
+        preview.AutoScrollPosition = Point.Empty;
     }
 
     private void PrintButton_Click(object? sender, EventArgs e)
@@ -77,28 +78,6 @@ public partial class ReceiptForm : StoreWindow
         try
         {
             PrintReceipt();
-        }
-        catch (Exception exception)
-        {
-            Ui.ShowError(this, exception);
-        }
-    }
-
-    private void SaveButton_Click(object? sender, EventArgs e)
-    {
-        try
-        {
-            RefreshReceipt();
-            using (SaveFileDialog saveDialog = new SaveFileDialog())
-            {
-                saveDialog.Filter = "Text receipt (*.txt)|*.txt";
-                saveDialog.FileName = "CustomPC-receipt.txt";
-
-                if (saveDialog.ShowDialog(this) == DialogResult.OK)
-                {
-                    File.WriteAllText(saveDialog.FileName, receiptText.Text);
-                }
-            }
         }
         catch (Exception exception)
         {
@@ -117,6 +96,9 @@ public partial class ReceiptForm : StoreWindow
 
         using (PrintDocument printDocument = new PrintDocument())
         {
+            // Quarter-inch outer margins; the document adds its own inner padding.
+            printDocument.DefaultPageSettings.Margins = new Margins(25, 25, 25, 25);
+            printDocument.DocumentName = "CustomPC receipt";
             printDocument.BeginPrint += PrintDocument_BeginPrint;
             printDocument.PrintPage += PrintDocument_PrintPage;
 
@@ -136,30 +118,20 @@ public partial class ReceiptForm : StoreWindow
     private void PrintDocument_BeginPrint(object? sender, PrintEventArgs e)
     {
         printPosition = 0;
-        printLines = receiptText.Lines;
     }
 
     private void PrintDocument_PrintPage(object? sender, PrintPageEventArgs e)
     {
         Graphics graphics = e.Graphics ?? throw new InvalidOperationException("The printer is unavailable.");
 
-        using (Font receiptFont = new Font("Consolas", 10F))
-        {
-            float lineHeight = receiptFont.GetHeight(graphics);
-            float verticalPosition = e.MarginBounds.Top;
-
-            // Continue on another page when the receipt reaches the bottom margin.
-            while (printPosition < printLines.Length &&
-                verticalPosition + lineHeight <= e.MarginBounds.Bottom)
-            {
-                graphics.DrawString(printLines[printPosition], receiptFont, Brushes.Black,
-                    e.MarginBounds.Left, verticalPosition);
-
-                printPosition++;
-                verticalPosition += lineHeight;
-            }
-        }
-
-        e.HasMorePages = printPosition < printLines.Length;
+        if (document == null) throw new InvalidOperationException("Open a receipt first.");
+        // Keep the same paper proportions in portrait and landscape printer bounds.
+        float width = Math.Min(e.MarginBounds.Width, e.MarginBounds.Height * 760F / 1000);
+        var bounds = new RectangleF(e.MarginBounds.Left + (e.MarginBounds.Width - width) / 2,
+            e.MarginBounds.Top, width, width * 1000F / 760);
+        // PrintPage bounds use hundredths of an inch; the renderer uses device pixels.
+        bounds = new RectangleF(bounds.X * graphics.DpiX / 100, bounds.Y * graphics.DpiY / 100,
+            bounds.Width * graphics.DpiX / 100, bounds.Height * graphics.DpiY / 100);
+        e.HasMorePages = document.DrawPage(graphics, bounds, printPosition++);
     }
 }

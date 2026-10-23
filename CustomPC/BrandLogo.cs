@@ -22,6 +22,15 @@ public sealed class BrandLogo : PictureBox
     [Browsable(false)]
     public new Image? Image { get => base.Image; set => base.Image = value; }
 
+    // Reuse the same embedded artwork on printed documents, preserving its proportions.
+    internal static void Draw(Graphics graphics, RectangleF bounds)
+    {
+        float scale = Math.Min(bounds.Width / logo.Width, bounds.Height / logo.Height);
+        float width = logo.Width * scale, height = logo.Height * scale;
+        graphics.DrawImage(logo, bounds.X + (bounds.Width - width) / 2,
+            bounds.Y + (bounds.Height - height) / 2, width, height);
+    }
+
     private static Bitmap ReadLogo()
     {
         using Stream stream = typeof(BrandLogo).Assembly.GetManifestResourceStream("CustomPC.Assets.logo.png")!;
