@@ -1,235 +1,74 @@
-# Validation evidence
+# Validation
 
-This page separates executed checks from manual checks. Test counts overlap between runs and must not be added into a unique-test total. The application remains under revision.
+This page describes validation coverage and checks to repeat before a release. It does not certify the current revision or every Windows environment.
 
-## Reading the evidence
+## Build
 
-Entries below record behavior at the time of each run. Later dated entries supersede older UI behavior; earlier results are retained rather than rewritten. In particular, earlier downstream compatibility filtering, Staff charts, page descriptions and the two-line filter chip are historical, not the current interface.
-
-Current implementation as of 23 October 2026 includes Staff operational cards without charts, incompatible builder choices with warnings, inline removable search filters, report thumbnails with text-only CSV, a dedicated stock-adjustment layout and password verification before restore file selection. Restore requires manual relaunch. Documentation cleanup itself was checked against current source and Markdown links; no new runtime, native-dialog, restore, printer or physical DPI checks were executed for that cleanup. Prior executed checks retain their own stated scope and limitations.
-
-## Receipt redesign - 24 October 2026
-
-The application and external receipt harness built with 0 warnings and 0 errors. Rendered the real receipt form at 1040x900 and 640x600 using an isolated database copy, plus paid/unpaid sample documents and a 35-item order spanning four numbered pages. Checked long customer/component names and exercised the actual PrintPage handler against a 300-DPI bitmap; reviewed the resulting paper layout. Preview and printing share ReceiptDocument; payment-aware instructions are shown on the receipt. The later print-margin correction removes text export and uses quarter-inch outer print margins. No live order/stock records were changed. A physical printer, native print dialog and Windows display scaling were not exercised.
-
-## Shop-policy dialogs - 24 October 2026
-
-Built the application and isolated policy harness with 0 warnings and 0 errors. Rendered all three policy readers at normal and compact sizes and scrolled each to its final section; compact readers had no horizontal scrollbar. Exercised all six policy links on login, registration, product details, receipts and order confirmation. Each opened the intended reader and returned without submitting its owner. Cancelling order confirmation returned false. Reviewed login, registration, confirmation, receipt and compact product renders. No order, payment, stock or customer records were created by these checks; the harness used an existing isolated database copy. Physical DPI changes and manual keyboard-only traversal remain separate checks.
-
-## Historical baseline run
-
-**15 October 2026, 16:21 â€” 501 checks passed, 0 failed. Build: 0 warnings, 0 errors.** The external harness operated real WinForms controls against an isolated copy of the saved database. No test accounts, stock or orders were written into the live database.
-
-[Machine-readable report](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/data-folder-build/bin/DataValidation/debug/results-20261015-162152/report.json)
-
-Screen-fit checks covered usable window areas 1536x816, 1366x728, 1280x680 and 1024x680, plus the maximized workspace, where all seven component selectors were checked inside the visible builder. They checked sidebar position, no forced builder horizontal overflow, visible checkout, nested Back/header separation and reaching Case by scrolling. Initial and scrolled renders were reviewed. An intermediate maximized-window clamp exception was found and corrected; the final run passed. Windows display-scale settings were not changed.
-
-Builder checks cover bold labels, Guest button wording, removal of the redundant sign-in message, CPU-platform changes, cleared incompatible motherboard/RAM selections and PSU filtering. The automated Guest flow selected a complete build, logged in as the isolated Customer, confirmed the order, closed its receipt and verified the saved owner/parts after reloading the copied database.
-
-The UI refresh uses rounded buttons with visible focus, lighter tables, responsive product-card widths, separate builder panels and white chart surfaces with short day labels. Runtime renders cover all 16 forms. Admin, Staff, Customer and Guest screens were exercised; Staff inventory actions and hidden Admin pages were checked. Header containment was tested after resizing. The catalog, login, builder, Staff dashboard, inventory and CPU/GPU/Case editor images were visually inspected. Receipt layout rendering did not exercise a physical printer.
-
-Historical result (superseded by the PNG migration below): the icon cleanup retained 18 original Lucide SVGs in Assets/Icons, with licenses and source hashes. IconAssets uses SVG.NET to render vectors directly. All 18 render checks passed; there are no PNG icon files/resources. The obsolete StoreIcons bitmap loader, colour matrix and conversion script were removed. Eye/eye-off rendering, Tab reachability, accessible action labels, text/caret preservation, masking restoration, checkbox removal and no text/button overlap passed. Masked and revealed login renders plus asset-backed sidebar icons were inspected.
-
-The control pass covers padded text/number/date fields, password reveal/remasking without changing the value, styled checkboxes, selected values in all seven part pickers, an opened native CPU dropdown captured with PrintWindow, modal Confirm/Cancel results, table binding, and visible viewport containment for management tables and resized report filters. Login, picker thumbnails, dropdown popup, modal, product editor, Inventory and Reports renders were inspected. Intermediate runs caught a column-sizing exception and table/action overlap; both were corrected before the final passing run. Actual Windows calendar interaction, file/print dialogs, full keyboard-only traversal, Visual Studio Designer and OS DPI scaling remain manual checks.
-
-Coverage also includes seven category layouts: relevant field visibility/enabled state, hidden-field keyboard exclusion, no overlapping inputs, draft preservation across category changes, saved Case normalization and existing-part stock preservation. CPU, GPU and Case renders were inspected. Actual OS DPI checks remain separate.
-
-Coverage: saved Admin login, local photo decoding, catalog rendering, hosted management navigation, table/button separation at normal and 950Ã—650 page sizes, period/greeting separation, mandatory socket/RAM/PSU checks, incompatible Customer checkout rejection, removal of supplier/rules UI/model fields/tables, database reload, and complete ZIP backup/restore. A sandbox-only temporary-folder permission failure was rerun with the required access; the completed run passed.
-
-Database removals were preceded by consistent SQLite backups. Settings/Rules/Suppliers removals preserved other table counts. Supplier-reference cleanup preserved all other product values. Photographs remained beside custompc.db.
-
-## Current rendered examples
-
-These images are runtime control renders from the latest isolated run, not browser mockups or proof of actual Designer interaction. Stock and accounts in the images are snapshot data, not fixed application defaults.
-
-| Screen | Preview |
-| --- | --- |
-| Admin overview | [Open](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/data-folder-build/bin/DataValidation/debug/results-20261015-162152/Overview.png) |
-| Catalog | [Open](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/data-folder-build/bin/DataValidation/debug/results-20261015-162152/Catalog.png) |
-| Inventory | [Open](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/data-folder-build/bin/DataValidation/debug/results-20261015-162152/Inventory.png) |
-| Reports | [Open](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/data-folder-build/bin/DataValidation/debug/results-20261015-162152/Reports.png) |
-| Activity & Backups | [Open](<C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/data-folder-build/bin/DataValidation/debug/results-20261015-162152/Store tools.png>) |
-
-## Historical broader tests
-
-The earlier modern UI revision passed 750 regression checks and 234 modern checks. Those tested Guest checkout ownership after reload, role bypasses, reservations/payment/completion, photo import, chart date boundaries, empty/error states and managed scaling. They also included features/data arrangements that have since changed, so they are historical evidence rather than current full-suite certification.
-
-[Earlier regression JSON](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/custompc-runtime-validation/run-20261014-014617-355-26148/report.json) Â· [Earlier modern JSON](C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703/modern-ui-build/bin/ModernValidation/debug/previews-20261014-014901/report.json)
-
-## Manual checks still open
-
-| Check | Action |
-| --- | --- |
-| Visual Studio Designer | Open the 16 forms with View Designer. Runtime/design-mode construction and a successful Designer MSBuild output target do not prove the Designer UI loads. Base-form design guards were added after the reported errors. |
-| Native file dialogs | Import a valid photo, test Cancel, delete the original and reopen. Select ZIP backup/restore paths through real Windows dialogs. Programmatic operations were checked separately. |
-| Windows DPI | Run at actual 100%, 125%, 150%; check focus, dropdowns, wrapping, scrolling and Save/Back. Earlier managed Scale simulations are separate. |
-| Printer | Print a practice receipt and inspect paper size/page breaks. |
-| External-drive recovery | Save ZIP to a removable drive, restore a practice database and verify records/photos after reopening. |
-| Whole store workflow | Repeat Customer order â†’ Staff payment/assembly/pickup using a separate practice database on the target workstation. |
-
-## Reproduce the focused run on this computer
+Install the .NET SDK required by `CustomPC/CustomPC.csproj` and the Windows desktop development tools. From the repository root on Windows, run:
 
 ```powershell
-$qaRoot = 'C:/Users/Jerald/.codex/visualizations/2026/10/07/01a11539-e782-7ae3-bb38-3eafc37ec703'
-dotnet build "$qaRoot/data-folder-validation/DataValidation.csproj" --artifacts-path "$qaRoot/data-folder-build" -p:UseAppHost=false
-dotnet "$qaRoot/data-folder-build/bin/DataValidation/debug/DataValidation.dll"
+dotnet restore CustomPC/CustomPC.csproj
+dotnet build CustomPC/CustomPC.csproj -c Release
+git diff --check
 ```
 
-The harness expects the prepared Admin credentials and catalog; if saved credentials/catalog change, fixtures must be adapted without resetting live data. Harnesses, reports and safety snapshots are local tooling outside the source project. Keep normal bin/obj build files for Visual Studio.
+A successful build verifies compilation. It does not verify runtime workflows, Visual Studio Designer loading, accessibility, native dialogs or printer output.
 
-### 20 October 2026 â€” report caption and backup layout
+## Use isolated data
 
-Changed the report action to Refresh. Activity & Backups now groups saving and restoring into separate Designer-editable cards, with the password inside Restore and a shorter successful account-check message. Existing restore authentication and replacement confirmation remain in place.
+Run validation against a separate practice database and product-image folder. Do not use operational accounts, orders, payments or inventory as test fixtures.
 
-Executed a separate compiled WinForms preview against a copied database: 16 checks passed across 1100Ã—688, 850Ã—650 and 760Ã—600 client sizes (backup/restore/password/status/table containment plus report caption). Reviewed the rendered narrow layout and corrected the activity-header row height. Preview files are outside the source project in `backup-ui-check/build/bin/Check/debug/preview` under the external validation workspace. This check did not execute file dialogs, restore operations, Visual Studio Designer or changes to Windows display scaling.
+`CUSTOMPC_DATABASE_PATH` selects an alternate database. For example, in PowerShell:
 
-The running application locked the normal build executable; validation used a separate output folder. Close the running app and rebuild to display the changed source.
+```powershell
+$env:CUSTOMPC_DATABASE_PATH = Join-Path $env:TEMP ('CustomPC-validation-' + [guid]::NewGuid().ToString('N') + '/custompc.db')
+dotnet run --project CustomPC/CustomPC.csproj
+```
 
+Complete setup with practice credentials. Close the application before clearing the override:
 
-### 20 October 2026 — PNG icons and Svg package removal
+```powershell
+Remove-Item Env:/CUSTOMPC_DATABASE_PATH
+```
 
-Converted all 20 Lucide UI icons to transparent 192×192 PNGs, preserving the license and original source hashes alongside PNG hashes. Removed the SVG assets and Svg package reference. IconAssets now uses System.Drawing with cached PNGs, alpha-based tinting and high-quality bilinear downscaling; no conversion tool is included in the project. Product photos and the live database were unchanged.
+Keep test photographs beside the selected database in `ProductImages`. Use the application's backup and restore operations when testing recovery; copying an open SQLite database file alone may omit pending changes.
 
-Separate build: zero warnings/errors. Executed 198 checks against a copied database: all 20 PNG resources present, no Svg assembly reference, 180 icon rendering/colour checks (20 icons × 3 sizes × 3 colours), and the existing 16 backup-layout/report-caption checks. Inspected the PNG contact sheet and rendered login screen, including the eye icon. NuGet's resolved package list contains no Svg package. Actual Visual Studio Designer and Windows display-scale changes were not tested.
+## Previously reported coverage
 
-### 20 October 2026 — inventory filters, empty state and Refresh placement
+Development checks have exercised the following areas using isolated data and programmatic WinForms rendering:
 
-Inventory now uses Designer-editable layout containers for its header, filters, table surface and bottom actions. Refresh sits at the top right beside filters, matching Reports. The table is hidden for an empty result so only the reusable centred empty state is shown. Clear filters also resets Include archived. Dropdown popups match their field width; table header minimum widths now account for measured label text.
+- Account validation, role restrictions and ownership of customer orders.
+- Component compatibility, invalid-checkout rejection, reservations and order processing.
+- Product photographs, inventory tables, report output and database reload.
+- Responsive layouts, empty states, search clearing and dashboard filter navigation.
+- Automatic view updates, retained filters and table selection.
+- Database and photograph backup and restore handling.
+- Shared receipt preview and paginated rendering, including long names and paid/unpaid instructions.
+- Policy readers, policy links and cancellation of order confirmation.
 
-Separate build: zero warnings/errors. The focused runner passed 222 checks total, including 24 inventory checks across 1366×728, 1000×650 and 850×600 client sizes: single empty state, centring, Refresh parent/placement, visible action containment, popup width and restoring populated rows. Reviewed empty and populated inventory renders. This run used a copied database and did not validate physical display-scale changes or Visual Studio Designer.
+The development harnesses and their reports are not included in this repository. These are historical coverage summaries, not independently reproducible test results or proof that the current revision passes. Counts from separate runs overlap and are intentionally omitted. Later source changes require fresh validation.
 
-### 21 October 2026 — login branding, password rules and activity clarity
+Programmatic renders can reveal clipping and layout problems, but do not establish that native controls, physical input or actual display scaling work correctly.
 
-Login uses the supplied Assets/backdrop.png under a dark green tint, at its original pixel dimensions, centred and clipped by the panel without scaling. Brand and hero labels use the bundled Righteous family explicitly with compatible text rendering. Removed the login footer below the account/guest buttons.
+## Manual release checklist
 
-New or changed passwords must contain 12–128 characters, uppercase and lowercase letters, a number and a non-whitespace symbol. Setup and account saving share ValidateNewPassword; sign-in still accepts existing passwords. Historical accounts are not reset. Form labels describe the combination requirement.
+Record the commit, application version, Windows version, .NET version and relevant test conditions in the release report. Use generic environment descriptions; do not publish personal device identifiers, account credentials, customer data or private filesystem paths.
 
-New audit entries describe order status/customer/total, product price/on-hand/archive state, account role/state, payment amount/order, stock movement quantity/reason and build component count. These are saved-state summaries, not full before/after diffs. Old audit text is preserved because its missing historical values cannot be reconstructed reliably. Activity rows wrap and double-click opens full details.
+| Area | Check |
+| --- | --- |
+| Visual Studio Designer | Open forms and reusable controls with View Designer. Confirm they load without accessing the operational database. |
+| Window layout | Resize and maximize the workspace. Check compact navigation, wrapping labels, scrolling, empty states and reachable actions. |
+| Display scaling | Test actual Windows scaling at 100%, 125% and 150% where supported. Check dropdowns, text, focus indicators and dialog bounds. |
+| Keyboard and accessibility | Navigate without a mouse. Check tab order, accessible names, password visibility, search clearing and chart navigation. Use a screen reader where available. |
+| Accounts and permissions | Exercise Admin, Staff, Customer and Guest separately. Verify restricted screens and operations remain blocked. |
+| Catalog and builder | Browse products, inspect details, retain draft choices across navigation and verify compatibility warnings. Confirm invalid builds cannot be ordered. |
+| Order workflow | Create a practice order as Customer; record payment, assembly and pickup as Staff. Verify ownership, reservations, expiry and saved state after reopening. |
+| Search and filters | Test matching and no-result queries, clear actions, dashboard constraints and preserved category/status filters. |
+| Automatic updates | Change practice data and confirm visible views update without interrupting modal editors or losing valid selection. |
+| Reports | Check date boundaries, role visibility, totals and CSV output. Image columns should not appear in CSV files. |
+| Native photo dialogs | Import a supported image, cancel selection, remove the original source file and reopen the saved product. |
+| Backup and recovery | Back up a practice store with photographs, restore through native dialogs, relaunch and verify records and images. Test removable storage separately. |
+| Receipts | Inspect preview and print a practice receipt. Check margins, wrapping, page breaks, totals and payment instructions. Bitmap rendering does not verify a physical printer. |
+| Policy dialogs | Open each policy link, scroll through the content and return to the owner. Cancelling confirmation must not submit an order. |
 
-Separate build: zero warnings/errors. Focused runner: 234 checks passed against a copied database, including six invalid-password cases, one valid combination, saved readable account activity, exclusion of the password from activity, both Righteous font families and removal of the footer. Reviewed the rendered final login screenshot. Actual Visual Studio Designer and physical display-scale settings were not tested.
-
-Login backdrop follow-up: fixed the source photograph's 171-DPI metadata shrinking it inside the bitmap by drawing with explicit pixel source/destination rectangles. The panel now crops the photo at native size, enlarging proportionally only when needed to cover a larger panel. Set the logo PictureBox background to Transparent in Designer and runtime. Separate build passed with zero warnings/errors; 235 focused checks passed, including logo transparency. Visually reviewed the final login render: photo reaches every panel edge and logo has no solid rectangle behind it.
-
-### 21 October 2026 — requested administrator credential and order cleanup
-
-At the owner's request, backed up Database/custompc.db outside the source tree, updated the existing admin@gmail.com account to the supplied new password using salted PBKDF2-SHA256 (600,000 iterations), and cleared 3 orders, 3 builds and 1 payment. All 42 product records and stock values were compared before/after and remained unchanged; all 4 accounts and stock movement history were preserved. Database integrity check returned OK. Cleared the admin login throttle only.
-
-Password validation now rejects a password equal to its account email (ignoring letter case and outer whitespace) in setup, registration/account saves and login. Changing an account email while keeping a password equal to the new email also requires a new password. No automatic password-change dialog was added.
-
-Separate build: zero warnings/errors. The copied-database runner passed its 235 checks plus assertions that the old credential fails without a session, the new credential signs in as Admin, orders/builds/payments are empty, and an otherwise complex password matching its email is rejected. README and Store guide list the updated prepared credentials. Backup: before-account-order-cleanup-20261021-090218.db in the external validation workspace.
-
-### 21 October 2026 — product specifications and chart empty states
-
-Product cards and catalog details now open ProductDetailsForm, with a separate Designer file: product name, price/availability, local photo, scrollable specification rows and Close. Known GPU attributes receive clear labels (graphics memory, colour, cooling, variant, recommended PSU and length); other saved specifications remain intact. No product specifications or stock were changed in the database. EmptyStateControl now centres its icon/message/detail/action as one compact group; empty charts include their title so sales and top-parts panels are distinguishable.
-
-Separate build passed; the existing 235-check focused suite passed. Added rendered previews for the RTX 4070 SUPER specifications dialog and a no-payments chart, and visually inspected both. These additional visual previews are not counted as automated assertions. Visual Studio Designer was not opened.
-
-### 21 October 2026 — action icons and catalog Refresh
-
-Added PNG icons for receipt, edit product/account, movement history and CSV export actions. Pencil was downloaded from Lucide and converted outside the source project; no Svg package was added to CustomPC. Catalog Refresh now sits at the upper right of the filter row and the old bottom refresh row no longer reserves space. Separate build: zero warnings/errors; 245 focused checks passed, including all 21 PNGs and the catalog Refresh placement. Visually reviewed catalog and inventory renders. Corrected a malformed separator in product-card availability text found during review.
-
-### 21 October 2026 — structured product specification table
-
-Replaced the specifications bullet list with a two-column, read-only table with subtle row separators and wrapped values. Product photo and price/stock sit to the left; stock is shown once. ProductSpecifications translates the existing saved text into category-aware attribute names, separates CPU cores/threads when explicit, and retains unrecognised text as Additional detail. Custom `Label: value` entries are supported. No catalog data or stock was changed and no new hardware facts were inferred.
-
-Separate build passed with zero warnings/errors. Focused runner passed 288 checks, including preservation of the recorded details for all 42 products and CPU cores/threads mapping. Visually reviewed CPU dialog at 720×500 and GPU at 900×650; longer specifications remain accessible by scrolling. Visual Studio Designer and actual OS display-scale changes were not tested.
-
-### 21 October 2026 — Admin overview summary and stock attention
-
-Added four Admin cards: confirmed payment amount, distinct paid orders in the selected local-date period, current low-stock product count and current out-of-stock count. Added Stock attention with a clear no-alert state and filtered inventory links. Admin's charts share one row, have persistent headings and retain chart selection/empty-state actions. Removed Admin's duplicate bottom navigation buttons. Staff retains operational charts and its existing navigation. Fixed malformed inventory/stock chart title separators.
-
-Separate build passed with zero warnings/errors; focused runner passed 292 checks including summary-card and stock-attention visibility at 1366×800 and 1000×680. Visually reviewed the smaller Admin overview render. These checks used a database copy; no live sales, stock or accounts were modified. Actual Visual Studio Designer, physical OS scaling and a complete Staff interaction regression were not performed in this change.
-
-### 21 October 2026 — Staff overview and remaining operational icons
-
-Staff now uses the compact three-chart layout with four count-only cards: incoming orders for the selected period, current work queue, ready-for-pickup orders and current stock alerts. Added filtered stock-attention links and removed duplicate bottom navigation buttons. Sales amounts/Admin report access remain unavailable. Corrected malformed category-selection separators and angled stock-chart labels for narrower panels.
-
-Added PNG-backed icons to Adjust stock, Record adjustment, Confirm store payment and Next order stage. The new Lucide arrow was converted outside the project; CustomPC still has no Svg package.
-
-Separate build: zero warnings/errors. Focused suite: 303 checks passed, including all 22 PNGs, Staff cards containing no sales amounts, and Staff report access remaining disabled. Visually reviewed Staff overview at 1100×750, stock-adjustment dialog and empty Orders screen with enabled/disabled icon styles. All QA accounts/data stayed in the copied database. Full payment/stage processing and physical Windows display-scale settings were not retested in this UI change.
-
-### 21 October 2026 — LiveCharts2 replaces ScottPlot
-
-Replaced the ScottPlot.WinForms reference with LiveChartsCore.SkiaSharpView.WinForms 2.0.4. NuGet's resolved dependency list and the compiled assembly reference check confirm ScottPlot is absent. DashboardChart still presents a database-free Designer placeholder and constructs runtime controls only when data exists. Existing backend date calculations, permissions, chart-selection targets and empty-state actions were retained.
-
-The chart layer now uses a green line with light area fill, rounded bars, a donut with an external legend and horizontal stacked stock bars. Axis lines/grids are subtle; date labels are spaced and full product names remain available through tooltips and the labelled selection control. Clicking series points opens the corresponding target; the selection dropdown and Open selected button remain available for keyboard users. Clearing role/account data disposes the runtime chart and clears all targets.
-
-Separate build: zero warnings/errors. Focused runner: 317 checks passed, including all six runtime chart constructions, six labelled navigation actions, disposal/clearing, absence of ScottPlot references and previous Admin/Staff restrictions. Inspected synthetic six-chart render plus real copied-data Admin and Staff renders. Synthetic sales/queue values exist only in the external QA tool, never in the store database. Direct physical mouse-hit testing, Visual Studio Designer and OS scaling changes remain manual checks.
-
-### 21 October 2026 — Orders duplicate empty state
-
-Moved the reusable Orders empty state inside the grid's body and resize it with that body. The generic grid painter skips its fallback message when a dedicated empty-state child is visible. Empty-state content is now selected using the actual row count instead of inherited Visible (which is false before the form is shown), fixing the initial Customer message as well. No filters, button placements, permissions or database records were changed.
-
-Separate build: zero warnings/errors. Twelve focused checks passed for Admin and Customer at 1100×688, 1660×850 and 850×600, checking empty-state ownership/bounds and the initial Customer message. Visually reviewed wide Admin and narrow Customer renders: one centred empty state, no duplicate fallback text. QA used a database copy; Visual Studio Designer and physical OS scaling were not tested.
-
-### 21 October 2026 — Catalog empty-state sizing
-
-The Catalog empty state now docks in the same layout cell as the product list, with only the matching view visible, rather than retaining fixed coordinates. The initial sibling-overlay attempt failed rendered review and was replaced with this shared layout cell. Message setup uses the result row count so it also works before the form becomes visible. Retry uses the same fitted overlay. Clear filters was verified to hide the empty state and restore product cards.
-
-Separate build: zero warnings/errors. Nine focused checks passed across 1660×850, 1100×688 and 850×600 client sizes for overlay bounds/visibility, message and Clear filters. Inspected the wide rendered Catalog empty state. QA used a database copy; live data was unchanged.
-
-## 2026-10-22 shared UI refresh
-
-- Shared controls now use Roboto body text, darker green primary actions with white text, quieter borders, and visible keyboard focus. Righteous remains the display face.
-- Tables use lighter headers, consistent rows, labelled status badges, readable monetary columns and explicit Pay before wording. Orders filters have a minimum gap above the table.
-- Catalog cards have clearer prices, stock labels and action spacing; login label/field spacing was adjusted. Sidebar selection includes a visible marker.
-- External build passed with zero warnings/errors. The isolated WinForms harness rendered 25 screens; login, catalog, builder, inventory, Orders and Staff overview bitmaps were visually reviewed. Final focused harness passed 19 checks covering Admin/Staff/Customer/Guest catalog and chart visibility at 1366x768 and 1100x700, direct operational-role catalog rejection, and Orders filter spacing.
-- All harness data and rendered images are outside the source project. Live database was not modified. These checks use DrawToBitmap; Visual Studio Designer, actual Windows 125%/150% scaling, native dialogs and printer output were not tested in this pass.
-
-## 2026-10-22 structural UI overhaul
-
-Replaced the former fixed workspace composition with adaptive navigation, reusable list workspaces, editor sheets, category navigation, compact product rows, component cards, a responsive login and stacked backup cards. This supersedes the earlier shared-style-only pass above. See ADAPTIVE_UI.md for the researched direction and implementation map.
-
-Executed against an isolated database copy and copied product photographs, outside the source project:
-
-- Build: zero warnings and zero errors.
-- Full UI harness: 98 responsive and permission checks passed. Admin, Staff, Customer and Guest were exercised at 1440x900, 1100x720 and 800x600. Checks cover navigation breakpoints, role-specific catalog/chart visibility, direct Admin/Staff catalog rejection, build-draft preservation through catalog/builder navigation, all seven categories and filter recovery, empty catalog views, category-specific editor fields at 860/520 widths, pinned Save reachability, compact login and stacked backups without horizontal page scrolling.
-- Final focused harness: 35 additional checks passed for list-page headers at 1440/1100/720 widths, visible report summaries, fitted Refresh/Back commands, compact-rail accessible names and programmatic focus. It also rechecked Customer inventory restriction and Staff chart removal.
-- Captured 25 primary screens and responsive variants. Reviewed rendered login, registration, product editor, catalog (wide and compact), builder, specifications, inventory, Orders, reports, backups and role overviews; repaired issues found in dropdown bitmap clipping, small builder validation, report headers and notices. The review uses DrawToBitmap, not screenshots of a manually operated desktop session.
-- Search is debounced; card layout is batched. Tables/form painting are double buffered, and hidden overview charts are not reconstructed behind hosted pages. No benchmark or speed multiplier is claimed.
-- PerMonitorV2 is configured. Actual OS DPI changes at 125%/150%, native Visual Studio Designer, Narrator, physical keyboard-only navigation, native file dialogs and printers remain manual checks. Programmatic focus is not a substitute for that testing.
-- Live store data was not changed by these tests. QA source, build output and image artifacts remain outside the source project.
-
-## 2026-10-22 visual refinement of the adaptive UI
-
-Working text now uses Segoe UI, with Righteous retained for the CustomPC wordmark. Emerald primary actions, quieter category navigation and Details actions, separated metric values/captions, tighter workspace headers and consistent focus outlines replace the earlier typography and button treatment. Editor dialogs have focused window chrome. Compact catalog category tabs now retain full names and calculate the rows they need.
-
-- External build passed with zero warnings/errors; git diff --check passed.
-- The full responsive/permission harness passed 98 checks during this refinement. The final header, font, role and programmatic-focus harness passed 45 checks, then passed again after the compact category-label correction.
-- Reviewed current rendered wide/compact catalog, Staff overview, reports, login, inventory and product editor. Captured primary screens and responsive variants in the external refined-ui-20261022 directory. The preview archive contains PNG files only.
-- Tests used copied database/photos; live data was unchanged. DrawToBitmap and programmatic focus do not verify native Visual Studio Designer, physical keyboard navigation, actual Windows 125%/150% display scaling, native file dialogs or printer output. Those checks remain manual.
-
-## 2026-10-22 automatic views, artwork and label sizing
-
-Removed visible manual Refresh actions from Catalog, Inventory, Orders, Reports and Activity & Backups. Visible read-only pages check the database/WAL timestamp and length every two seconds, reloading only when saved data changes. Filters, selected record and table scroll are retained. Modal dialogs pause automatic reloads; Orders and overview retain their expiry timers. Report dates now trigger report updates. Failed automatic checks are logged; existing catalog Retry remains available.
-
-Header/action buttons measure their runtime text with icon space. Icon labels now align left after the icon rather than centering again in the remaining space. Removed the obsolete sidebar menu-positioning method, which used sidebar coordinates inside the nested navigation panel and added a second header offset. Dashboard metric drawing now scales its padding and line positions with DPI. The shopping banner uses the existing backdrop.png with proportional cropping; sidebar.png supplied by the user is embedded and rendered behind the navigation.
-
-- External build: zero warnings/errors. git diff --check passed.
-- Responsive and role harness: 98 checks passed with DPI-aware navigation assertions and the restored login layout expectation.
-- Additional focused harness: 10 checks passed, including an external SQLite change appearing in an open Inventory view after polling, preserved search, absent Refresh actions on five views, receipt-label space and top-aligned expanded navigation after opening Orders. The final focused runner passed again after the modal-timer and selection-preservation adjustments.
-- Visually reviewed rendered Orders, Admin sidebar at 1920 client width, Guest banner, Admin metric cards and compact navigation. Captures and copied database/photos remain in the external automatic-ui-20261022 QA folder. The live database was unchanged. Actual OS scale switching, native Designer and physical input checks were not performed.
-
-## 2026-10-22 text clipping audit
-
-Rendered review found the Builder description overlapping the bottom of Back, a total row shorter than its two text lines, the account password label needing two lines, and the product editor description needing more height at narrow widths. Builder header bounds now scale consistently and the total row measures its text. Shared workspace titles/descriptions/footer rows and editor headings/labels now measure wrapped text. Product cards scale their rows and grow for complete product names. Narrow editors use a vertical flow and clear retained horizontal offsets.
-
-The broad responsive harness passed 98 checks during the audit. After the final corrections, 24 focused clipping checks passed for account labels at 580/440 widths, Inventory/Reports/Orders headings at 1100/720, Builder totals and Back at 1440/800, and all six GPU names. Reviewed rendered Builder, GPU catalog and narrow account editor; fixed the horizontal offset found in that last render and reran the focused checks. External build passed with zero warnings/errors; git diff --check passed. Tests used copied data, and live records were unchanged. Physical display-scale switching and native Designer checks remain unexecuted.
-
-### Inventory photo-column regression
-
-The runtime log identified a NullReferenceException in DataGridViewBand.MinimumThickness at InventoryForm.LoadRows while setting the price column's minimum width. Paused fill-column sizing while applying thumbnail and price widths, then restored it. External build passed with zero warnings/errors. Copied-data checks passed for 43 thumbnail cells for Admin and Staff and for opening Inventory through DashboardForm.OpenScreen for both roles. Live data was unchanged.
-
-### Builder checkout review
-
-Added category/model/price rows for all seven selections, integrated-graphics and missing-selection states, selection progress, socket/memory status and the existing backend minimum PSU calculation beside selected PSU capacity. The review scrolls independently while the total and checkout action remain outside it. Reuses existing compatibility/checkout logic. Focused copied-data checks passed for breakdown creation, repeated selection changes without disposing validation, and checkout reachability at 1600/800 client widths. Reviewed the wide render. External build passed with zero warnings/errors; live data was not changed.
-
-### Incompatible builder options
-
-Builder dropdowns now retain all active, in-stock parts. A downloaded warning PNG and an Incompatible label mark options with socket, memory or PSU conflicts against the other current selections. The selected field retains the warning icon and exposes the reason through AccessibleDescription. Named-part explanations appear above the price breakdown. Existing CheckBuild and ordering permissions still block invalid checkout. Tests on copied data verified counts across all seven categories, warning callbacks for an AM4/LGA1700 mismatch, preserved motherboard choice after selecting DDR5 against DDR4, named conflict details, disabled invalid checkout and popup operation. Visually reviewed the conflict render. Build passed with zero warnings/errors; live records were unchanged.
-
-## 2026-10-23 searchable fields and dashboard filter chip
-
-Orders now shows the dashboard date/queue constraint inside the search field. Removed the separate caption and Clear dashboard filter button. All four search fields (Orders, Inventory, Users, Catalog) show a keyboard-accessible × when text or a search filter is present; Escape also clears it. Orders clears its dashboard constraint together with the query. Ordinary text clearing leaves other category/status filters in place. The date filter remains a typed OrderViewFilter rather than editable query text, preserving its date and role checks.
-
-Copied-data validation passed 23 checks for trimmed/case-insensitive matching input, no-result input, × restoring rows, visibility of clear actions, a future payment-date constraint yielding no rows, filter-only clearing and debounced Catalog results. Reviewed the rendered Orders chip. External build passed with zero warnings/errors. Live data was unchanged; physical keyboard and OS scale switching were not exercised.
+Mark each check as passed, failed or not run, and describe failures and remaining limitations. Do not present unexecuted checks as completed.
