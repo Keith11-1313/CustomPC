@@ -113,6 +113,22 @@ public sealed partial class AppStore
             throw new InvalidOperationException("Choose a category and enter a positive price.");
         }
 
+        // Compare product identity, not prices or stock; edits exclude their own saved record.
+        static string Normalize(string value) => string.Join(" ", value.Split((char[]?)null,
+            StringSplitOptions.RemoveEmptyEntries));
+        string name = Normalize(part.Name);
+        string brand = Normalize(part.Brand);
+        Part? duplicate = Parts.FirstOrDefault(saved => saved.Id != part.Id &&
+            string.Equals(saved.Category, part.Category, StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(Normalize(saved.Brand), brand, StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(Normalize(saved.Name), name, StringComparison.OrdinalIgnoreCase));
+        if (duplicate != null)
+        {
+            throw new InvalidOperationException(duplicate.Archived
+                ? "This product already exists in archived parts. Select Include archived and edit the existing part to restore it."
+                : "This product already exists. Edit the existing part instead.");
+        }
+
         if (part.Stock < Reserved(part.Id))
         {
             throw new InvalidOperationException("Stock cannot be below the reserved quantity.");
