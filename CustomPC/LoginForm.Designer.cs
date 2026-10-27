@@ -128,8 +128,8 @@ partial class LoginForm
         Controls.Add(login);
         register = new LinkLabel();
         register.Name = "register";
-        register.Text = "New to CustomPC? Create account";
-        register.LinkArea = new LinkArea(register.Text.IndexOf("Create account", StringComparison.Ordinal), "Create account".Length);
+        register.Text = "New to CustomPC? Create an account";
+        register.LinkArea = new LinkArea(register.Text.IndexOf("Create an account", StringComparison.Ordinal), "Create an account".Length);
         register.Font = new Font("Segoe UI", 10.5F);
         register.ForeColor = StoreTheme.Muted;
         register.LinkColor = StoreTheme.Action;

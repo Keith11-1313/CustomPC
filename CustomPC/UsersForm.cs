@@ -4,6 +4,7 @@ namespace CustomPC;
 
 public partial class UsersForm : StoreWindow
 {
+    private readonly Button resetPassword = new() { Name = "resetPassword", Text = "Reset password", BackColor = Color.White };
     public UsersForm()
     {
         InitializeComponent();
@@ -15,7 +16,7 @@ public partial class UsersForm : StoreWindow
 
         var workspace = new WorkspacePage { Name = "workspace" };
         workspace.Bind(this, heading, back, "Manage store access and account roles.", grid,
-            null, new[] { add, edit }, (searchLabel, search));
+            null, new[] { add, edit, resetPassword }, (searchLabel, search));
         workspace.AddFilterOption(archived);
 
         if (!AppStore.Current.IsAdmin)
@@ -28,6 +29,17 @@ public partial class UsersForm : StoreWindow
         archived.CheckedChanged += FiltersChanged;
         add.Click += AddClicked;
         edit.Click += EditClicked;
+        resetPassword.Click += (_, _) =>
+        {
+            try
+            {
+                AppStore.Current.Refresh(); ValidateAccess(AppStore.Current);
+                using var dialog = new ResetPasswordForm(Ui.RequireSelection(grid));
+                dialog.ShowDialog(this);
+                LoadRows();
+            }
+            catch (Exception error) { Ui.ShowError(this, error); }
+        };
         LoadRows();
     }
 
@@ -120,6 +132,7 @@ public partial class UsersForm : StoreWindow
     {
         add.Enabled = store.IsAdmin;
         edit.Enabled = store.IsAdmin;
+        resetPassword.Enabled = store.IsAdmin;
 
         if (!store.IsAdmin)
         {

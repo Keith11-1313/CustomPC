@@ -61,7 +61,7 @@ public sealed partial class AppStore
             string action = reader.GetString(2) switch
             {
                 "CompleteSetup" => "Store set up", "CreateSampleData" => "Demo data created",
-                "SaveUser" => "Account saved", "SavePart" => "Part saved",
+                "ResetUserPassword" => "Password reset", "SaveUser" => "Account saved", "SavePart" => "Part saved",
                 "AdjustStock" => "Stock adjusted", "CreateOrder" => "Order confirmed",
                 "ConfirmPayment" => "Payment recorded", "AdvanceOrder" => "Order stage updated",
                 "CancelOrder" => "Order cancelled", "ExpireOrders" => "Unpaid orders expired",

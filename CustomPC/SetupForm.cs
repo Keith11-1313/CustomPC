@@ -9,7 +9,11 @@ public partial class SetupForm : StoreWindow
         var sheet = new EditorSheet { Name = "editorSheet" };
         sheet.Bind(this, heading, back, save, "Create the first administrator for CustomPC.", false,
             (fullNameLabel, fullName), (emailLabel, email), (passwordLabel, password), (confirmLabel, confirm));
+        sheet.UseCompactSpacing();
+        password.MaxLength = confirm.MaxLength = 128;
+        sheet.AddFieldHint(password, PasswordGuidance.Requirements);
         sheet.AddOption(help);
+        ClientSize = new Size(580, 640);
         save.Click += SaveButton_Click;
         back.Click += BackButton_Click;
     }

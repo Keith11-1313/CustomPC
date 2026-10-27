@@ -15,6 +15,17 @@ public partial class LoginForm : StoreWindow
         privacy.Name = "loginPrivacyLink"; privacy.AutoSize = false;
         privacy.TextAlign = ContentAlignment.MiddleCenter;
         authSurface.Controls.Add(privacy);
+        var forgot = new LinkLabel { Name = "forgotPassword", Text = "Forgot password?", AutoSize = false,
+            TextAlign = ContentAlignment.MiddleRight, LinkColor = StoreTheme.Action,
+            ActiveLinkColor = StoreTheme.Ink, VisitedLinkColor = StoreTheme.Action,
+            Font = AppFonts.Body(10), UseMnemonic = false };
+        forgot.LinkClicked += (_, _) =>
+        {
+            using var help = new StoreDialog("Reset your password",
+                "For help accessing your account, visit the CustomPC service counter.\n\nPlease provide the name and email address associated with your account. Our team will verify your identity before assisting with a password reset.");
+            help.ShowDialog(this);
+        };
+        authSurface.Controls.Add(forgot);
         ApplyBrandAppearance();
         Load += (_, _) => RestoreLoginLayout();
         SizeChanged += (_, _) => { if (IsHandleCreated) RestoreLoginLayout(); };
@@ -36,7 +47,11 @@ public partial class LoginForm : StoreWindow
         heading.SetBounds(Px(32), Px(42), width, Px(60));
         emailLabel.SetBounds(Px(32), Px(144), width, Px(24));
         email.SetBounds(Px(32), Px(176), width, Px(44));
-        passwordLabel.SetBounds(Px(32), Px(244), width, Px(24));
+        var forgot = authSurface.Controls["forgotPassword"];
+        int forgotWidth = forgot == null ? 0 : TextRenderer.MeasureText(forgot.Text, forgot.Font).Width + Px(8);
+        passwordLabel.TextAlign = ContentAlignment.MiddleLeft;
+        passwordLabel.SetBounds(Px(32), Px(244), Math.Max(1, width - forgotWidth - Px(12)), Px(24));
+        forgot?.SetBounds(Px(32) + width - forgotWidth, Px(244), forgotWidth, Px(24));
         password.SetBounds(Px(32), Px(276), width, Px(44));
         login.SetBounds(Px(32), Px(354), width, Px(48));
         register.SetBounds(Px(32), Px(422), width, Px(34));

@@ -135,6 +135,34 @@ public sealed partial class AppStore
         }
     }
 
+    // Assisted recovery changes only the password and its login throttle, atomically.
+    public void ResetUserPassword(string userId, string newPassword)
+    {
+        using var connection = database.OpenConnection();
+        using var transaction = connection.BeginTransaction();
+        try
+        {
+            LoadData(connection);
+            RequireAdmin();
+            UserAccount account = Users.FirstOrDefault(user => user.Id == userId)
+                ?? throw new InvalidOperationException("The selected account no longer exists.");
+            if (account.Archived) throw new InvalidOperationException("Restore this account before resetting its password.");
+            ValidateNewPassword(newPassword, account.Email);
+            account.PasswordHash = HashPassword(newPassword);
+            using var command = connection.CreateCommand();
+            command.Transaction = transaction;
+            command.CommandText = "DELETE FROM LoginAttempts WHERE Key = $key";
+            command.Parameters.AddWithValue("$key", LoginKey(account.Email));
+            command.ExecuteNonQuery();
+            SaveData(connection, transaction);
+        }
+        catch
+        {
+            UndoFailedChange(connection, transaction);
+            throw;
+        }
+    }
+
     // Apply only when creating/changing a password. Existing accounts can still sign in.
     public static void ValidateNewPassword(string password, string? email = null)
     {
