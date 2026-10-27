@@ -183,7 +183,7 @@ public partial class CatalogForm : StoreWindow
         }
 
         Ui.Bind(grid, table);
-        catalogWorkspace?.SetResults(table.Rows.Count, "components  •  Prices in PHP");
+        catalogWorkspace?.SetResults(table.Rows.Count, "components");
         products.ResumeLayout(true);
         FitProductCards();
         emptyProducts.Visible = table.Rows.Count == 0;
