@@ -469,7 +469,7 @@ public partial class DashboardForm : StoreWindow
         chartActions.Visible = store.IsStaff;
         adminSummary.Visible = stockAttention.Visible = operational;
         FitWorkspace();
-        chartSummary.Visible = store.IsAdmin;
+        chartSummary.Visible = false;
         viewQueueOrders.Text = store.IsAdmin ? "View paid parts orders" : "View open orders";
         viewPeriodOrders.Text = store.IsStaff ? "View received orders" : "View period orders";
         viewStock.Text = store.IsStaff ? "View inventory" : "View current inventory";
@@ -551,7 +551,7 @@ public partial class DashboardForm : StoreWindow
             stockAttentionText.Text = low + unavailable == 0 ? "No low-stock or out-of-stock products." : $"Products needing stock: {low + unavailable:N0}";
             lowStockAction.Text = $"Low stock ({low})";
             outOfStockAction.Text = $"Out of stock ({unavailable})";
-            chartSummary.Text = $"{data.FirstDate:MMM d}–{data.LastDate:MMM d}: PHP {data.Sales.Sum(value => value.Value):N2} confirmed payments. Stock levels reflect current inventory.";
+            chartSummary.Text = "";
             trendChart.EmptyActionText = "Change period";
             distributionChart.EmptyActionText = "View orders";
             stockChart.EmptyActionText = "Add products";
