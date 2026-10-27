@@ -16,6 +16,22 @@ public class EditorSheet : UserControl
         compactSpacing = true;
         Reflow();
     }
+    public void FitOwnerHeightToContent(Form owner)
+    {
+        Reflow();
+        layout.PerformLayout();
+        int contentHeight = fields.Controls.Cast<Control>().Where(control => control.Visible)
+            .Sum(control => control.Height + control.Margin.Vertical) + fields.Padding.Vertical;
+        int requiredHeight = contentHeight + (int)layout.RowStyles[0].Height +
+            (int)layout.RowStyles[2].Height + layout.Padding.Vertical;
+        Rectangle workArea = Screen.FromControl(owner).WorkingArea;
+        int frameHeight = owner.Height - owner.ClientSize.Height;
+        owner.ClientSize = new Size(owner.ClientSize.Width,
+            Math.Min(requiredHeight, workArea.Height - frameHeight));
+        Reflow();
+        owner.Location = new Point(owner.Left,
+            workArea.Top + Math.Max(0, (workArea.Height - owner.Height) / 2));
+    }
     public EditorSheet()
     {
         layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));

@@ -51,6 +51,7 @@ public partial class RegisterForm : StoreWindow
         sheet.AddOption(agreement);
         FitAgreement();
         ClientSize = new Size(580, 640);
+        Shown += (_, _) => sheet.FitOwnerHeightToContent(this);
         save.Enabled = false;
         policyAgreement.CheckedChanged += (_, _) => save.Enabled = policyAgreement.Checked;
         save.Click += SaveButton_Click;
