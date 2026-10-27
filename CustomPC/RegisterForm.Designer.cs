@@ -72,7 +72,7 @@ partial class RegisterForm
         passwordLabel.Location = new Point(32, 264);
         passwordLabel.Size = new Size(480, 28);
         passwordLabel.TabIndex = 6;
-        passwordLabel.Text = "Password (12+; Aa, number, symbol)";
+        passwordLabel.Text = "Password";
         passwordLabel.UseMnemonic = false;
         Controls.Add(passwordLabel);
         password = new StoreTextField();
