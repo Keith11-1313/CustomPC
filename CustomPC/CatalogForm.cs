@@ -60,11 +60,21 @@ public partial class CatalogForm : StoreWindow
         bool compact = available < 700 * DeviceDpi / 96F || products.ClientSize.Height < 440 * DeviceDpi / 96F;
         int columns = compact ? 1 : Math.Max(1, available / 302);
         int width = Math.Max(240, available / columns - 16);
-        foreach (ProductCard card in products.Controls.OfType<ProductCard>())
+        ProductCard[] cards = products.Controls.OfType<ProductCard>().ToArray();
+        products.SuspendLayout();
+        foreach (ProductCard card in cards)
         {
+            card.SetMinimumNameHeight(0);
             card.UseCompactLayout(compact);
             card.Width = width;
         }
+        // Match only neighboring cards; a long title in another row must not add empty space here.
+        foreach (ProductCard[] row in cards.Chunk(columns))
+        {
+            int nameHeight = row.Max(card => card.NameRowHeight);
+            foreach (ProductCard card in row) card.SetMinimumNameHeight(nameHeight);
+        }
+        products.ResumeLayout(true);
     }
 
     private void FilterChanged(object? sender, EventArgs e)

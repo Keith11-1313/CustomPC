@@ -7,6 +7,13 @@ public partial class ProductCard : UserControl
 {
     private bool? compactLayout;
     private bool fittingText;
+    private int minimumNameHeight;
+    internal int NameRowHeight => (int)cardLayout.RowStyles[compactLayout == true ? 1 : 2].Height;
+    internal void SetMinimumNameHeight(int height)
+    {
+        minimumNameHeight = height;
+        FitCardText();
+    }
     public void UseCompactLayout(bool compact)
     {
         if (compactLayout == compact) { FitCardText(); return; }
@@ -33,10 +40,11 @@ public partial class ProductCard : UserControl
         {
             float scale = DeviceDpi / 96F;
             bool compact = compactLayout.Value;
-            int textWidth = Math.Max(40, Width - cardLayout.Padding.Horizontal - (compact ? (int)(112 * scale) : 0) - 8);
-            int nameHeight = Math.Max((int)(44 * scale), TextRenderer.MeasureText(productName.Text, productName.Font,
-                new Size(textWidth, int.MaxValue), TextFormatFlags.WordBreak | TextFormatFlags.NoPrefix).Height + productName.Margin.Vertical + 4);
-            cardLayout.RowStyles[compact ? 1 : 2].Height = nameHeight;
+            int textWidth = Math.Max(40, Width - Padding.Horizontal - cardLayout.Padding.Horizontal -
+                (compact ? (int)(112 * scale) : 0) - productName.Margin.Horizontal);
+            int nameHeight = TextRenderer.MeasureText(productName.Text, productName.Font,
+                new Size(textWidth, int.MaxValue), TextFormatFlags.WordBreak | TextFormatFlags.NoPrefix).Height + productName.Margin.Vertical + (int)(4 * scale);
+            cardLayout.RowStyles[compact ? 1 : 2].Height = Math.Max(nameHeight, minimumNameHeight);
             Height = (int)cardLayout.RowStyles.Cast<RowStyle>().Sum(row => row.Height) + cardLayout.Padding.Vertical + Padding.Vertical;
         }
         finally { fittingText = false; }
