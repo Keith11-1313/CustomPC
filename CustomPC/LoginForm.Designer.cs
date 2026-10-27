@@ -57,7 +57,7 @@ partial class LoginForm
         brandFooter.Location = new Point(38, 482);
         brandFooter.Size = new Size(332, 80);
         brandFooter.TabIndex = 4;
-        brandFooter.Text = "Choose compatible parts.\nReserve your build.\nPay and collect at the store.";
+        brandFooter.Text = "Choose your components.\nReserve your build.\nPay and collect at the store.";
         brandFooter.Font = new Font("Roboto", 11F, FontStyle.Regular);
         brandFooter.ForeColor = Color.FromArgb(213, 231, 202);
         brandFooter.BackColor = Color.FromArgb(32, 41, 35);

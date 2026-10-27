@@ -33,6 +33,12 @@ public partial class BuilderForm : StoreWindow
             throw new InvalidOperationException("Customer access is required to build and order a PC. Guests may preview only.");
 
         partSelectors = new ComboBox[] { part0, part1, part2, part3, part4, part5, part6 };
+        part0.FormattingEnabled = true;
+        part0.Format += (_, e) =>
+        {
+            if (e.ListItem is Part cpu)
+                e.Value = $"{cpu.Name} · {(cpu.HasIntegratedGraphics ? "Integrated graphics" : "Dedicated GPU required")} | {Ui.Money(cpu.Price)}";
+        };
         foreach (StoreComboBox selector in partSelectors.OfType<StoreComboBox>())
             selector.WarningText = item => item is Part part ? CandidateConflict(part) : null;
         BuildComponentWorkspace();
@@ -137,14 +143,17 @@ public partial class BuilderForm : StoreWindow
 
         if (errors.Count == 0)
         {
-            validation.Text = "Socket, memory and power checks passed.\nReview your selection before confirming. Staff will review physical fit and BIOS support.";
+            validation.Text = "Supported compatibility checks passed.\nStaff will verify storage connections, BIOS support and physical fit before assembly.";
             validation.ForeColor = Color.FromArgb(15, 98, 84);
         }
         else
         {
-            List<string> missing = AppStore.Categories.Where(category => category != "GPU" && !selectedParts.Any(part => part.Category == category)).ToList();
-            List<string> issues = errors.Where(error => !error.StartsWith("Select one ")).ToList();
-            validation.Text = (missing.Count > 0 ? "Still to choose: " + string.Join(", ", missing) + ".\n\n" : "") + string.Join("\n", issues);
+            // Detailed socket, memory and PSU conflicts already appear in the red review section.
+            List<string> issues = errors.Where(error => !error.StartsWith("Select one ") &&
+                error != "CPU and motherboard sockets do not match or are unspecified." &&
+                error != "RAM and motherboard memory types do not match or are unspecified." &&
+                !error.StartsWith("Power supply needs at least")).ToList();
+            validation.Text = string.Join("\n", issues);
             validation.ForeColor = StoreTheme.Muted;
         }
 

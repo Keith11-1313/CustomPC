@@ -95,7 +95,16 @@ public partial class BuilderForm
         string power = parts.Count == 0 ? "Choose components first" : $"Minimum PSU: {required:N0} W for selected parts\n" +
             (psu == null ? "Power supply not selected" : $"Selected PSU: {psu.Watts:N0} W" + (psu.Watts >= required ? " · Sufficient" : " · More power required"));
         Full(new Label { Text = "Compatibility & power", AutoSize = true, Font = AppFonts.Body(11, FontStyle.Bold), Margin = new Padding(0, 8, 0, 10) });
-        Full(new Label { Text = "Socket: " + socket + "\nMemory: " + memory + "\n" + power,
+        var checks = new List<string>();
+        // A failed check is explained once, with the selected specifications, above the parts.
+        if (cpu == null || board == null ||
+            cpu.Socket.Length > 0 && cpu.Socket.Equals(board.Socket, StringComparison.OrdinalIgnoreCase))
+            checks.Add("Socket: " + socket);
+        if (ram == null || board == null ||
+            ram.MemoryType.Length > 0 && ram.MemoryType.Equals(board.MemoryType, StringComparison.OrdinalIgnoreCase))
+            checks.Add("Memory: " + memory);
+        checks.Add(power);
+        Full(new Label { Text = string.Join("\n", checks),
             AutoSize = true, Font = AppFonts.Body(10), ForeColor = StoreTheme.Ink, Margin = new Padding(0, 0, 0, 16) });
         validation.Margin = new Padding(0, 0, 0, 12);
         Full(validation);
