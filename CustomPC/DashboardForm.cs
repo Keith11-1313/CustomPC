@@ -469,7 +469,7 @@ public partial class DashboardForm : StoreWindow
         chartActions.Visible = store.IsStaff;
         adminSummary.Visible = stockAttention.Visible = operational;
         FitWorkspace();
-        chartSummary.Visible = operational;
+        chartSummary.Visible = store.IsAdmin;
         viewQueueOrders.Text = store.IsAdmin ? "View paid parts orders" : "View open orders";
         viewPeriodOrders.Text = store.IsStaff ? "View received orders" : "View period orders";
         viewStock.Text = store.IsStaff ? "View inventory" : "View current inventory";
@@ -571,7 +571,7 @@ public partial class DashboardForm : StoreWindow
             stockAttentionText.Text = stockAlerts == 0 ? "No low-stock or out-of-stock products." : $"Products needing stock: {stockAlerts:N0}";
             lowStockAction.Text = $"Low stock ({low})";
             outOfStockAction.Text = $"Out of stock ({unavailable})";
-            chartSummary.Text = $"Orders received in the last {days} days: {data.Incoming.Sum(value => value.Value):N0}. Open orders right now: {data.Queue.Sum(value => value.Value):N0}.";
+            chartSummary.Text = "";
             // Staff use operational counts and stock links without loading chart controls.
             trendChart.ClearRuntimeData();
             distributionChart.ClearRuntimeData();

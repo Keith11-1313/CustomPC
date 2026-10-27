@@ -139,7 +139,7 @@ public partial class DashboardForm
             period.SetBounds(x + width - Px(180), Px(34), Px(180), Px(40));
             chartSummary.SetBounds(x, Px(124), width, Px(42));
             bool operational = AppStore.Current.IsAdmin || AppStore.Current.IsStaff;
-            int y = operational ? Px(180) : Px(136);
+            int y = AppStore.Current.IsAdmin ? Px(180) : Px(136);
             if (operational)
             {
                 bool two = width < Px(900);
