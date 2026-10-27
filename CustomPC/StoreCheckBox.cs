@@ -5,6 +5,8 @@ namespace CustomPC;
 // Keep CheckBox keyboard/accessibility behavior and replace only its drawing.
 public class StoreCheckBox : CheckBox
 {
+    [System.ComponentModel.DefaultValue(false)]
+    public bool WrapText { get; set; }
     public StoreCheckBox() { AutoSize = false; SetStyle(ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer, true); }
     protected override void OnPaint(PaintEventArgs e)
     {
@@ -17,7 +19,7 @@ public class StoreCheckBox : CheckBox
         e.Graphics.FillPath(fill, path); e.Graphics.DrawPath(border, path);
         if (Checked) IconAssets.Paint(e.Graphics, "check", Rectangle.Inflate(box, -2, -2), Color.White);
         Rectangle text = new(30, 0, Math.Max(1, Width - 32), Height);
-        TextRenderer.DrawText(e.Graphics, Text, Font, text, Enabled ? StoreTheme.Ink : StoreTheme.Muted, TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix);
+        TextRenderer.DrawText(e.Graphics, Text, Font, text, Enabled ? StoreTheme.Ink : StoreTheme.Muted, TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix | (WrapText ? TextFormatFlags.WordBreak : TextFormatFlags.EndEllipsis));
         if (Focused) ControlPaint.DrawFocusRectangle(e.Graphics, text);
     }
 }

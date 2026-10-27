@@ -8,7 +8,14 @@ public class EditorSheet : UserControl
     private readonly FlowLayoutPanel fields = new() { Dock = DockStyle.Fill, WrapContents = true, AutoScroll = true, BackColor = Color.White, Padding = new Padding(20), Margin = new Padding(0) };
     private readonly FlowLayoutPanel actions = new() { Dock = DockStyle.Fill, FlowDirection = FlowDirection.RightToLeft, Padding = new Padding(0, 16, 0, 0), Margin = new Padding(0) };
     private readonly Dictionary<Control, Control> groups = new();
+    private readonly Dictionary<Control, Label> hints = new();
     private bool twoColumns;
+    private bool compactSpacing;
+    public void UseCompactSpacing()
+    {
+        compactSpacing = true;
+        Reflow();
+    }
     public EditorSheet()
     {
         layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
@@ -46,6 +53,15 @@ public class EditorSheet : UserControl
         input.Parent = group; input.Dock = DockStyle.Bottom; input.Height = inputHeight; input.Visible = true; input.AccessibleName = label.Text;
         groups[input] = group; fields.Controls.Add(group);
     }
+    public void AddFieldHint(Control input, string text)
+    {
+        if (!groups.TryGetValue(input, out Control? group)) return;
+        var hint = new Label { Name = input.Name + "Hint", Text = text, AutoSize = false,
+            ForeColor = StoreTheme.Muted, Font = AppFonts.Body(9.5F), UseMnemonic = false };
+        hints.Add(input, hint); group.Controls.Add(hint);
+        input.AccessibleDescription = text;
+        Reflow();
+    }
     public void AddOption(Control option, bool first = false)
     {
         Panel group = new() { Height = 54, Width = 240, Margin = new Padding(0, 0, 16, 8) };
@@ -73,10 +89,18 @@ public class EditorSheet : UserControl
     {
         if (fitting) return; fitting = true;
         try {
+        int Px(int value) => (int)(value * DeviceDpi / 96F);
+        if (compactSpacing)
+        {
+            layout.Padding = new Padding(Px(24), Px(16), Px(24), 0);
+            fields.Padding = new Padding(Px(20));
+            actions.Padding = new Padding(0, Px(12), 0, 0);
+            layout.RowStyles[2].Height = Px(64);
+        }
         int headingHeight = 0;
         foreach (Label title in header.Controls.OfType<Label>())
         {
-            title.Height = Math.Max((int)(54 * DeviceDpi / 96F), TextRenderer.MeasureText(title.Text, title.Font,
+            title.Height = Math.Max((int)((compactSpacing ? 48 : 54) * DeviceDpi / 96F), TextRenderer.MeasureText(title.Text, title.Font,
                 new Size(Math.Max(1, header.Width), int.MaxValue), TextFormatFlags.WordBreak).Height + 4);
             headingHeight = title.Height;
         }
@@ -85,10 +109,17 @@ public class EditorSheet : UserControl
         fields.FlowDirection = columns == 1 ? FlowDirection.TopDown : FlowDirection.LeftToRight;
         fields.WrapContents = columns != 1;
         int width = Math.Max(100, (fields.ClientSize.Width - fields.Padding.Horizontal - SystemInformation.VerticalScrollBarWidth) / columns - 16);
+        if (compactSpacing)
+            width = Math.Max(100, (fields.ClientSize.Width - fields.Padding.Horizontal -
+                (fields.VerticalScroll.Visible ? SystemInformation.VerticalScrollBarWidth : 0)) / columns - (columns > 1 ? Px(12) : 0));
         fields.SuspendLayout();
         foreach (Control field in fields.Controls)
         {
+            if (compactSpacing) field.Margin = new Padding(0, 0, 0, Px(14));
             field.Width = width;
+            if (field.Controls.Count == 1 && field.Controls[0] is StoreCheckBox checkbox && checkbox.WrapText)
+                field.Height = Math.Max((int)(54 * DeviceDpi / 96F), TextRenderer.MeasureText(checkbox.Text, checkbox.Font,
+                    new Size(Math.Max(1, width - 32), int.MaxValue), TextFormatFlags.WordBreak | TextFormatFlags.NoPrefix).Height + (int)(12 * DeviceDpi / 96F));
             if (field.Controls.Count == 1 && field.Controls[0] is Label summary)
                 field.Height = Math.Max((int)(54 * DeviceDpi / 96F), TextRenderer.MeasureText(summary.Text, summary.Font,
                     new Size(width, int.MaxValue), TextFormatFlags.WordBreak).Height + 12);
@@ -98,6 +129,25 @@ public class EditorSheet : UserControl
                 label.Height = Math.Max((int)(28 * DeviceDpi / 96F), TextRenderer.MeasureText(label.Text, label.Font,
                     new Size(width, int.MaxValue), TextFormatFlags.WordBreak).Height + 4);
                 field.Height = input.Height + label.Height + 12;
+                if (compactSpacing)
+                {
+                    label.Height = Math.Max(Px(22), TextRenderer.MeasureText(label.Text, label.Font,
+                        new Size(width, int.MaxValue), TextFormatFlags.WordBreak | TextFormatFlags.NoPrefix).Height + 2);
+                    input.Height = Px(input is StoreTextField multiline && multiline.Multiline ? 108 : 42);
+                    input.Dock = DockStyle.None;
+                    input.SetBounds(0, label.Height + Px(6), width, input.Height);
+                    field.Height = input.Bottom;
+                }
+                if (hints.TryGetValue(input, out Label? hint))
+                {
+                    int gap = (int)((compactSpacing ? 6 : 8) * DeviceDpi / 96F);
+                    int hintHeight = TextRenderer.MeasureText(hint.Text, hint.Font,
+                        new Size(width, int.MaxValue), TextFormatFlags.WordBreak | TextFormatFlags.NoPrefix).Height + 4;
+                    input.Dock = DockStyle.None;
+                    input.SetBounds(0, label.Height + (compactSpacing ? Px(6) : 4), width, input.Height);
+                    hint.SetBounds(0, input.Bottom + gap, width, hintHeight);
+                    field.Height = hint.Bottom + (compactSpacing ? 0 : gap);
+                }
             }
         }
         foreach (Button button in actions.Controls.OfType<Button>())
