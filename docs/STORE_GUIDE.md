@@ -12,9 +12,17 @@ The sidebar switches hosted pages. Overview/Back returns to the dashboard. Edito
 
 The main window opens maximized to use the monitor's working area. Restore it with the title-bar button to resize it. The sidebar stays in place and changes to an icon rail in narrower windows; hover or focus a destination for its label. Navigation can scroll on short screens. In a narrower builder, checkout moves below the parts; scroll the component list to reach the remaining categories. The total and order action stay visible.
 
+## Forgotten passwords
+
+The **Forgot password?** link on login opens service-counter recovery instructions. It does not look up an email, send mail or change an account. Customers and Staff ask an Admin for assistance. Another signed-in Admin can help an Admin account; there is no self-service recovery code or last-Admin bypass.
+
+Password entry is shown when creating a new account. Editing an existing account changes only its details, role and archive status; use the dedicated Reset password action to change its password.
+
+After checking the account holder's identity, Admin opens **User accounts**, selects the account and clicks **Reset password**. Confirm the displayed name/email, have the account holder enter and confirm a new password, check the identity-verification box and save. Passwords require 12-128 characters with uppercase/lowercase letters, a number and a symbol. A successful reset takes effect immediately, clears that email's failed-login lockout and records a Password reset activity without including the password. Archived accounts must be restored first. This sets a normal new password, not a temporary password or a forced-change-on-next-login flow. Identity verification is performed by shop personnel; the checkbox records an acknowledgement in the dialog, not automated identity proof or a saved consent record.
+
 ## Shop policies
 
-Customer-facing Terms & Conditions, Warranty & Returns, and Privacy Notice open as scrollable dialogs. Privacy is linked from login and registration; registration also links to the terms. Order confirmation shows the total, 24-hour reservation/payment rule and a Terms & Conditions link. Product details and receipts link to Warranty & Returns. Close or Esc returns to the original screen without submitting it.
+Customer-facing Terms & Conditions, Warranty & Returns, and Privacy Notice open as scrollable dialogs. Public registration requires an initially unchecked agreement to the terms and acknowledgement of the privacy notice before Create account is enabled. The form also rejects an unchecked agreement if submission is invoked directly; policy links remain available before agreement. This is a form acknowledgement, not a versioned consent-history record. Privacy is linked from login and registration; registration also links to the terms. Order confirmation shows the total, 24-hour reservation/payment rule and a Terms & Conditions link. Product details and receipts link to Warranty & Returns. Close or Esc returns to the original screen without submitting it.
 
 The wording is centralized in `ShopPolicies.cs`. Opening a policy does not record consent, create an order or change account data. Warranty handling, privacy requests and retention remain shop procedures; these notices do not introduce automatic retention/deletion or warranty-processing features.
 

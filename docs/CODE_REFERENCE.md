@@ -9,7 +9,7 @@ Use [CODE_GUIDE.md](CODE_GUIDE.md) for lessons. This reference answers where beh
 | Program.cs | Initializes WinForms, single-instance guard, Setup/Login then Dashboard |
 | StoreDataPath.cs | Default Database folder resolution |
 | AppStore.cs | Lazy singleton, session, loaded records, transactions |
-| AppStore.Accounts.cs | Login, registration, role assignment, password hashing |
+| AppStore.Accounts.cs | Login, registration, role assignment, password hashing and Admin-assisted password reset |
 | AppStore.Inventory.cs | Parts, reservations, availability, Staff stock adjustments |
 | AppStore.Compatibility.cs | Mandatory build checks |
 | AppStore.Orders.cs | Owned build/order creation, payments, progress, cancellation/expiry |
@@ -39,6 +39,7 @@ Use [CODE_GUIDE.md](CODE_GUIDE.md) for lessons. This reference answers where beh
 | LoginForm / RegisterForm | Authentication, Guest access and Customer registration |
 | DashboardForm | Main window, sidebar, role dashboard and account switching |
 | CatalogForm / BuilderForm | Product cards, draft selections and checkout |
+| ResetPasswordForm.cs / .Designer.cs | Admin-assisted reset with account summary, masked password confirmation and identity-verification acknowledgement |
 | ShopPolicies.cs / PolicyForm | Shared shop-policy text, navigation links and scrollable policy reader; terms link on order confirmation |
 | OrdersForm / ReceiptForm | Order actions and owned/read-authorized receipt |
 | ReceiptDocument.cs | Shared paper preview and paginated print layout with wrapped component names, quantities, prices and payment-aware instructions |
@@ -166,3 +167,9 @@ DashboardChart uses LiveCharts2 at runtime. Line creates a LineSeries, Bars choo
 | SurfaceArtwork.cs | Proportional cropping/tint for supplied banner/sidebar images; no product photo data is embedded here |
 
 WorkspacePage no longer renders descriptive page subtitles. AddSummaryAction positions Export CSV on the left and a responsive report summary on the right. Ui.Export omits DataGridViewImageColumn values. StoreComboBox paints its closed surface in one buffered pass while Windows retains popup/keyboard behavior. Dashboard navigation places Reports before User accounts; Staff has no runtime charts. The latest login layout uses the inset white card and photo panel, with native LinkLabel account/guest actions.
+
+Admin-assisted recovery uses `AppStore.ResetUserPassword`: refresh and require Admin inside a transaction, reject missing/archived accounts, validate/hash the new password, remove the target email login-throttle record, and save with a password-free audit entry. Failed validation rolls back both password and throttle changes. Login recovery guidance does not enumerate accounts or reset passwords.
+
+`PasswordGuidance.Requirements` provides consistent password-creation help for registration, initial setup, Admin account creation and reset. `EditorSheet.AddFieldHint` places a wrapping helper below the input and includes its measured height in field layout. Existing-account editing hides the entire password group, including the helper. Login and restore verification continue to ask for existing passwords without creation requirements.
+
+Account creation/setup/editing opt into `EditorSheet.UseCompactSpacing()` for measured label/input gaps, balanced field padding and a smaller pinned action row. Registration renders terms/privacy links within the agreement sentence; opening either policy does not check the agreement or submit the form.
