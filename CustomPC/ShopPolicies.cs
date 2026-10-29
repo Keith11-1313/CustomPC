@@ -40,8 +40,8 @@ internal static class ShopPolicies
     }
     internal static bool ConfirmOrder(Form owner, decimal total)
     {
-        using var dialog = new StoreDialog("Confirm your order", "Order total: " + Ui.Money(total) +
-            "\n\nYour parts will be reserved for 24 hours. Pay at the store before the deadline shown on your order. Unpaid reservations automatically expire.", true);
+        using var dialog = new StoreDialog("Place this order?", "Are you sure you want to place this order?\n\nOrder total: " + Ui.Money(total) +
+            "\n\nYour parts will be reserved for 24 hours. Pay at the store before the deadline shown on your order. Unpaid reservations automatically expire.", true, "Place order");
         dialog.AddPolicyLink(Link("Terms & Conditions", "terms", dialog));
         return dialog.ShowDialog(owner) == DialogResult.Yes;
     }

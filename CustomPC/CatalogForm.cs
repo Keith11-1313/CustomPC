@@ -6,6 +6,8 @@ public partial class CatalogForm : StoreWindow
 {
     private BuildDraft draft = new();
     private readonly System.Windows.Forms.Timer searchDelay = new() { Interval = 180 };
+    private readonly PaginationBar catalogPages = new(12);
+    private string catalogIdentity = "";
     public CatalogForm(BuildDraft sharedDraft) : this() { draft = sharedDraft; }
     public CatalogForm()
     {
@@ -31,6 +33,8 @@ public partial class CatalogForm : StoreWindow
         availability.SelectedIndex = 0;
 
         BuildBrowseWorkspace();
+        catalogWorkspace!.SetPagination(catalogPages);
+        catalogPages.PageChanged += () => { products.AutoScrollPosition = Point.Empty; LoadRows(); };
 
         search.TextChanged += (_, _) => { searchDelay.Stop(); searchDelay.Start(); };
         searchDelay.Tick += (_, _) => { searchDelay.Stop(); LoadRows(); };
@@ -143,6 +147,7 @@ public partial class CatalogForm : StoreWindow
         products.SuspendLayout();
         AppStore store = AppStore.Current;
         string searchText = search.Text.Trim();
+        var matches = new List<Part>();
 
         // The table contains only the columns displayed in the catalog.
         DataTable table = new DataTable();
@@ -188,6 +193,15 @@ public partial class CatalogForm : StoreWindow
 
             table.Rows.Add(part.Id, part.Name, part.Category, part.Brand,
                 Ui.Money(part.Price), part.Specifications, availableStock, stockStatus);
+            matches.Add(part);
+        }
+
+        string identity = string.Join("|", matches.Select(part => part.Id));
+        catalogPages.SetTotal(matches.Count, identity != catalogIdentity);
+        if (identity != catalogIdentity) products.AutoScrollPosition = Point.Empty;
+        catalogIdentity = identity;
+        foreach (Part part in matches.Skip(catalogPages.PageIndex * catalogPages.PageSize).Take(catalogPages.PageSize))
+        {
             Action<Part>? select = store.Session == null || store.IsCustomer ? AddToBuild : null;
             products.Controls.Add(new ProductCard(part, store, select));
         }

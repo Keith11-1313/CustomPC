@@ -49,16 +49,24 @@ public partial class WorkspacePage : UserControl
             fields.Add(field); filters.Controls.Add(field);
         }
         body.Parent = content; body.Dock = DockStyle.Fill; body.Margin = new Padding(0); body.Visible = true;
-        if (body is DataGridView grid)
+        static DataGridView? FindGrid(Control control) => control as DataGridView ??
+            control.Controls.Cast<Control>().Select(FindGrid).FirstOrDefault(grid => grid != null);
+        if (FindGrid(body) is DataGridView grid)
         {
-            void CountRows() => footer.Text = $"{grid.Rows.Count:N0} records   •   Select a row to use its available actions";
-            grid.DataBindingComplete += (_, _) => CountRows(); CountRows();
+            SetPagination(TablePagination.Attach(grid));
         }
         else footer.Text = "";
         owner.Controls.Add(this); BringToFront();
         owner.AutoScroll = false; owner.MinimumSize = new Size(640, 480);
         SizeChanged += (_, _) => Reflow(); Reflow();
         owner.ResumeLayout(true);
+    }
+
+    internal void SetPagination(Control pager)
+    {
+        footer.Visible = false;
+        layout.Controls.Remove(footer);
+        layout.Controls.Add(pager, 0, 4);
     }
 
     private void Reflow()
@@ -85,7 +93,7 @@ public partial class WorkspacePage : UserControl
             new Size(titleWidth, int.MaxValue), TextFormatFlags.WordBreak | TextFormatFlags.NoPrefix).Height + 4);
         title.SetBounds(0, 0, titleWidth, titleHeight);
         layout.RowStyles[0].Height = Math.Max(back.Bottom, title.Bottom) + (int)(12 * scale);
-        layout.RowStyles[4].Height = Math.Max((int)(32 * scale), TextRenderer.MeasureText(footer.Text, footer.Font,
+        layout.RowStyles[4].Height = Math.Max((int)((footer.Visible ? 32 : 44) * scale), TextRenderer.MeasureText(footer.Text, footer.Font,
             new Size(Math.Max(1, width), int.MaxValue), TextFormatFlags.WordBreak | TextFormatFlags.NoPrefix).Height + 8);
         int columns = Math.Max(1, Math.Min(fields.Count + options, width / (int)(230 * scale)));
         int fieldWidth = Math.Max(120, (width - columns * 12) / columns);

@@ -168,7 +168,7 @@ public partial class StoreToolsForm : StoreWindow
             if (dialog.ShowDialog(this) != DialogResult.OK) return;
             string replacedData = Path.GetExtension(dialog.FileName).Equals(".zip", StringComparison.OrdinalIgnoreCase)
                 ? "current records and product photos" : "current database records";
-            if (!Ui.Confirm(this, "Restore this backup?\n\n" + dialog.FileName + "\n\nThis replaces your " + replacedData + ". A safety backup is saved first.\n\nAfter restoration, CustomPC will close. Open it again manually and sign in with an account from the restored backup.")) return;
+            if (!Ui.Confirm(this, "Are you sure you want to restore this backup?\n\n" + dialog.FileName + "\n\nThis replaces your " + replacedData + ". A safety backup is saved first.\n\nAfter restoration, CustomPC will close. Open it again manually and sign in with an account from the restored backup.", "Restore this backup?", "Restore backup")) return;
             AppStore.Current.RestoreBackup(dialog.FileName, passwordDialog.Password);
             Ui.Message(this, "Backup restored successfully.\n\nCustomPC will now close. Open CustomPC again manually, then sign in with an account from the restored backup.", "Restore complete");
             Application.Exit();

@@ -31,8 +31,13 @@ internal static class Ui
         Message(owner, message, "Please check");
     }
 
-    public static void Bind(DataGridView grid, object data)
+    public static void Bind(DataGridView grid, object data, bool paginate = true)
     {
+        if (paginate && data is System.Data.DataTable table && TablePagination.For(grid) is TablePagination pager)
+        {
+            pager.Bind(table);
+            return;
+        }
         grid.DataSource = data;
 
         // Id identifies the saved record, but does not need to appear on screen.
@@ -154,9 +159,9 @@ internal static class Ui
         return selectedId;
     }
 
-    public static bool Confirm(IWin32Window owner, string message)
+    public static bool Confirm(IWin32Window owner, string message, string title = "Are you sure?", string confirmText = "Confirm")
     {
-        using StoreDialog dialog = new("Confirm action", message, true);
+        using StoreDialog dialog = new(title, message, true, confirmText);
         return dialog.ShowDialog(owner) == DialogResult.Yes;
     }
 
@@ -178,41 +183,53 @@ internal static class Ui
                 return;
             }
 
-            List<DataGridViewColumn> visibleColumns = new List<DataGridViewColumn>();
-            List<string> headings = new List<string>();
-
-            foreach (DataGridViewColumn column in grid.Columns)
-            {
-                if (column.Visible && column is not DataGridViewImageColumn)
-                {
-                    visibleColumns.Add(column);
-                    headings.Add(EscapeCsvValue(column.HeaderText));
-                }
-            }
-
-            List<string> lines = new List<string>();
-            lines.Add(string.Join(",", headings));
-
-            foreach (DataGridViewRow row in grid.Rows)
-            {
-                if (row.IsNewRow)
-                {
-                    continue;
-                }
-
-                List<string> values = new List<string>();
-                foreach (DataGridViewColumn column in visibleColumns)
-                {
-                    object? cellValue = row.Cells[column.Index].Value;
-                    values.Add(EscapeCsvValue(cellValue));
-                }
-
-                lines.Add(string.Join(",", values));
-            }
-
+            List<string> lines = BuildExportLines(grid);
             File.WriteAllLines(saveDialog.FileName, lines, new UTF8Encoding(true));
             Message(owner, "Report exported.", "CustomPC");
         }
+    }
+
+    internal static List<string> BuildExportLines(DataGridView grid)
+    {
+        List<DataGridViewColumn> visibleColumns = new List<DataGridViewColumn>();
+        List<string> headings = new List<string>();
+
+        foreach (DataGridViewColumn column in grid.Columns)
+        {
+            if (column.Visible && column is not DataGridViewImageColumn)
+            {
+                visibleColumns.Add(column);
+                headings.Add(EscapeCsvValue(column.HeaderText));
+            }
+        }
+
+        List<string> lines = new List<string>();
+        lines.Add(string.Join(",", headings));
+
+        var source = TablePagination.For(grid)?.Source;
+        if (source != null)
+        {
+            foreach (System.Data.DataRowView row in source.DefaultView)
+                lines.Add(string.Join(",", visibleColumns.Select(column => EscapeCsvValue(row[column.DataPropertyName]))));
+        }
+        else foreach (DataGridViewRow row in grid.Rows)
+        {
+            if (row.IsNewRow)
+            {
+                continue;
+            }
+
+            List<string> values = new List<string>();
+            foreach (DataGridViewColumn column in visibleColumns)
+            {
+                object? cellValue = row.Cells[column.Index].Value;
+                values.Add(EscapeCsvValue(cellValue));
+            }
+
+            lines.Add(string.Join(",", values));
+        }
+
+        return lines;
     }
 
     private static string EscapeCsvValue(object? value)

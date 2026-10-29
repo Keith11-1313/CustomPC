@@ -109,6 +109,16 @@ public partial class DashboardForm : StoreWindow
 
     private void SignOutButton_Click(object? sender, EventArgs e)
     {
+        if (AppStore.Current.Session != null)
+        {
+            string message = "Are you sure you want to sign out? You will return to the sign-in screen.";
+            if (AppStore.Categories.Any(category => Draft.SelectedId(category).Length > 0))
+                message += "\n\nYour current build selections will be cleared.";
+            using var dialog = new StoreDialog("Sign out?", message, true, "Sign out");
+            dialog.AcceptButton = dialog.CancelButton;
+            dialog.ActiveControl = dialog.CancelButton as Control;
+            if (dialog.ShowDialog(this) != DialogResult.Yes) return;
+        }
         SignIn();
     }
 

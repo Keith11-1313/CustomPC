@@ -124,7 +124,8 @@ public partial class OrdersForm : StoreWindow
         {
             string orderId = Ui.RequireSelection(grid);
             bool confirmed = Ui.Confirm(this,
-                "Confirm the customer paid the full amount at the physical store?");
+                "Has the customer paid the full amount at the store? Confirm only after receiving the payment.",
+                "Record this payment?", "Record payment");
 
             if (confirmed)
             {
@@ -144,7 +145,8 @@ public partial class OrdersForm : StoreWindow
         {
             string orderId = Ui.RequireSelection(grid);
             bool confirmed = Ui.Confirm(this,
-                "Move this order to the next stage? Completion records pickup and deducts stock.");
+                "Are you sure you want to move this order to the next stage? Completing an order records pickup and deducts stock.",
+                "Update order status?", "Update status");
 
             if (confirmed)
             {
@@ -164,7 +166,8 @@ public partial class OrdersForm : StoreWindow
         {
             string orderId = Ui.RequireSelection(grid);
             bool confirmed = Ui.Confirm(this,
-                "Cancel this unpaid order and release its reserved parts?");
+                "Are you sure you want to cancel this unpaid order? Its reserved parts will become available again.",
+                "Cancel this order?", "Cancel order");
 
             if (confirmed)
             {
