@@ -35,6 +35,12 @@ Keep test photographs beside the selected database in `ProductImages`. Use the a
 
 ## Previously reported coverage
 
+### Pagination, confirmations and business text
+
+On isolated data, check catalog navigation (12 products per page) and inventory, orders, users, reports and activity navigation (20 records per page). Verify first/last/empty boundaries, searches for records on later pages, sorting across the full result set, retained pages on unchanged refresh and CSV exports containing every matching row. Check Previous/Next labels at narrow widths and display scaling.
+
+Try pasted emojis, flags, skin-tone sequences, joined emoji, keycap emoji and hidden formatting characters in names, email, product text and stock-adjustment reasons. Saving must reject them without adding records or stock movements. Accented names, punctuation, technical units and ordinary multiline specifications must remain valid. Password validation remains separate. Confirm that Cancel, Escape and the window close button dismiss confirmations without performing their action.
+
 Development checks have exercised the following areas using isolated data and programmatic WinForms rendering:
 
 - Account validation, role restrictions and ownership of customer orders.

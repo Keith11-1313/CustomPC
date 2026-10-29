@@ -8,7 +8,13 @@ Open the solution and press F5. Login opens before the dashboard. Guests choose 
 
 The prepared Admin was `admin@gmail.com`, password `AdminPassword@123`, name `admin`. Use its current saved credentials if edited. Admin creates Staff/Customer accounts in User accounts. Public registration always creates Customer accounts. Roles are separate; Admin cannot perform Staff or Customer transactions.
 
-The sidebar switches hosted pages. Overview/Back returns to the dashboard. Editors close without saving when Cancel is used. Sign out clears the unfinished build. Cancelling Guest Sign in returns to the Guest workspace; cancelling after signing out ends the app.
+The sidebar switches hosted pages. Overview/Back returns to the dashboard. Editors close without saving when Cancel is used. Sign out asks for confirmation for every signed-in role; Cancel or closing the confirmation preserves the session and build. Confirmed sign-out clears the unfinished build. Cancelling Guest Sign in returns to the Guest workspace; cancelling login after signing out ends the app.
+
+## Pages and input validation
+
+Parts catalog shows up to 12 products per page. Inventory, orders, accounts, reports and activity history show up to 20 records per page. Use Previous, Next or a numbered page below the results; the current page is highlighted. Search and filters apply to the complete matching dataset; changing the result set returns to page one. Automatic refresh retains the page when the result set is unchanged. Table sorting applies across all matching records. CSV export includes all matching records, not just the visible page.
+
+Names, email addresses, product details and stock-adjustment reasons reject emojis and hidden control characters when saved, including pasted input. Accented names, ordinary punctuation and technical units remain supported. This business-text rule does not restrict passwords or change existing saved data. Confirmation dialogs use action-specific questions and buttons, with Cancel as the default keyboard action.
 
 The main window opens maximized to use the monitor's working area. Restore it with the title-bar button to resize it. The sidebar stays in place and changes to an icon rail in narrower windows; hover or focus a destination for its label. Navigation can scroll on short screens. In a narrower builder, checkout moves below the parts; scroll the component list to reach the remaining categories. The total and order action stay visible.
 
