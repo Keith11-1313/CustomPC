@@ -61,6 +61,8 @@ public sealed partial class AppStore
                     RequireAdmin();
                 }
 
+                BusinessText.Validate(user.Name, "Name");
+                BusinessText.Validate(user.Email, "Email address");
                 if (string.IsNullOrWhiteSpace(user.Name) || user.Name.Length > 100 || user.Email.Length > 254 || !MailAddress.TryCreate(user.Email, out _))
                 {
                     throw new InvalidOperationException("Enter a name and valid email address.");

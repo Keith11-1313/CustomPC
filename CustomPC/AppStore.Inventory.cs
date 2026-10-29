@@ -102,6 +102,12 @@ public sealed partial class AppStore
 
     private void ValidatePart(Part part)
     {
+        BusinessText.Validate(part.Name, "Product name");
+        BusinessText.Validate(part.Brand, "Brand");
+        BusinessText.Validate(part.Specifications, "Specifications");
+        BusinessText.Validate(part.Socket, "Socket");
+        BusinessText.Validate(part.MemoryType, "Memory type");
+        BusinessText.Validate(part.CatalogCode, "Catalog code");
         if (part.PhotoFileName.Length > 0) ProductPhotos.Resolve(DatabasePath, part.PhotoFileName);
         if (string.IsNullOrWhiteSpace(part.Name) || string.IsNullOrWhiteSpace(part.Brand))
         {
@@ -157,6 +163,7 @@ public sealed partial class AppStore
             {
                 LoadData(connection);
                 RequireStaff();
+                BusinessText.Validate(reason, "Adjustment reason");
                 Part part = FindPart(partId);
 
                 if (quantity == 0 || string.IsNullOrWhiteSpace(reason))

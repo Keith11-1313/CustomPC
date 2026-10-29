@@ -22,6 +22,8 @@ public sealed partial class AppStore
         {
             LoadData(connection);
             if (!NeedsSetup) throw new InvalidOperationException("Store setup has already been completed.");
+            BusinessText.Validate(adminName, "Name");
+            BusinessText.Validate(email, "Email address");
             if (
                 string.IsNullOrWhiteSpace(adminName) || adminName.Length > 100 || !MailAddress.TryCreate(email, out _))
                 throw new InvalidOperationException("Enter an administrator name and valid email address.");
