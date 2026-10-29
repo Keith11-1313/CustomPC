@@ -20,7 +20,7 @@ partial class RegisterForm
         heading.TabIndex = 0;
         heading.Text = "Create an account";
         heading.UseMnemonic = false;
-        heading.Font = new Font("Righteous", 22F, FontStyle.Regular);
+        heading.Font = AppFonts.Heading(22F);
         Controls.Add(heading);
         back = new Button();
         back.Name = "back";

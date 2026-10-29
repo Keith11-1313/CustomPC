@@ -20,7 +20,7 @@ partial class ResetPasswordForm
         layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 64));
-        heading = new Label { Text = "Reset password", Font = new Font("Segoe UI", 22, FontStyle.Bold),
+        heading = new Label { Text = "Reset password", Font = AppFonts.Heading(22),
             AutoSize = true, Margin = new Padding(0, 0, 0, 20) };
         var scroll = new Panel { Dock = DockStyle.Fill, AutoScroll = true, Margin = Padding.Empty };
         var fields = new TableLayoutPanel { Dock = DockStyle.Top, AutoSize = true, ColumnCount = 1, RowCount = 7,

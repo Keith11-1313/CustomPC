@@ -134,7 +134,7 @@ public static class StoreTheme
         }
         string icon = button.Name switch { "back" => "back", "add" => "add", "refresh" => "refresh",
             "catalog" or "inventory" => "grid", "builder" => "build", "orders" or "tools" => "list",
-            "users" => "user", "reports" or "home" => "chart", "signout" => "log-out", "adjust" => "plus", "pay" => "check", "advance" => "arrow-right", "save" => "check", "receipt" => "clipboard-list", "edit" => "pencil", "history" => "rotate-ccw", "export" => "download", "backup" => "download", "restore" => "rotate-ccw", _ => "" };
+            "users" => "user", "reports" or "home" => "chart", "signout" => "log-out", "adjust" => "plus", "pay" or "accept" => "check", "previousPage" => "arrow-left", "nextPage" => "arrow-right", "advance" => "arrow-right", "save" => "check", "receipt" => "clipboard-list", "edit" => "pencil", "history" => "rotate-ccw", "export" => "download", "backup" => "download", "restore" => "rotate-ccw", _ => "" };
         if (button.Text == "Cancel") icon = "";
         if (button.Name == "details") text = Action;
         Rectangle textBounds = bounds;

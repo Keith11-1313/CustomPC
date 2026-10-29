@@ -29,7 +29,8 @@ internal static class AppFonts
         }
     }
 
-    public static Font Heading(float size) => new Font("Segoe UI", size, FontStyle.Bold);
+    // Use the same bundled display face as the login hero.
+    public static Font Heading(float size) => Brand(size);
     public static Font Brand(float size) => new Font(fonts.Families.First(f => f.Name == "Righteous"), size, FontStyle.Regular);
     public static Font Body(float size, FontStyle style = FontStyle.Regular) => new Font("Segoe UI", size, style);
 
@@ -53,8 +54,8 @@ internal static class AppFonts
         string name = original.OriginalFontName ?? original.Name;
         if (name != "Righteous" && name != "Roboto") return original;
         if (brand) return Brand(original.Size);
-        return new Font("Segoe UI", original.Size,
-            name == "Righteous" ? FontStyle.Bold : original.Style, original.Unit);
+        if (name == "Righteous") return Heading(original.Size);
+        return new Font("Segoe UI", original.Size, original.Style, original.Unit);
     }
 
     [DllImport("gdi32.dll")]

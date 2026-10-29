@@ -208,7 +208,7 @@ partial class DashboardForm
         heading.Size = new Size(780, 42);
         heading.TabIndex = 13;
         heading.Text = "Store overview";
-        heading.Font = new Font("Righteous", 24F, FontStyle.Regular);
+        heading.Font = AppFonts.Heading(24F);
         heading.ForeColor = Color.FromArgb(32, 41, 35);
         heading.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
         heading.UseMnemonic = false;
@@ -348,7 +348,7 @@ partial class DashboardForm
         workflowTitle.Size = new Size(258, 30);
         workflowTitle.TabIndex = 28;
         workflowTitle.Text = "Next steps";
-        workflowTitle.Font = new Font("Righteous", 14F, FontStyle.Regular);
+        workflowTitle.Font = AppFonts.Heading(14F);
         workflowTitle.ForeColor = Color.FromArgb(32, 41, 35);
         workflowTitle.BackColor = Color.White;
         workflowTitle.UseMnemonic = false;
@@ -371,7 +371,7 @@ partial class DashboardForm
         recentTitle.Size = new Size(442, 30);
         recentTitle.TabIndex = 30;
         recentTitle.Text = "Recent orders";
-        recentTitle.Font = new Font("Righteous", 14F, FontStyle.Regular);
+        recentTitle.Font = AppFonts.Heading(14F);
         recentTitle.ForeColor = Color.FromArgb(32, 41, 35);
         recentTitle.UseMnemonic = false;
         Controls.Add(recentTitle);

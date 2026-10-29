@@ -28,7 +28,7 @@ partial class SetupForm
         heading.Size = new Size(580, 42);
         heading.TabIndex = 1;
         heading.Text = "Set up CustomPC";
-        heading.Font = new Font("Righteous", 24F, FontStyle.Regular);
+        heading.Font = AppFonts.Heading(24F);
         heading.ForeColor = Color.FromArgb(32, 41, 35);
         heading.BackColor = Color.White;
         heading.UseMnemonic = false;

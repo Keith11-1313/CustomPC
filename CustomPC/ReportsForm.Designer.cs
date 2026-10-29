@@ -21,7 +21,7 @@ partial class ReportsForm
         heading.TabIndex = 0;
         heading.Text = "Business reports";
         heading.UseMnemonic = false;
-        heading.Font = new Font("Righteous", 22F, FontStyle.Regular);
+        heading.Font = AppFonts.Heading(22F);
         Controls.Add(heading);
         reportLabel = new Label();
         reportLabel.Name = "reportLabel";

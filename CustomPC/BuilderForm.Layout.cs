@@ -20,7 +20,7 @@ public partial class BuilderForm
             Panel card = new() { Dock = DockStyle.Fill, BackColor = Color.White, Margin = new Padding(0, 0, 0, 12) };
             photos[i].Parent = card; photos[i].Dock = DockStyle.None; photos[i].SetBounds(16, 20, 72, 76);
             labels[i].Parent = card; labels[i].Dock = DockStyle.None; labels[i].SetBounds(108, 16, 300, 28);
-            labels[i].Font = AppFonts.Body(12, FontStyle.Bold);
+            labels[i].Font = AppFonts.Heading(12);
             partSelectors[i].Parent = card; partSelectors[i].Dock = DockStyle.None; partSelectors[i].SetBounds(108, 56, 300, 40);
             Button details = new() { Name = "details", Text = "Details", BackColor = Color.White, Width = 82, Height = 32, Top = 16 };
             details.Click += (_, _) => { if (partSelectors[index].SelectedItem is Part part) { using var dialog = new ProductDetailsForm(part); dialog.ShowDialog(this); } };
@@ -65,7 +65,7 @@ public partial class BuilderForm
         }
         bool integrated = part3.SelectedItem is string;
         Full(new Label { Text = $"Your build · {parts.Count + (integrated ? 1 : 0)} of 7 selections", AutoSize = true,
-            Font = AppFonts.Body(11, FontStyle.Bold), Margin = new Padding(0, 0, 0, 16) });
+            Font = AppFonts.Heading(11), Margin = new Padding(0, 0, 0, 16) });
         string[] conflicts = parts.Select(CandidateConflict).Where(reason => !string.IsNullOrEmpty(reason)).SelectMany(reason => reason!.Split('\n')).Distinct().ToArray();
         if (conflicts.Length > 0)
             Full(new Label { Name = "compatibilityConflicts", Text = "Incompatible selections\n" + string.Join("\n\n", conflicts),
@@ -94,7 +94,7 @@ public partial class BuilderForm
         long required = AppStore.RequiredPowerSupplyWatts(parts);
         string power = parts.Count == 0 ? "Choose components first" : $"Minimum PSU: {required:N0} W for selected parts\n" +
             (psu == null ? "Power supply not selected" : $"Selected PSU: {psu.Watts:N0} W" + (psu.Watts >= required ? " · Sufficient" : " · More power required"));
-        Full(new Label { Text = "Compatibility & power", AutoSize = true, Font = AppFonts.Body(11, FontStyle.Bold), Margin = new Padding(0, 8, 0, 10) });
+        Full(new Label { Text = "Compatibility & power", AutoSize = true, Font = AppFonts.Heading(11), Margin = new Padding(0, 8, 0, 10) });
         var checks = new List<string>();
         // A failed check is explained once, with the selected specifications, above the parts.
         if (cpu == null || board == null ||

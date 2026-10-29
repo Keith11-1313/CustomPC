@@ -11,7 +11,7 @@ public partial class PolicyForm : StoreWindow
         foreach (var section in content.Sections)
         {
             var title = new Label { Text = section.Heading, AutoSize = true, UseMnemonic = false,
-                Font = AppFonts.Body(11, FontStyle.Bold), ForeColor = StoreTheme.Ink, Margin = new Padding(0, 0, 0, 8) };
+                Font = AppFonts.Heading(11), ForeColor = StoreTheme.Ink, Margin = new Padding(0, 0, 0, 8) };
             var body = new Label { Text = section.Body, AutoSize = true, UseMnemonic = false,
                 Font = AppFonts.Body(10.5F), ForeColor = StoreTheme.Ink, Margin = new Padding(0, 0, 0, 24) };
             sections.Controls.Add(title); sections.Controls.Add(body);

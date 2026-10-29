@@ -20,7 +20,7 @@ partial class RestorePasswordForm
         layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 46));
         layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 48));
-        layout.Controls.Add(new Label { Text = "Confirm your password", AutoSize = true, Font = new Font("Segoe UI", 21, FontStyle.Bold), Margin = new Padding(0, 0, 0, 20) }, 0, 0);
+        layout.Controls.Add(new Label { Text = "Confirm your password", AutoSize = true, Font = AppFonts.Heading(21), Margin = new Padding(0, 0, 0, 20) }, 0, 0);
         layout.Controls.Add(new Label { Text = "Your password", AutoSize = true, Margin = new Padding(0, 0, 0, 8) }, 0, 1);
         password = new StoreTextField { Name = "password", Dock = DockStyle.Fill, UseSystemPasswordChar = true, ShowPasswordToggle = true, MaxLength = 128, AccessibleName = "Your password", Margin = Padding.Empty };
         layout.Controls.Add(password, 0, 2);

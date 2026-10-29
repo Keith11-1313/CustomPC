@@ -28,7 +28,7 @@ partial class StoreToolsForm
         heading.Size = new Size(890, 40);
         heading.TabIndex = 1;
         heading.Text = "Activity & Backups";
-        heading.Font = new Font("Righteous", 22F, FontStyle.Regular);
+        heading.Font = AppFonts.Heading(22F);
         heading.ForeColor = Color.FromArgb(32, 41, 35);
         heading.BackColor = Color.White;
         heading.UseMnemonic = false;

@@ -20,7 +20,7 @@ partial class PartEditForm
         heading.TabIndex = 0;
         heading.Text = "Component details";
         heading.UseMnemonic = false;
-        heading.Font = new Font("Righteous", 22F, FontStyle.Regular);
+        heading.Font = AppFonts.Heading(22F);
         Controls.Add(heading);
         back = new Button();
         back.Name = "back";

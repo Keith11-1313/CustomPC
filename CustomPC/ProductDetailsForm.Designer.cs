@@ -28,7 +28,7 @@ partial class ProductDetailsForm
         layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
         layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 100F));
         heading.Text = "Product specifications";
-        heading.Font = new Font("Righteous", 18F);
+        heading.Font = AppFonts.Heading(18F);
         heading.Dock = DockStyle.Fill;
         layout.Controls.Add(heading, 0, 0);
         layout.SetColumnSpan(heading, 2);

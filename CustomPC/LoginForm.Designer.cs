@@ -69,7 +69,7 @@ partial class LoginForm
         heading.Size = new Size(480, 44);
         heading.TabIndex = 5;
         heading.Text = "Welcome back";
-        heading.Font = new Font("Righteous", 24F, FontStyle.Regular);
+        heading.Font = AppFonts.Heading(24F);
         heading.ForeColor = Color.FromArgb(32, 41, 35);
         heading.UseMnemonic = false;
         Controls.Add(heading);

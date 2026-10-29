@@ -21,7 +21,7 @@ partial class BuilderForm
         heading.TabIndex = 0;
         heading.Text = "PC builder";
         heading.UseMnemonic = false;
-        heading.Font = new Font("Righteous", 22F, FontStyle.Regular);
+        heading.Font = AppFonts.Heading(22F);
         Controls.Add(heading);
         part0Label = new Label();
         part0Label.Name = "part0Label";

@@ -13,7 +13,7 @@ partial class PolicyForm
         layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 64));
         heading = new Label { Text = "Shop policy", AutoSize = true, UseMnemonic = false,
-            Font = new Font("Segoe UI", 22, FontStyle.Bold), Margin = new Padding(0, 0, 0, 24) };
+            Font = AppFonts.Heading(22), Margin = new Padding(0, 0, 0, 24) };
         sections = new FlowLayoutPanel { Name = "policySections", Dock = DockStyle.Fill, FlowDirection = FlowDirection.TopDown,
             WrapContents = false, AutoScroll = true, TabStop = true, Margin = new Padding(0), Padding = new Padding(0, 0, 8, 0) };
         var footer = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.RightToLeft,

@@ -14,7 +14,7 @@ partial class StoreDialog
         SuspendLayout();
         heading = new Label();
         heading.Text = "Message";
-        heading.Font = new Font("Righteous", 18F);
+        heading.Font = AppFonts.Heading(18F);
         heading.Dock = DockStyle.Fill;
         heading.TextAlign = ContentAlignment.MiddleLeft;
         body = new Label();
