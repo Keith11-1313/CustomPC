@@ -35,9 +35,6 @@ The first run creates an administrator when no accounts exist. Store data is ign
 
 ## Documentation
 
-<<<<<<< Updated upstream
-A missing/empty database opens **Set up CustomPC** to create an administrator. It does not recreate the researched catalog. `CUSTOMPC_DEMO_MODE=1` explicitly enables separate practice fixtures; normal startup does not create demo accounts or stock.
-=======
 | Guide | Contents |
 | --- | --- |
 | [Installation](docs/INSTALLATION.md) | Run, build, publish, and transfer data |
@@ -55,4 +52,3 @@ CustomPC uses a local SQLite database on one Windows workstation. Separate insta
 ## Issues
 
 Report bugs through [Issues](https://github.com/Keith11-1313/CustomPC/issues). Include the affected screen, reproduction steps, expected and actual results, and Windows version. Leave passwords and private customer records out of attachments.
->>>>>>> Stashed changes
