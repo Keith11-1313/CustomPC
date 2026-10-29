@@ -1,80 +1,72 @@
-# Validation
+# Testing
 
-This page describes validation coverage and checks to repeat before a release. It does not certify the current revision or every Windows environment.
+## Status
 
-## Build
+This repository does not include an automated test project or a current release test report. Earlier development checks covered business rules and programmatic WinForms rendering using external tools. Those tools and their results are not reproducible from this checkout, so this page does not claim a passing test total.
 
-Install the .NET SDK required by `CustomPC/CustomPC.csproj` and the Windows desktop development tools. From the repository root on Windows, run:
+Run the checks below against the exact build being distributed. Record its commit/version, Windows version, expected and actual results, and Pass, Fail, or Not run for each check. Screenshots illustrate the interface; they do not prove an operation passed.
+
+## Build checks
+
+From the repository root:
 
 ```powershell
-dotnet restore CustomPC/CustomPC.csproj
-dotnet build CustomPC/CustomPC.csproj -c Release
+dotnet restore CustomPC.slnx
+dotnet build CustomPC.slnx -c Release
 git diff --check
 ```
 
-A successful build verifies compilation. It does not verify runtime workflows, Visual Studio Designer loading, accessibility, native dialogs or printer output.
+A successful build confirms compilation, not login, order processing, printing, or recovery.
 
-## Use isolated data
+## Practice database
 
-Run validation against a separate practice database and product-image folder. Do not use operational accounts, orders, payments or inventory as test fixtures.
-
-`CUSTOMPC_DATABASE_PATH` selects an alternate database. For example, in PowerShell:
+Close the application. From the repository root, run in a PowerShell session:
 
 ```powershell
-$env:CUSTOMPC_DATABASE_PATH = Join-Path $env:TEMP ('CustomPC-validation-' + [guid]::NewGuid().ToString('N') + '/custompc.db')
+$env:CUSTOMPC_DATABASE_PATH = Join-Path $env:TEMP ('CustomPC-test-' + [guid]::NewGuid().ToString('N') + '/custompc.db')
 dotnet run --project CustomPC/CustomPC.csproj
 ```
 
-Complete setup with practice credentials. Close the application before clearing the override:
+Complete setup with practice details, create Staff/Customer accounts, add components, and receive test stock as Staff. The override also selects a separate photograph folder. After closing the app:
 
 ```powershell
-Remove-Item Env:/CUSTOMPC_DATABASE_PATH
+Remove-Item Env:CUSTOMPC_DATABASE_PATH
 ```
 
-Keep test photographs beside the selected database in `ProductImages`. Use the application's backup and restore operations when testing recovery; copying an open SQLite database file alone may omit pending changes.
+These variables affect that terminal and its child process, not an already-open Visual Studio session. Keep operational records out of test fixtures.
 
-## Previously reported coverage
+## Functional checklist
 
-### Pagination, confirmations and business text
-
-On isolated data, check catalog navigation (12 products per page) and inventory, orders, users, reports and activity navigation (20 records per page). Verify first/last/empty boundaries, searches for records on later pages, sorting across the full result set, retained pages on unchanged refresh and CSV exports containing every matching row. Check Previous/Next labels at narrow widths and display scaling.
-
-Try pasted emojis, flags, skin-tone sequences, joined emoji, keycap emoji and hidden formatting characters in names, email, product text and stock-adjustment reasons. Saving must reject them without adding records or stock movements. Accented names, punctuation, technical units and ordinary multiline specifications must remain valid. Password validation remains separate. Confirm that Cancel, Escape and the window close button dismiss confirmations without performing their action.
-
-Development checks have exercised the following areas using isolated data and programmatic WinForms rendering:
-
-- Account validation, role restrictions and ownership of customer orders.
-- Component compatibility, invalid-checkout rejection, reservations and order processing.
-- Product photographs, inventory tables, report output and database reload.
-- Responsive layouts, empty states, search clearing and dashboard filter navigation.
-- Automatic view updates, retained filters and table selection.
-- Database and photograph backup and restore handling.
-- Shared receipt preview and paginated rendering, including long names and paid/unpaid instructions.
-- Policy readers, policy links and cancellation of order confirmation.
-
-The development harnesses and their reports are not included in this repository. These are historical coverage summaries, not independently reproducible test results or proof that the current revision passes. Counts from separate runs overlap and are intentionally omitted. Later source changes require fresh validation.
-
-Programmatic renders can reveal clipping and layout problems, but do not establish that native controls, physical input or actual display scaling work correctly.
-
-## Manual release checklist
-
-Record the commit, application version, Windows version, .NET version and relevant test conditions in the release report. Use generic environment descriptions; do not publish personal device identifiers, account credentials, customer data or private filesystem paths.
-
-| Area | Check |
+| Area | Check and expected result |
 | --- | --- |
-| Visual Studio Designer | Open forms and reusable controls with View Designer. Confirm they load without accessing the operational database. |
-| Window layout | Resize and maximize the workspace. Check compact navigation, wrapping labels, scrolling, empty states and reachable actions. |
-| Display scaling | Test actual Windows scaling at 100%, 125% and 150% where supported. Check dropdowns, text, focus indicators and dialog bounds. |
-| Keyboard and accessibility | Navigate without a mouse. Check tab order, accessible names, password visibility, search clearing and chart navigation. Use a screen reader where available. |
-| Accounts and permissions | Exercise Admin, Staff, Customer and Guest separately. Verify restricted screens and operations remain blocked. |
-| Catalog and builder | Browse products, inspect details, retain draft choices across navigation and verify compatibility warnings. Confirm invalid builds cannot be ordered. |
-| Order workflow | Create a practice order as Customer; record payment, assembly and pickup as Staff. Verify ownership, reservations, expiry and saved state after reopening. |
-| Search and filters | Test matching and no-result queries, clear actions, dashboard constraints and preserved category/status filters. |
-| Automatic updates | Change practice data and confirm visible views update without interrupting modal editors or losing valid selection. |
-| Reports | Check date boundaries, role visibility, totals and CSV output. Image columns should not appear in CSV files. |
-| Native photo dialogs | Import a supported image, cancel selection, remove the original source file and reopen the saved product. |
-| Backup and recovery | Back up a practice store with photographs, restore through native dialogs, relaunch and verify records and images. Test removable storage separately. |
-| Receipts | Inspect preview and print a practice receipt. Check margins, wrapping, page breaks, totals and payment instructions. Bitmap rendering does not verify a physical printer. |
-| Policy dialogs | Open each policy link, scroll through the content and return to the owner. Cancelling confirmation must not submit an order. |
+| Setup and login | Create the first Admin, reject invalid credentials, and preserve accounts after restart. |
+| Registration | Reject duplicates, invalid business text, weak passwords, mismatched confirmation, and an unchecked policy agreement. |
+| Roles | Exercise every role in [Roles](ROLES.md); restricted operations must not save changes. |
+| Accounts | Create/edit/archive/reactivate accounts. Prevent self-demotion or archiving of the signed-in Admin. |
+| Recovery | Reset an active practice account's password; old password fails, new password works, lockout clears. |
+| Catalog | Search, filter, inspect details, clear search, and check empty results and page boundaries. |
+| Builder | Retain draft selections across navigation; reject invalid socket, RAM, graphics, PSU, and stock combinations. |
+| Guest checkout | Customer login continues the same build; cancelled login creates no order and retains the preview. |
+| Order creation | Verify owner, line prices, total, 24-hour deadline, and reservations after database reload. |
+| Privacy | A second Customer cannot read the first Customer's orders or receipts. |
+| Payment and pickup | Staff records payment once and advances one stage at a time; completion deducts stock only once. |
+| Cancellation | Own unpaid cancellation releases reservations; paid-order cancellation is rejected. |
+| Expiry | With isolated expired fixtures, startup/refresh cancels unpaid orders and releases reservations. |
+| Product CRUD | Admin adds/edits/archives/reactivates products. Cancel discards edits; new products start with zero stock. |
+| Stock | Staff adjustments require a nonzero quantity/reason and cannot reduce stock below reservations. |
+| Photos | Import, cancel, remove, and reopen photographs; deleting the original upload must not remove the managed copy. |
+| Reports | Compare totals, inclusive date boundaries, and CSV output to known practice records. Export includes all matching pages. |
+| Activity | Saved changes appear with actor and details. Failed changes do not appear as completed actions. |
+| Backup | Save a ZIP with records/photos, restore a practice snapshot, reopen, and verify both. Check refused overwrite/corrupt backup. |
+| Policies | Open and close each link; cancelling order confirmation creates no order. |
 
-Mark each check as passed, failed or not run, and describe failures and remaining limitations. Do not present unexecuted checks as completed.
+## Desktop and package checks
+
+- Open forms and reusable controls in Visual Studio Designer without accessing the operational database.
+- Run at actual Windows 100%, 125%, and 150% scaling where available. Check narrow windows, scrolling, long text, and reachable actions.
+- Navigate with Tab, Shift+Tab, Enter, Space, and Escape. Check focus, password visibility, labels, and screen-reader behavior.
+- Complete native file dialogs, test Cancel, export CSV, and print a receipt or save through Microsoft Print to PDF.
+- Test external-drive backup and recovery separately from local copies.
+- Extract the published ZIP outside the source checkout and run it on another supported Windows computer. Test setup and one complete order flow.
+
+Do not mark a check as passed unless it was executed. Keep remaining failures and untested hardware behavior in the release test record.

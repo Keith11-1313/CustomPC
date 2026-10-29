@@ -26,12 +26,12 @@ Use [CODE_GUIDE.md](CODE_GUIDE.md) for lessons. This reference answers where beh
 | StoreComboBox.cs / StoreCheckBox.cs / IconAssets.cs | Dropdown rows, checkbox surfaces and Lucide PNG icons |
 | PasswordEyeButton.cs | Clickable eye/eye-off button inside password fields |
 | StoreDialog.cs | App message and confirmation modal |
-| Ui.cs | Prices, grids, receipts, CSV/text export and validation messages |
+| Ui.cs | Prices, grids, receipts, CSV export and validation messages |
 | AppLog.cs | Unexpected-error diagnostic references |
 
 `AppStore.*.cs` are parts of one `partial` class. `AppStore.Current` creates it lazily. Forms call business methods; they do not write SQL directly.
 
-## The 16 forms
+## Forms and supporting classes
 
 | Form | Purpose |
 | --- | --- |

@@ -1,120 +1,90 @@
-# Using CustomPC
+# User guide
 
-For permissions, read [ROLES.md](ROLES.md). For learning the code, start with [CODE_GUIDE.md](CODE_GUIDE.md).
+## Accounts and navigation
 
-## Start and sign in
+A new database opens **Set up CustomPC** to create the first Admin. Otherwise, sign in with an existing account. Customers can register from login; registration requires agreement to the Terms & Conditions and acknowledgement of the Privacy Notice. Guest access supports browsing and build previews.
 
-Open the solution and press F5. Login opens before the dashboard. Guests choose Browse as guest. Closing startup login exits the app. If the database is empty, Setup creates the first Admin and requires a personal password of at least 12 characters.
+New passwords require 12–128 characters, uppercase and lowercase letters, a number, and a symbol, and must differ from the account email. Forgotten-password assistance is handled by shop personnel. Admin uses **User accounts → Reset password** after checking identity. Reset clears the account's failed-login lockout; archived accounts must be reactivated first.
 
-The prepared Admin was `admin@gmail.com`, password `AdminPassword@123`, name `admin`. Use its current saved credentials if edited. Admin creates Staff/Customer accounts in User accounts. Public registration always creates Customer accounts. Roles are separate; Admin cannot perform Staff or Customer transactions.
+The sidebar changes pages. Overview or Back returns to the dashboard. Cancel closes an editor without saving. Confirmed sign-out clears an unfinished build. Roles have separate permissions; see [Roles](ROLES.md).
 
-The sidebar switches hosted pages. Overview/Back returns to the dashboard. Editors close without saving when Cancel is used. Sign out asks for confirmation for every signed-in role; Cancel or closing the confirmation preserves the session and build. Confirmed sign-out clears the unfinished build. Cancelling Guest Sign in returns to the Guest workspace; cancelling login after signing out ends the app.
+## Customer: build and order
 
-## Pages and input validation
+1. Open **Parts catalog**. Search or filter products and inspect details.
+2. Add parts to a build, then open **PC builder**.
+3. Select CPU, motherboard, RAM, storage, PSU, and case. A dedicated GPU can be omitted only with integrated CPU graphics and motherboard video output.
+4. Resolve the compatibility messages and review the total.
+5. Confirm the order. Guest **Log in and order** retains selections and continues after Customer login.
+6. Open **My orders** to track progress or view a receipt.
 
-Parts catalog shows up to 12 products per page. Inventory, orders, accounts, reports and activity history show up to 20 records per page. Use Previous, Next or a numbered page below the results; the current page is highlighted. Search and filters apply to the complete matching dataset; changing the result set returns to page one. Automatic refresh retains the page when the result set is unchanged. Table sorting applies across all matching records. CSV export includes all matching records, not just the visible page.
+The builder checks availability, socket, memory, graphics, and PSU requirements. Staff still verifies physical fit, connectors, and BIOS support.
 
-Names, email addresses, product details and stock-adjustment reasons reject emojis and hidden control characters when saved, including pasted input. Accented names, ordinary punctuation and technical units remain supported. This business-text rule does not restrict passwords or change existing saved data. Confirmation dialogs use action-specific questions and buttons, with Cancel as the default keyboard action.
+Orders reserve components for a 24-hour payment window. Pay at the physical store before the displayed deadline. Customers can cancel their own unpaid pending orders. Cancellation or expiry releases reservations. Paid-order concerns go through the service counter.
 
-The main window opens maximized to use the monitor's working area. Restore it with the title-bar button to resize it. The sidebar stays in place and changes to an icon rail in narrower windows; hover or focus a destination for its label. Navigation can scroll on short screens. In a narrower builder, checkout moves below the parts; scroll the component list to reach the remaining categories. The total and order action stay visible.
+Receipts provide **Print / save PDF**, using the Windows print dialog and Microsoft Print to PDF when available. There is no text-receipt save action.
 
-## Forgotten passwords
+## Staff: stock and fulfilment
 
-The **Forgot password?** link on login opens service-counter recovery instructions. It does not look up an email, send mail or change an account. Customers and Staff ask an Admin for assistance. Another signed-in Admin can help an Admin account; there is no self-service recovery code or last-Admin bypass.
+### Receive stock
 
-Password entry is shown when creating a new account. Editing an existing account changes only its details, role and archive status; use the dedicated Reset password action to change its password.
+Open **Parts & inventory**, select a part, and choose **Adjust stock**. Enter a positive quantity for receipts or a negative quantity for a correction, with a reason. Zero changes, missing reasons, and reductions below reserved stock are rejected.
 
-After checking the account holder's identity, Admin opens **User accounts**, selects the account and clicks **Reset password**. Confirm the displayed name/email, have the account holder enter and confirm a new password, check the identity-verification box and save. Passwords require 12-128 characters with uppercase/lowercase letters, a number and a symbol. A successful reset takes effect immediately, clears that email's failed-login lockout and records a Password reset activity without including the password. Archived accounts must be restored first. This sets a normal new password, not a temporary password or a forced-change-on-next-login flow. Identity verification is performed by shop personnel; the checkbox records an acknowledgement in the dialog, not automated identity proof or a saved consent record.
+**Available = On hand − Reserved**
 
-## Shop policies
+### Process an order
 
-Customer-facing Terms & Conditions, Warranty & Returns, and Privacy Notice open as scrollable dialogs. Public registration requires an initially unchecked agreement to the terms and acknowledgement of the privacy notice before Create account is enabled. The form also rejects an unchecked agreement if submission is invoked directly; policy links remain available before agreement. This is a form acknowledgement, not a versioned consent-history record. Privacy is linked from login and registration; registration also links to the terms. Order confirmation shows the total, 24-hour reservation/payment rule and a Terms & Conditions link. Product details and receipts link to Warranty & Returns. Close or Esc returns to the original screen without submitting it.
+1. Open **Orders & payments** and select an unexpired pending order.
+2. Receive the full payment at the store, then choose **Confirm store payment**.
+3. Use **Next order stage** as assembly progresses.
+4. Mark Completed when the customer collects the PC.
 
-The wording is centralized in `ShopPolicies.cs`. Opening a policy does not record consent, create an order or change account data. Warranty handling, privacy requests and retention remain shop procedures; these notices do not introduce automatic retention/deletion or warranty-processing features.
+```text
+Pending Payment → Paid → Processing → Assembly → Ready for Pickup → Completed
+```
 
-## Products and stock
+Payment leaves on-hand stock unchanged. Completion deducts it once and records stock movements. Buttons depend on the selected order and its status. Staff cannot place Customer orders, cancel them manually, or perform Admin management.
 
-Commands are above tables; filters wrap as the page narrows. Visible data pages update automatically when saved data changes; no Refresh button is needed. Customer and Guest browse Parts catalog using the category rail, which moves above products in narrower windows. Product editors use scrolling field groups with pinned Save/Cancel buttons.
+## Admin: products and accounts
 
-Admin adds/edits/archives products in Parts & inventory, including price, specifications and photographs. New products start at zero stock. Staff uses Adjust stock with a quantity change and reason to record actual receipts or corrections. Admin metadata edits preserve Staff stock. Available stock equals on-hand stock minus reservations.
+### Products
 
-Admin's part editor accepts JPG/PNG files up to 15 MB. It copies a normalized PNG into ProductImages beside the database; deleting the original upload does not remove the saved photo. Remove photo clears the part reference. Older copied images are retained for recovery. Missing/unreadable photos show a placeholder. Copying arbitrary pictures into ProductImages alone does not associate them with a product; use the editor.
+Use **Parts & inventory** to add, edit, archive, or reactivate products. Maintain prices, specifications, and low-stock thresholds. New products start at zero stock; Staff records received quantities.
 
-The 42-product [manifest](CATALOG_MANIFEST.md) records researched reference prices/specifications and image limitations. Admin reviews actual prices and specifications; Staff records actual inventory. The document is not a live stock report.
+Category-specific inputs cover sockets, memory, graphics, and power. Admin catalog changes preserve Staff-managed stock. Photo import accepts JPG/PNG up to 15 MB and copies the image into managed storage. Deleting the original upload does not remove the saved photograph. Missing photographs use a placeholder.
 
+### Accounts
 
-The editor changes its visible specification fields when Category changes:
+Use **User accounts** to add accounts, assign roles, edit details, or archive/reactivate users. Archived accounts cannot sign in. Admin cannot archive or demote their own signed-in account. Changing a saved role removes its former permissions on refresh or the next protected operation.
 
-| Category | Category-specific inputs |
-| --- | --- |
-| CPU | Socket, power use, integrated graphics |
-| Motherboard | Socket, memory type, power use, video output |
-| RAM | Memory type, power use |
-| GPU | Power use, recommended PSU capacity |
-| Storage | Power use |
-| Power Supply | PSU capacity |
-| Case | General specifications; no compatibility inputs |
+Use **Reset password** for password changes after checking the account holder's identity. This is assisted recovery, not email-based recovery or a temporary-password workflow.
 
-Name, brand, price, low-stock threshold, specifications and photo controls remain common. The Admin stock box is hidden. Switching categories preserves unsaved draft inputs, but saving excludes fields unrelated to the selected category. The form closes gaps and adjusts its height.
+## Reports
 
-## Build, payment and pickup
+Admin reports cover Inventory, Orders, Stock movements, and Sales. Historical reports use inclusive local dates. Inventory shows current stock, so dates do not apply. Sales represents confirmed payments, not unpaid order values.
 
-1. Customer or Guest chooses CPU, motherboard, RAM, storage, PSU and case. GPU is optional only with verified CPU integrated graphics and motherboard video output.
-   All active, in-stock parts remain in each dropdown. Warning icons mark socket, RAM-type or PSU conflicts with the other selections. Selecting an incompatible part keeps the choice and explains the conflict in the build review. Checkout stays disabled until the build is valid. The integrated-graphics option appears only for a verified CPU/board pair. Guest checkout is labelled **Log in and order** and becomes available for a complete valid build.
-2. Socket, memory and PSU checks always run. PSU must cover estimated component power plus 100 W and recorded recommended PSU requirements. BIOS support, case dimensions and cooler clearance still need physical review.
-3. Valid Guest checkout opens login. Customer login continues the same checkout and saves the selected build/order to that account after confirmation. Cancelled login retains the preview; Admin/Staff login returns to their own dashboard.
-4. The order reserves stock and has a 24-hour payment deadline. Staff records full payment received at the store.
-5. Staff advances Paid → Processing → Assembly → Ready for Pickup → Completed. Completion deducts on-hand stock and ends reservations.
-6. Customer can cancel their own unpaid pending order. Cancellation/expiry releases reservations. Paid orders cannot be cancelled through this feature.
-
-Expiry runs on startup/refresh and the running timer. It does not run while the app is closed. Order buttons depend on role, selected row and status. Completed/cancelled records remain readable, with transaction actions disabled.
-
-## Charts and reports
-
-Admin defaults to 30 days: recorded payment amounts by local payment date, quantities of top paid parts, and current inventory health. Staff defaults to seven days: Orders received uses local order creation dates; Open orders, Ready for pickup and Products needing stock reflect current data. Staff sees operational summary counts and stock-attention links without charts. The period selector affects historical counts and Admin charts, not current snapshots.
-
-Use Open selected, chart double-clicks or labelled navigation buttons to open filtered Orders/Inventory. Admin reports provide inventory, orders, stock movements and sales with CSV export. Receipts use the fixed CustomPC name and support text saving and printing.
+**Export CSV** includes every matching record, not just the visible page. Visible data updates automatically as saved records change. Search and filters apply across all result pages; changing them returns to page one.
 
 ## Activity & Backups
 
-Admin can view the latest 500 activity entries, which update automatically when saved data changes. Historical actions from before logging was implemented cannot be reconstructed. Unexpected failures display a diagnostic reference; default logs are still under `%LOCALAPPDATA%/CustomPC/Logs` (an explicit database override places logs beside that override).
+Admin can review the latest 500 activity entries and double-click an entry for its details. The history records successful saved changes; it does not reconstruct activity from before logging existed.
 
-Save backup creates a ZIP containing custompc.db and ProductImages. Choose a new filename; existing backups are refused. One automatic ZIP per local date is saved to Database/Backups when an existing database is opened. An app left open across days gets the next startup backup when reopened.
+### Save
 
-Click Restore backup to open Confirm your password. Enter Your password and choose Choose backup; only a verified current Admin can proceed to the file picker. Cancel stops the flow. The selected backup then requires confirmation. It replaces records/photos from the selected ZIP, saves a safety backup first, then closes the app. The app does not reopen automatically: open CustomPC manually and sign in with credentials from the restored backup. Older database-only `.db` backups remain supported but do not contain photos. If recovery itself fails, preserve the named recovery files and safety ZIP before continuing.
+Choose **Save backup** and a new filename. The ZIP includes `custompc.db` and `ProductImages`. Existing backup files are not overwritten. A startup backup is also created once per local date when opening an existing database.
 
-## Practice separately
+### Restore
 
-Stop the app, open PowerShell, then run:
+1. Choose **Restore backup** and verify the current Admin password.
+2. Select a backup and confirm replacement.
+3. After restoration closes the app, reopen CustomPC.
+4. Sign in with credentials that existed in the restored backup.
 
-```powershell
-$env:CUSTOMPC_DATABASE_PATH = Join-Path $env:TEMP 'CustomPC-Practice/custompc.db'
-$env:CUSTOMPC_DEMO_MODE = '1'
-dotnet run --project 'C:/Users/Jerald/Desktop/CustomPC/CustomPC/CustomPC.csproj'
-```
+Restoration creates safety recovery files before replacing records and photographs. Older database-only `.db` backups do not recover missing images. If recovery fails, preserve the named recovery files. If corruption prevents login, keep the damaged file and seek maintainer assistance rather than repeatedly deleting the database.
 
-A fresh practice database has demo Admin/Staff/Customer emails `admin@custompc.local`, `staff@custompc.local`, `customer@custompc.local`, password `CustomPC123!`. These are explicit practice fixtures. When finished, close the app and remove both environment variables from that shell:
+## Policies and operating limits
 
-```powershell
-Remove-Item Env:/CUSTOMPC_DATABASE_PATH
-Remove-Item Env:/CUSTOMPC_DEMO_MODE
-```
+Terms & Conditions, Warranty & Returns, and Privacy Notice are available from relevant registration, product, checkout, and receipt screens. Warranty claims and privacy requests remain shop procedures. Policy acknowledgement is not a versioned consent-history feature.
 
-Before actual store use, perform the manual Designer, file-dialog, printer, Windows DPI and external-drive recovery checks in [VALIDATION.md](VALIDATION.md).
+The application uses one local workstation. Payment and pickup happen in-store; there is no online payment or computer-to-computer synchronization. Unpaid-order expiry runs while the app is open or when it next starts, not while it is closed.
 
-New and changed account passwords use 12–128 characters with uppercase and lowercase letters, a number and a symbol. Existing passwords continue to work until changed. Activity & Backups shows readable saved-state summaries for new actions; double-click a row to read its full details. Older activity entries retain their original text.
-
-
-Admin overview: confirmed-payment and paid-order cards use the selected 7/30/90-day period. Low-stock and out-of-stock cards are current product counts. Stock attention links open inventory with the corresponding stock filter. The three charts retain keyboard-accessible selection controls; empty charts show their headings and a relevant action. Staff sees operational summary cards and stock-attention links without charts. Parts catalog is available only to Customer and Guest; Admin and Staff use Parts & inventory.
-
-## Current screen controls
-
-- Orders, Parts & inventory, User accounts and Parts catalog search as you type. Search is case-insensitive and ignores leading/trailing spaces; catalog search waits briefly while you type.
-- The × inside a search field clears its text. Escape does the same. On Orders it also removes the dashboard date/open-order constraint. Other category, stock and status selections remain unchanged.
-- Orders dashboard filters appear as an inline chip after the search icon, beside the typing area. Narrow chips expose the full filter through a tooltip. Open orders means Pending Payment, Paid, Processing, Assembly or Ready for Pickup; completed/cancelled orders are excluded from that view.
-- Inventory tables in Parts & inventory and the Inventory report include product thumbnails. Missing/unreadable images use a category placeholder. CSV exports contain text/number columns, not images.
-- Admin sidebar order is Overview, View orders, Parts & inventory, Reports, User accounts, Activity & Backups. Staff and shopping roles retain only their permitted pages. The old Custom PC builds sidebar caption is removed.
-- The builder review lists selected models and prices, selection progress, socket/memory compatibility and the minimum PSU capacity for the current choices. Integrated graphics counts as a resolved graphics choice only when supported. The total and checkout action stay outside the scrolling review.
-- Adjust stock shows the selected product/photo and on-hand, reserved and available counts. Choose Add stock or Remove stock, enter a positive quantity and a reason, and review Stock after adjustment. Saving is disabled for missing reasons or quantities that violate stock/reservation limits; the business method checks again before saving.
-- Activity & Backups has compact Save backup and Restore backup actions. Save backup confirms the saved file location. Restore opens the Your password dialog before file selection; wrong passwords remain in that dialog. After a confirmed successful restore the app closes and must be reopened manually.
-- Login uses Create account and Browse as guest text links below Sign in.
+For installation and record transfer, see [Installation](INSTALLATION.md). See [the screenshot gallery](screenshots/README.md) for example screens and [Testing](VALIDATION.md) for the release checklist.

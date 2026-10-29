@@ -6,7 +6,7 @@ Your first goal is small: **find the code behind Sign in, explain what it does, 
 
 Before testing different jobs, read [who can do what](ROLES.md). Admin manages accounts/catalog/reports; Staff adjusts stock and records payments/progress; Customers place and cancel their own unpaid orders. Admin does not automatically get every permission.
 
-The longer [code reference](CODE_REFERENCE.md) contains the complete file map, C# lookup table, role rules, and detailed database explanation. Use it when you have a specific question. [Validation results](VALIDATION.md) describe what was tested.
+The longer [code reference](CODE_REFERENCE.md) contains the complete file map, C# lookup table, role rules, and detailed database explanation. Use it when you have a specific question. [Testing](VALIDATION.md) separates historical coverage from checks to repeat before release.
 
 For hosted pages, photos and dashboards, use [the code reference](CODE_REFERENCE.md) after the basic lessons.
 
@@ -14,7 +14,7 @@ For hosted pages, photos and dashboards, use [the code reference](CODE_REFERENCE
 
 **Goal:** open the application and find one form's code.
 
-1. Open `C:\Users\Jerald\Desktop\CustomPC\CustomPC.slnx` in Visual Studio. A solution is the file Visual Studio uses to open the project.
+1. Open `CustomPC.slnx` in Visual Studio. A solution is the file Visual Studio uses to open the project.
 2. Open **View → Solution Explorer**. Expand the `CustomPC` project using the arrow beside its name. A project groups the source files and settings needed to build one application.
 3. Find `LoginForm.cs`. Right-click it and choose **View Code**. If you see a drawn window instead of code, press **F7**.
 4. Press **Ctrl+F** and find `LoginButton_Click`.
@@ -25,7 +25,7 @@ For hosted pages, photos and dashboards, use [the code reference](CODE_REFERENCE
 
 An application must be **built** before it runs: the compiler checks your C# and creates the executable. If F5 reports an error, open **View → Error List** and read the first error before trying later lessons. This project requires .NET 10 and Visual Studio's .NET desktop development tools.
 
-An `.exe` appearing after F5 is the test program Visual Studio built. It does not mean the product is finished. `bin` holds build outputs; `obj` holds temporary compiler files. Keep your edits in the `.cs`, `.Designer.cs` and asset files. This project is still under revision and has no published release package.
+An `.exe` appearing after F5 is the test program Visual Studio built. It does not mean the product is finished. `bin` holds build outputs; `obj` holds temporary compiler files. Keep your edits in the `.cs`, `.Designer.cs` and asset files. Use the published package for distribution; see [Installation](INSTALLATION.md).
 
 A **method** is a named block of instructions. `LoginButton_Click` is a method: the instructions between its `{` and `}` run when it is called. You will follow those instructions in lesson 4.
 
@@ -62,7 +62,7 @@ The keyword `partial` lets the same class be written across multiple files. Here
 
 **Answer:** No. Text changes its caption. The event connection determines which method runs.
 
-**Try the branding:** `AppFonts.cs` defines Segoe UI for application headings and working text, while the CustomPC brand keeps its bundled Righteous font. Existing Designer font names are mapped at runtime, so changing a legacy Font property alone may not change the final typeface. `StoreTheme.cs` owns the shared colours and control styling. The primary action colour is `#147750` with white text. Your logo is `CustomPC/Assets/logo.png`; `BrandLogo.cs` displays it.
+**Try the branding:** `AppFonts.cs` uses Righteous for its heading/brand helpers and Segoe UI for ordinary interface text. Existing Designer font names are mapped at runtime, so changing a legacy Font property alone may not change the final typeface. `StoreTheme.cs` owns the shared colours and control styling. The primary action colour is `#147750` with white text. Your logo is `CustomPC/Assets/logo.png`; `BrandLogo.cs` displays it.
 
 **Checkpoint:** To replace the logo, would you edit the login button handler?
 
@@ -278,7 +278,7 @@ This lesson changes stock. Use a separate practice database so the exercise has 
 ```powershell
 $env:CUSTOMPC_DATABASE_PATH = Join-Path $env:TEMP 'CustomPC-Learning\guide.db'
 $env:CUSTOMPC_DEMO_MODE = '1'
-dotnet run --project 'C:\Users\Jerald\Desktop\CustomPC\CustomPC\CustomPC.csproj'
+dotnet run --project './CustomPC/CustomPC.csproj'
 ```
 
 The first line chooses a database for apps started from **this PowerShell process**, without changing an already-open Visual Studio's F5 environment. The second explicitly enables demo data for this exercise. The third builds and runs the project. A fresh practice path gets sample accounts and parts; later launches reuse them. Keep demo mode out of the real store's startup environment.
@@ -381,6 +381,6 @@ For any feature, answer these four questions before moving on:
 3. Where is invalid input rejected?
 4. Does this action only change the screen, or does it save records?
 
-If you cannot answer one, return to that part of the flow. You do not need to memorize all 16 forms. The [reference](CODE_REFERENCE.md) provides their map, less common C# expressions, password hashing, database details, and the advanced manual validation checklist. The [store guide](STORE_GUIDE.md) explains setup, backups and daily operation.
+If you cannot answer one, return to that part of the flow. You do not need to memorize all forms. The [reference](CODE_REFERENCE.md) provides their map, less common C# expressions, password hashing, database details, and the advanced manual validation checklist. The [store guide](STORE_GUIDE.md) explains setup, backups and daily operation.
 
 Compatibility validation is mandatory during preview and checkout. The current database has no Settings, Rules or Suppliers features. Use the code reference for the current file/table map.
