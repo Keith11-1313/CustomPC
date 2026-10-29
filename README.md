@@ -35,11 +35,3 @@ The default Database folder is beside the solution. If the app is copied outside
 The prepared catalog contains 42 researched products with local photos. They are ordinary SQLite records, not embedded assets or a runtime seed pack. Current stock, accounts, prices and order counts are saved data and can change. Initial prepared Admin credentials were name `admin`, email `admin@gmail.com`, password `AdminPassword@123`; use the saved password if it has since changed. Add Staff and Customer accounts through User accounts.
 
 A missing/empty database opens **Set up CustomPC** to create an administrator. It does not recreate the researched catalog. `CUSTOMPC_DEMO_MODE=1` explicitly enables separate practice fixtures; normal startup does not create demo accounts or stock.
-
-## Current behavior
-
-Admin manages catalog metadata/photos, accounts, reports and **Activity & Backups**. Staff records stock changes, payments and order progress. Customers order and cancel their own unpaid orders. Guests browse and prepare a build; valid checkout asks for login and Customer login continues with the selected parts.
-
-Compatibility checks are mandatory: required categories, stock, graphics output, socket, RAM type and PSU capacity. There are no editable compatibility rules, supplier management, business-name customization or database-location field. Receipts use **CustomPC**.
-
-Admin charts show confirmed payments, top-selling parts and current inventory health. Staff has no charts: it shows orders received, open orders, ready-for-pickup orders and products needing stock. The 7/30/90-day selector affects historical order/payment totals and Admin charts. Open orders and stock levels reflect current saved data.
